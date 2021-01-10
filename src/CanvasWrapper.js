@@ -64,7 +64,7 @@ class CanvasWrapper {
      * @param {Number} height 
      */
     updateSize(width, height) {
-        this.devicePixelRatio = window.devicePixelRatio || 1;
+        this.devicePixelRatio = 1;
         this.backingStoreRatio = this.ctx.webkitBackingStorePixelRatio || this.ctx.mozBackingStorePixelRatio ||
             this.ctx.msBackingStorePixelRatio || this.ctx.oBackingStorePixelRatio ||
             this.ctx.backingStorePixelRatio || 1;
@@ -126,21 +126,19 @@ class CanvasWrapper {
         this.drawingWidth = maxX - minX;
         this.drawingHeight = maxY - minY;
 
-        var scaleX = this.canvas.offsetWidth / this.drawingWidth;
-        var scaleY = this.canvas.offsetHeight / this.drawingHeight;
-
-        var scale = (scaleX < scaleY) ? scaleX : scaleY;
-
-        this.ctx.scale(scale, scale);
-
         this.offsetX = -minX;
         this.offsetY = -minY;
 
+        var scaleX = this.opts.width / this.drawingWidth;
+        var scaleY = this.opts.height/ this.drawingHeight;
+        var scale = (scaleX < scaleY) ? scaleX : scaleY;
+        this.ctx.scale(scale, scale);
+
         // Center
         if (scaleX < scaleY) {
-            this.offsetY += this.canvas.offsetHeight / (2.0 * scale) - this.drawingHeight / 2.0;
+            this.offsetY += this.opts.height / (2.0 * scale) - this.drawingHeight / 2.0;
         } else {
-            this.offsetX += this.canvas.offsetWidth / (2.0 * scale) - this.drawingWidth / 2.0;
+            this.offsetX += this.opts.width / (2.0 * scale) - this.drawingWidth / 2.0;
         }
     }
 

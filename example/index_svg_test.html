@@ -76,6 +76,7 @@
         svg.setAttributeNS(null, "width", size)
         svg.setAttributeNS(null, "height", size)
         svg.setAttributeNS(null, "viewbox", `0 0 ${size} ${size}`)
+        // TODO add fill color, e.g. jpeg has black background only
 
         container.appendChild(svg)
         const svgDrawer = new SmilesDrawer.SvgDrawer(options);
