@@ -9293,13 +9293,17 @@ const Line = require('./Line');
 
 const SvgWrapper = require('./SvgWrapper');
 
+const MathHelper = require('./MathHelper');
+
 const ThemeManager = require('./ThemeManager');
 
 const Vector2 = require('./Vector2');
 
 class SvgDrawer {
   constructor(options) {
+    // TODO aneb: properly handle config
     this.preprocessor = new Drawer(options);
+    this.opts = this.preprocessor.opts;
   }
   /**
    * Draws the parsed smiles data to an svg element.
@@ -9308,7 +9312,7 @@ class SvgDrawer {
    * @param {(String|HTMLElement)} target The id of the HTML svg element the structure is drawn to - or the element itself.
    * @param {String} themeName='dark' The name of the theme to use. Built-in themes are 'light' and 'dark'.
    * @param {Boolean} infoOnly=false Only output info on the molecule without drawing anything to the canvas.
-     * @returns {Oject} The dimensions of the drawing in { width, height }
+     * @returns {Object} The dimensions of the drawing in { width, height }
    */
 
 
@@ -9344,16 +9348,8 @@ class SvgDrawer {
 
 
   drawAromaticityRing(ring) {
-    let ctx = this.ctx;
-    let radius = MathHelper.apothemFromSideLength(this.opts.bondLength, ring.getSize());
-    ctx.save();
-    ctx.strokeStyle = this.getColor('C');
-    ctx.lineWidth = this.opts.bondThickness;
-    ctx.beginPath();
-    ctx.arc(ring.center.x + this.offsetX, ring.center.y + this.offsetY, radius - this.opts.bondSpacing, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.restore();
+    const r = MathHelper.apothemFromSideLength(this.opts.bondLength, ring.getSize());
+    this.svgWrapper.drawRing(ring.center.x, ring.center.y, r * 0.8);
   }
   /**
    * Draw the actual edges as bonds.
@@ -9608,7 +9604,7 @@ class SvgDrawer {
 
 module.exports = SvgDrawer;
 
-},{"./ArrayHelper":2,"./Atom":3,"./Drawer":5,"./Graph":7,"./Line":8,"./SvgWrapper":15,"./ThemeManager":16,"./Vector2":18}],15:[function(require,module,exports){
+},{"./ArrayHelper":2,"./Atom":3,"./Drawer":5,"./Graph":7,"./Line":8,"./MathHelper":9,"./SvgWrapper":15,"./ThemeManager":16,"./Vector2":18}],15:[function(require,module,exports){
 "use strict";
 
 const {
@@ -9800,11 +9796,12 @@ class SvgWrapper {
     this.svg.setAttributeNS(null, 'viewBox', `0 0 ${viewBoxDim} ${viewBoxDim}`);
     this.offsetX = -minX;
     this.offsetY = -minY; // Center
-    // if (scaleX < scaleY) {
-    //   this.offsetY += this.svg.clientHeight / (2.0 * scale) - this.drawingHeight / 2.0;
-    // } else {
-    //   this.offsetX += this.svg.clientWidth / (2.0 * scale) - this.drawingWidth / 2.0;
-    // }
+
+    if (scaleX < scaleY) {
+      this.offsetY += this.svg.clientHeight / (2.0 * scale) - this.drawingHeight / 2.0;
+    } else {
+      this.offsetX += this.svg.clientWidth / (2.0 * scale) - this.drawingWidth / 2.0;
+    }
   }
   /**
    * Draw an svg ellipse as a ball.
@@ -9822,6 +9819,24 @@ class SvgWrapper {
     ball.setAttributeNS(null, 'r', this.opts.bondLength / 4.5);
     ball.setAttributeNS(null, 'fill', this.themeManager.getColor(elementName));
     this.vertices.push(ball);
+  }
+  /**
+   * Draw an svg ring.
+   *
+   * @param {Number} x The x position of the text.
+   * @param {Number} y The y position of the text.
+   * @param {Number} r Radius of ring
+   */
+
+
+  drawRing(x, y, r) {
+    let ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    ring.setAttributeNS(null, 'cx', x + this.offsetX);
+    ring.setAttributeNS(null, 'cy', y + this.offsetY);
+    ring.setAttributeNS(null, 'r', r);
+    ring.setAttributeNS(null, 'fill', 'none');
+    ring.setAttributeNS(null, 'stroke', this.themeManager.getColor("C"));
+    this.vertices.push(ring);
   }
   /**
    * Draw a dashed wedge on the canvas.
