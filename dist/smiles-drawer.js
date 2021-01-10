@@ -9800,12 +9800,11 @@ class SvgWrapper {
     this.svg.setAttributeNS(null, 'viewBox', `0 0 ${viewBoxDim} ${viewBoxDim}`);
     this.offsetX = -minX;
     this.offsetY = -minY; // Center
-
-    if (scaleX < scaleY) {
-      this.offsetY += this.svg.clientHeight / (2.0 * scale) - this.drawingHeight / 2.0;
-    } else {
-      this.offsetX += this.svg.clientWidth / (2.0 * scale) - this.drawingWidth / 2.0;
-    }
+    // if (scaleX < scaleY) {
+    //   this.offsetY += this.svg.clientHeight / (2.0 * scale) - this.drawingHeight / 2.0;
+    // } else {
+    //   this.offsetX += this.svg.clientWidth / (2.0 * scale) - this.drawingWidth / 2.0;
+    // }
   }
   /**
    * Draw an svg ellipse as a ball.
