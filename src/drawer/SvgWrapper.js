@@ -205,6 +205,7 @@ class SvgWrapper {
         // TODO aneb: find how to scale svg during construction properly
         // dividing by ratio makes all images roughly equal, but still too small
         this.svg.setAttributeNS(null, 'viewBox', `0 0 ${this.opts.width / scale} ${this.opts.height / scale}`);
+        // this.svg.setAttributeNS(null, 'viewBox', `0 0 ${this.opts.width} ${this.opts.height}`);
 
         // Center
         if (scaleX < scaleY) {
@@ -222,7 +223,7 @@ class SvgWrapper {
      * @param {Number} y The y position of the text.
      * @param {String} elementName The name of the element (single-letter).
      */
-    drawBall(vertexIdLabel, vertexIdValue,x, y, elementName) {
+    drawBall(vertexIdLabel, vertexIdValue, x, y, elementName) {
         let ball = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         ball.setAttributeNS(null, vertexIdLabel, vertexIdValue);
         ball.setAttributeNS(null, 'cx', x + this.offsetX);
@@ -345,7 +346,7 @@ class SvgWrapper {
      * @param {Number} y The y position of the point.
      * @param {String} elementName The name of the element (single-letter).
      */
-    drawPoint(vertexIdLabel, vertexIdValue,x, y, elementName) {
+    drawPoint(vertexIdLabel, vertexIdValue, x, y, elementName) {
         let offsetX = this.offsetX;
         let offsetY = this.offsetY;
 
@@ -385,7 +386,7 @@ class SvgWrapper {
      * @param {Number} attachedPseudoElement.count The number of occurences that match the key.
      * @param {Number} attachedPseudoElement.hyrogenCount The number of hydrogens attached to each atom matching the key.
      */
-    drawText(vertexIdLabel, vertexIdValue,x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
+    drawText(vertexIdLabel, vertexIdValue, x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
         let offsetX = this.offsetX,
             offsetY = this.offsetY,
             pos = {
