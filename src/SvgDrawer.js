@@ -147,7 +147,7 @@ class SvgDrawer {
                 normals[1].multiplyScalar(opts.bondSpacing);
 
                 // Choose the normal that is on the same side as the center
-                let line = null;
+                let line;
 
                 if (center.sameSideAs(vertexA.position, vertexB.position, Vector2.add(a, normals[0]))) {
                     line = new Line(Vector2.add(a, normals[0]), Vector2.add(b, normals[0]), elementA, elementB);
@@ -168,7 +168,7 @@ class SvgDrawer {
 
                 svgWrapper.drawLine(new Line(a, b, elementA, elementB));
             } else if ((edge.center || vertexA.isTerminal() && vertexB.isTerminal()) ||
-                (s.anCount == 0 && s.bnCount > 1 || s.bnCount == 0 && s.anCount > 1)) {
+                (s.anCount === 0 && s.bnCount > 1 || s.bnCount === 0 && s.anCount > 1)) {
                 this.multiplyNormals(normals, opts.halfBondSpacing);
 
                 let lineA = new Line(Vector2.add(a, normals[0]), Vector2.add(b, normals[0]), elementA, elementB),
@@ -273,7 +273,7 @@ class SvgDrawer {
                 } else if (opts.atomVisualization === 'balls') {
                     svgWrapper.drawBall(vertex.position.x, vertex.position.y, element);
                 }
-            } else if (vertex.getNeighbourCount() === 2 && vertex.forcePositioned == true) {
+            } else if (vertex.getNeighbourCount() === 2 && vertex.forcePositioned === true) {
                 // If there is a carbon which bonds are in a straight line, draw a dot
                 let a = graph.vertices[vertex.neighbours[0]].position;
                 let b = graph.vertices[vertex.neighbours[1]].position;
