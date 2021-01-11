@@ -429,7 +429,8 @@ class SvgWrapper {
         }
 
         // now the text element
-        textElem.setAttributeNS(null, `text-element-${vertexIdLabel}`, vertexIdValue);
+        // TODO aneb: make naming consistent, this is the actual label, so it gets the passed idLabel
+        textElem.setAttributeNS(null, `${vertexIdLabel}`, vertexIdValue);
         textElem.setAttributeNS(null, 'x', pos.x + xShift);
         textElem.setAttributeNS(null, 'y', pos.y + yShift);
         textElem.setAttributeNS(null, 'class', 'element');
