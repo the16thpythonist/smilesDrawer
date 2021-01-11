@@ -26,6 +26,7 @@
     "webpack-stream": "^5.2.1"
   },
   "dependencies": {
-    "canvas": "^2.6.1"
+    "canvas": "^2.6.1",
+    "jsdom": "^16.4.0"
   }
 }
