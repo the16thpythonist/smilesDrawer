@@ -110,7 +110,6 @@ class SvgWrapper {
 
     /**
      * Create a linear gradient to apply to a line
-     *
      * @param {Line} line the line to apply the gradiation to.
      */
     createGradient(line) {
@@ -150,7 +149,6 @@ class SvgWrapper {
     /**
      * Create a tspan element for sub or super scripts that styles the text
      * appropriately as one of those text types.
-     *
      * @param {String} text the actual text
      * @param {String} shift the type of text, either 'sub', or 'super'
      */
@@ -165,7 +163,6 @@ class SvgWrapper {
 
     /**
      * Determine drawing dimensiosn based on vertex positions.
-     *
      * @param {Vertex[]} vertices An array of vertices containing the vertices associated with the current molecule.
      */
     determineDimensions(vertices) {
@@ -219,13 +216,15 @@ class SvgWrapper {
 
     /**
      * Draw an svg ellipse as a ball.
-     *
+     * @param vertexIdLabel
+     * @param vertexIdValue
      * @param {Number} x The x position of the text.
      * @param {Number} y The y position of the text.
      * @param {String} elementName The name of the element (single-letter).
      */
-    drawBall(x, y, elementName) {
+    drawBall(vertexIdLabel, vertexIdValue,x, y, elementName) {
         let ball = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        ball.setAttributeNS(null, vertexIdLabel, vertexIdValue);
         ball.setAttributeNS(null, 'cx', x + this.offsetX);
         ball.setAttributeNS(null, 'cy', y + this.offsetY);
         ball.setAttributeNS(null, 'r', this.opts.bondLength / 4.5);
@@ -236,7 +235,6 @@ class SvgWrapper {
 
     /**
      * Draw an svg ring.
-     *
      * @param {Number} x The x position of the text.
      * @param {Number} y The y position of the text.
      * @param {Number} r Radius of ring
@@ -254,10 +252,11 @@ class SvgWrapper {
 
     /**
      * Draw a dashed wedge on the canvas.
-     *
+     * @param idLabel
+     * @param idValue
      * @param {Line} line A line.
      */
-    drawDashedWedge(line) {
+    drawDashedWedge(idLabel, idValue, line) {
         if (isNaN(line.from.x) || isNaN(line.from.y) ||
             isNaN(line.to.x) || isNaN(line.to.y)) {
             return;
@@ -298,44 +297,26 @@ class SvgWrapper {
             let endDash = startDash.clone();
             endDash.add(Vector2.multiplyScalar(dashOffset, 2.0));
 
-            this.drawLine(new Line(startDash, endDash), null, gradient);
+            this.drawLine(idLabel, idValue, new Line(startDash, endDash), null, gradient);
         }
     }
 
     /**
-     * Draws a debug dot at a given coordinate and adds text.
-     *
-     * @param {Number} x The x coordinate.
-     * @param {Number} y The y coordindate.
-     * @param {String} [debugText=''] A string.
-     * @param {String} [color='#f00'] A color in hex form.
-     */
-    drawDebugPoint(x, y, debugText = '', color = '#f00') {
-        let point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        point.setAttributeNS(null, 'cx', x + this.offsetX);
-        point.setAttributeNS(null, 'cy', y + this.offsetY);
-        point.setAttributeNS(null, 'r', '2');
-        point.setAttributeNS(null, 'fill', '#f00');
-        this.vertices.push(point);
-        this.drawDebugText(x, y, debugText);
-    }
-
-    /**
      * Draws a debug text message at a given position
-     *
+     * @param idLabel
+     * @param idValue
      * @param {Number} x The x coordinate.
      * @param {Number} y The y coordinate.
      * @param {String} text The debug text.
      */
-    drawDebugText(x, y, text) {
+    drawDebugText(idLabel, idValue, x, y, text) {
         let textElem = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        textElem.setAttributeNS(null, idLabel, idValue);
         textElem.setAttributeNS(null, 'x', x + this.offsetX);
         textElem.setAttributeNS(null, 'y', y + this.offsetY);
         textElem.setAttributeNS(null, 'class', 'debug');
         textElem.setAttributeNS(null, 'fill', '#ff0000');
-        textElem.setAttributeNS(null, 'style', `
-                font: 5px Droid Sans, sans-serif;
-            `);
+        textElem.setAttributeNS(null, 'style', `font: 5px Droid Sans, sans-serif;`);
         textElem.appendChild(document.createTextNode(text));
 
         this.vertices.push(textElem);
@@ -343,12 +324,13 @@ class SvgWrapper {
 
     /**
      * Draws a line.
-     *
+     * @param idLabel
+     * @param idValue
      * @param {Line} line A line.
      * @param {Boolean} dashed defaults to false.
      * @param {String} gradient gradient url. Defaults to null.
      */
-    drawLine(line, dashed = false, gradient = null) {
+    drawLine(idLabel, idValue, line, dashed = false, gradient = null) {
         let stylesArr = [
                 ['stroke-linecap', 'round'],
                 ['stroke-dasharray', dashed ? '5, 5' : 'none'],
@@ -363,32 +345,34 @@ class SvgWrapper {
         let styles = stylesArr.map(sub => sub.join(':')).join(';'),
             lineElem = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 
+        gradient = gradient || this.createGradient(line);
+
+        lineElem.setAttributeNS(null, idLabel, idValue);
         lineElem.setAttributeNS(null, 'x1', fromX);
         lineElem.setAttributeNS(null, 'y1', fromY);
         lineElem.setAttributeNS(null, 'x2', toX);
         lineElem.setAttributeNS(null, 'y2', toY);
         lineElem.setAttributeNS(null, 'style', styles);
-        this.paths.push(lineElem);
-
-        if (gradient == null) {
-            gradient = this.createGradient(line);
-        }
         lineElem.setAttributeNS(null, 'stroke', `url('#${gradient}')`);
+
+        this.paths.push(lineElem);
     }
 
     /**
      * Draw a point.
-     *
+     * @param vertexIdLabel
+     * @param vertexIdValue
      * @param {Number} x The x position of the point.
      * @param {Number} y The y position of the point.
      * @param {String} elementName The name of the element (single-letter).
      */
-    drawPoint(x, y, elementName) {
+    drawPoint(vertexIdLabel, vertexIdValue,x, y, elementName) {
         let offsetX = this.offsetX;
         let offsetY = this.offsetY;
 
         // first create a mask
         let mask = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        mask.setAttributeNS(null, `mask-${vertexIdLabel}`, vertexIdValue);
         mask.setAttributeNS(null, 'cx', x + offsetX);
         mask.setAttributeNS(null, 'cy', y + offsetY);
         mask.setAttributeNS(null, 'r', '1.5');
@@ -397,6 +381,7 @@ class SvgWrapper {
 
         // now create the point
         let point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        mask.setAttributeNS(null, `point-${vertexIdLabel}`, vertexIdValue);
         point.setAttributeNS(null, 'cx', x + offsetX);
         point.setAttributeNS(null, 'cy', y + offsetY);
         point.setAttributeNS(null, 'r', '0.75');
@@ -406,7 +391,8 @@ class SvgWrapper {
 
     /**
      * Draw a text to the canvas.
-     *
+     * @param vertexIdLabel
+     * @param vertexIdValue
      * @param {Number} x The x position of the text.
      * @param {Number} y The y position of the text.
      * @param {String} elementName The name of the element (single-letter).
@@ -420,7 +406,7 @@ class SvgWrapper {
      * @param {Number} attachedPseudoElement.count The number of occurences that match the key.
      * @param {Number} attachedPseudoElement.hyrogenCount The number of hydrogens attached to each atom matching the key.
      */
-    drawText(x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
+    drawText(vertexIdLabel, vertexIdValue,x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
         let offsetX = this.offsetX,
             offsetY = this.offsetY,
             pos = {
@@ -436,6 +422,7 @@ class SvgWrapper {
             yShift = 2.5;
 
         let mask = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        mask.setAttributeNS(null, `text-mask-${vertexIdLabel}`, vertexIdValue);
         mask.setAttributeNS(null, 'cx', pos.x);
         mask.setAttributeNS(null, 'cy', pos.y);
         mask.setAttributeNS(null, 'r', '3.5');
@@ -463,29 +450,20 @@ class SvgWrapper {
         }
 
         // now the text element
+        textElem.setAttributeNS(null, `text-element-${vertexIdLabel}`, vertexIdValue);
         textElem.setAttributeNS(null, 'x', pos.x + xShift);
         textElem.setAttributeNS(null, 'y', pos.y + yShift);
         textElem.setAttributeNS(null, 'class', 'element');
         textElem.setAttributeNS(null, 'fill', this.themeManager.getColor(elementName));
-        textElem.setAttributeNS(null, 'style', `
-                text-anchor: start;
-                writing-mode: ${writingMode};
-                text-orientation: ${textOrientation};
-                letter-spacing: ${letterSpacing};
-                ${textDirection}
+        textElem.setAttributeNS(null, 'style', `text-anchor: start;writing-mode: ${writingMode};text-orientation: ${textOrientation};letter-spacing: ${letterSpacing};${textDirection}
             `);
 
         let textNode = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
         // special case for element names that are 2 letters
         if (elementName.length > 1) {
             let textAnchor = /up|down/.test(direction) ? 'middle' : 'start';
-
-            textNode.setAttributeNS(null, 'style', `
-                unicode-bidi: plaintext;
-                writing-mode: lr-tb;
-                letter-spacing: normal;
-                text-anchor: ${textAnchor};
-            `);
+            textNode.setAttributeNS(null, `text-node-${vertexIdLabel}`, vertexIdValue);
+            textNode.setAttributeNS(null, 'style', `unicode-bidi: plaintext;writing-mode: lr-tb;letter-spacing: normal;text-anchor: ${textAnchor};`);
         }
         textNode.appendChild(document.createTextNode(elementName));
         textElem.appendChild(textNode);
@@ -515,7 +493,7 @@ class SvgWrapper {
                 }
             }
         }
-
+        // TODO aneb: should be ok not to set ids here since text element has id
         if (hydrogens > 0) {
             let hydrogenElem = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
             hydrogenElem.setAttributeNS(null, 'style', 'unicode-bidi: plaintext;');
@@ -573,9 +551,11 @@ class SvgWrapper {
     }
 
     /**
+     * @param idLabel
+     * @param idValue
      * @param {Line} line the line object to create the wedge from
      */
-    drawWedge(line) {
+    drawWedge(idLabel, idValue, line) {
         let offsetX = this.offsetX,
             offsetY = this.offsetY,
             l = line.getLeftVector().clone(),
@@ -607,8 +587,10 @@ class SvgWrapper {
             v = Vector2.add(end, Vector2.multiplyScalar(normals[1], 1.5 + this.halfBondThickness)),
             w = Vector2.add(start, Vector2.multiplyScalar(normals[1], this.halfBondThickness));
 
-        let polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'),
-            gradient = this.createGradient(line);
+        let polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+        let gradient = this.createGradient(line);
+
+        polygon.setAttributeNS(null, idLabel, idValue);
         polygon.setAttributeNS(null, 'points', `${t.x},${t.y} ${u.x},${u.y} ${v.x},${v.y} ${w.x},${w.y}`);
         polygon.setAttributeNS(null, 'fill', `url('#${gradient}')`);
         this.paths.push(polygon);
