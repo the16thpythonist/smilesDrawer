@@ -57,17 +57,16 @@ class SvgDrawer {
 
     /**
      * Draws a ring inside a provided ring, indicating aromaticity.
-     *
      * @param {Ring} ring A ring.
      */
     drawAromaticityRing(ring) {
+        // TODO think about how to add bonds to model when drawing ring!
         const r = MathHelper.apothemFromSideLength(this.opts.bondLength, ring.getSize());
         this.svgWrapper.drawRing(ring.center.x, ring.center.y, r * 0.8)
     }
 
     /**
      * Draw the actual edges as bonds.
-     *
      * @param {Boolean} debug A boolean indicating whether or not to draw debug helpers.
      */
     drawEdges(debug) {
@@ -159,10 +158,8 @@ class SvgDrawer {
 
                 // The shortened edge
                 if (edge.isPartOfAromaticRing) {
-                    // preprocessor.canvasWrapper.drawLine(line, true);
                     svgWrapper.drawLine(line, true);
                 } else {
-                    // preprocessor.canvasWrapper.drawLine(line);
                     svgWrapper.drawLine(line);
                 }
 
@@ -303,7 +300,6 @@ class SvgDrawer {
 
     /**
      * Returns the total overlap score of the current molecule.
-     *
      * @returns {Number} The overlap score.
      */
     getTotalOverlapScore() {
@@ -312,7 +308,6 @@ class SvgDrawer {
 
     /**
      * Returns the molecular formula of the loaded molecule as a string.
-     *
      * @returns {String} The molecular formula.
      */
     getMolecularFormula() {
