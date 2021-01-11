@@ -302,27 +302,6 @@ class SvgWrapper {
     }
 
     /**
-     * Draws a debug text message at a given position
-     * @param idLabel
-     * @param idValue
-     * @param {Number} x The x coordinate.
-     * @param {Number} y The y coordinate.
-     * @param {String} text The debug text.
-     */
-    drawDebugText(idLabel, idValue, x, y, text) {
-        let textElem = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        textElem.setAttributeNS(null, idLabel, idValue);
-        textElem.setAttributeNS(null, 'x', x + this.offsetX);
-        textElem.setAttributeNS(null, 'y', y + this.offsetY);
-        textElem.setAttributeNS(null, 'class', 'debug');
-        textElem.setAttributeNS(null, 'fill', '#ff0000');
-        textElem.setAttributeNS(null, 'style', `font: 5px Droid Sans, sans-serif;`);
-        textElem.appendChild(document.createTextNode(text));
-
-        this.vertices.push(textElem);
-    }
-
-    /**
      * Draws a line.
      * @param idLabel
      * @param idValue

@@ -43,7 +43,6 @@ class Drawer {
             bondSpacing: 0.18 * 15,
             atomVisualization: 'default',
             isomeric: true,
-            debug: false,
             terminalCarbons: false,
             explicitHydrogens: true,
             overlapSensitivity: 0.42,

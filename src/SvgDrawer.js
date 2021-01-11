@@ -43,8 +43,8 @@ class SvgDrawer {
         this.svgWrapper.determineDimensions(preprocessor.graph.vertices);
 
         // Do the actual drawing
-        this.drawEdges(preprocessor.opts.debug);
-        this.drawVertices(preprocessor.opts.debug);
+        this.drawEdges();
+        this.drawVertices();
 
         if (preprocessor.opts.debug) {
             console.log(preprocessor.graph);
@@ -66,9 +66,8 @@ class SvgDrawer {
 
     /**
      * Draw the actual edges as bonds.
-     * @param {Boolean} debug A boolean indicating whether or not to draw debug helpers.
      */
-    drawEdges(debug) {
+    drawEdges() {
         let preprocessor = this.preprocessor,
             graph = preprocessor.graph,
             rings = preprocessor.rings,
@@ -82,7 +81,7 @@ class SvgDrawer {
                 let edgeId = edges[i];
                 if (!drawn[edgeId]) {
                     drawn[edgeId] = true;
-                    this.drawEdge(edgeId, debug);
+                    this.drawEdge(edgeId);
                 }
             }
         });
@@ -104,9 +103,8 @@ class SvgDrawer {
     /**
      * Draw the an edge as a bond.
      * @param {Number} edgeId An edge id.
-     * @param {Boolean} debug A boolean indicating whether or not to draw debug helpers.
      */
-    drawEdge(edgeId, debug) {
+    drawEdge(edgeId) {
         let preprocessor = this.preprocessor,
             opts = preprocessor.opts,
             svgWrapper = this.svgWrapper,
@@ -120,12 +118,8 @@ class SvgDrawer {
             return;
         }
 
-
         const edgeIdLabel = "edge-id"
         const edgeIdValue = `edge-${edgeId}`
-
-        const edgeIdDebugLabel = "edge-id-debug"
-        const edgeIdDebugValue = edgeIdValue
 
         const wedgeIdLabel = "wedge-id"
         const wedgeIdValue = `wedge-${edgeId}`
@@ -222,26 +216,18 @@ class SvgDrawer {
                 svgWrapper.drawLine(edgeIdLabel, edgeIdValue, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB));
             }
         }
-
-        if (debug) {
-            let midpoint = Vector2.midpoint(a, b);
-            svgWrapper.drawDebugText(edgeIdDebugLabel, edgeIdDebugValue, midpoint.x, midpoint.y, 'e: ' + edgeId);
-        }
     }
 
     /**
      * Draws the vertices representing atoms to the canvas.
      *
-     * @param {Boolean} debug A boolean indicating whether or not to draw debug messages to the canvas.
      */
-    drawVertices(debug) {
+    drawVertices() {
         let preprocessor = this.preprocessor,
             opts = preprocessor.opts,
             graph = preprocessor.graph,
-            rings = preprocessor.rings,
             svgWrapper = this.svgWrapper;
 
-        const vertexIdDebugLabel = "vertex-id-debug"
         const vertexIdLabel = "vertex-id"
 
 
@@ -257,7 +243,6 @@ class SvgDrawer {
             let isTerminal = opts.terminalCarbons || element !== 'C' || atom.hasAttachedPseudoElements ? vertex.isTerminal() : false;
             let isCarbon = atom.element === 'C';
 
-            const vertexIdDebugValue = `vertex-id-debug-${i}`
             const vertexIdValue = `vertex-id-${i}`
 
             // This is a HACK to remove all hydrogens from nitrogens in aromatic rings, as this
@@ -290,13 +275,6 @@ class SvgDrawer {
                 if (Math.abs(Math.PI - angle) < 0.1) {
                     svgWrapper.drawPoint(vertexIdLabel, vertexIdValue, vertex.position.x, vertex.position.y, element);
                 }
-            }
-
-            if (debug) {
-                let value = 'v: ' + vertex.id + ' ' + ArrayHelper.print(atom.ringbonds);
-                svgWrapper.drawDebugText(vertexIdDebugLabel, vertexIdDebugValue, vertex.position.x, vertex.position.y, value);
-            } else {
-                svgWrapper.drawDebugText(vertexIdDebugLabel, vertexIdDebugValue, vertex.position.x, vertex.position.y, vertex.value.chirality);
             }
         }
     }
