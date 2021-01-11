@@ -175,7 +175,7 @@ class SvgWrapper {
         let minX = Number.MAX_VALUE;
         let minY = Number.MAX_VALUE;
 
-        for (var i = 0; i < vertices.length; i++) {
+        for (let i = 0; i < vertices.length; i++) {
             if (!vertices[i].value.isDrawn) {
                 continue;
             }
@@ -201,9 +201,9 @@ class SvgWrapper {
         this.offsetX = -minX;
         this.offsetY = -minY;
 
-        var scaleX = this.opts.width / this.drawingWidth;
-        var scaleY = this.opts.height / this.drawingHeight;
-        var scale = (scaleX < scaleY) ? scaleX : scaleY;
+        const scaleX = this.opts.width / this.drawingWidth;
+        const scaleY = this.opts.height / this.drawingHeight;
+        const scale = (scaleX < scaleY) ? scaleX : scaleY;
 
         // TODO aneb: find how to scale svg during construction properly
         // dividing by ratio makes all images roughly equal, but still too small
@@ -263,9 +263,7 @@ class SvgWrapper {
             return;
         }
 
-        let offsetX = this.offsetX,
-            offsetY = this.offsetY,
-            l = line.getLeftVector().clone(),
+        let l = line.getLeftVector().clone(),
             r = line.getRightVector().clone(),
             normals = Vector2.normals(l, r);
 
@@ -286,8 +284,7 @@ class SvgWrapper {
 
         let dir = Vector2.subtract(end, start).normalize(),
             length = line.getLength(),
-            step = 1.25 / (length / (this.opts.bondThickness * 3.0)),
-            changed = false;
+            step = 1.25 / (length / (this.opts.bondThickness * 3.0));
 
         let gradient = this.createGradient(line);
 
@@ -352,8 +349,7 @@ class SvgWrapper {
      * @param {String} gradient gradient url. Defaults to null.
      */
     drawLine(line, dashed = false, gradient = null) {
-        let opts = this.opts,
-            stylesArr = [
+        let stylesArr = [
                 ['stroke-linecap', 'round'],
                 ['stroke-dasharray', dashed ? '5, 5' : 'none'],
             ],
@@ -375,7 +371,7 @@ class SvgWrapper {
         this.paths.push(lineElem);
 
         if (gradient == null) {
-            gradient = this.createGradient(line, fromX, fromY, toX, toY);
+            gradient = this.createGradient(line);
         }
         lineElem.setAttributeNS(null, 'stroke', `url('#${gradient}')`);
     }
@@ -388,7 +384,6 @@ class SvgWrapper {
      * @param {String} elementName The name of the element (single-letter).
      */
     drawPoint(x, y, elementName) {
-        let ctx = this.ctx;
         let offsetX = this.offsetX;
         let offsetY = this.offsetY;
 
@@ -501,13 +496,10 @@ class SvgWrapper {
             textNode.appendChild(chargeElem);
         }
 
-        let isotopeText = '0';
-
         if (isotope > 0) {
             let isotopeElem = this.createSubSuperScripts(isotope.toString(), 'super');
             textNode.appendChild(isotopeElem);
         }
-
 
         // TODO: Better handle exceptions
         // Exception for nitro (draw nitro as NO2 instead of N+O-O)
@@ -522,7 +514,6 @@ class SvgWrapper {
                     charge: ''
                 }
             }
-            charge = 0;
         }
 
         if (hydrogens > 0) {
@@ -617,7 +608,7 @@ class SvgWrapper {
             w = Vector2.add(start, Vector2.multiplyScalar(normals[1], this.halfBondThickness));
 
         let polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'),
-            gradient = this.createGradient(line, l.x, l.y, r.x, r.y);
+            gradient = this.createGradient(line);
         polygon.setAttributeNS(null, 'points', `${t.x},${t.y} ${u.x},${u.y} ${v.x},${v.y} ${w.x},${w.y}`);
         polygon.setAttributeNS(null, 'fill', `url('#${gradient}')`);
         this.paths.push(polygon);
