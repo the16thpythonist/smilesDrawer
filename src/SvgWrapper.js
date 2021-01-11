@@ -5,9 +5,13 @@ const {
 const Line = require('./Line');
 const Vector2 = require('./Vector2');
 
+const jsdom = require("jsdom");
+const {JSDOM} = jsdom;
+const {document} = (new JSDOM(``)).window;
+
 class SvgWrapper {
     constructor(themeManager, target, options) {
-        this.svg = document.getElementById(target);
+        this.svg = target;
         this.opts = options;
         this.gradientId = 0;
 
@@ -42,6 +46,7 @@ class SvgWrapper {
         this.maskElements.push(mask);
 
         // clear the svg element
+        // TODO aneb: remove block since svg comes clean
         while (this.svg.firstChild) {
             this.svg.removeChild(this.svg.firstChild);
         }
@@ -193,22 +198,22 @@ class SvgWrapper {
         this.drawingWidth = maxX - minX;
         this.drawingHeight = maxY - minY;
 
-        let scaleX = this.svg.clientWidth / this.drawingWidth;
-        let scaleY = this.svg.clientHeight / this.drawingHeight;
-
-        let scale = (scaleX < scaleY) ? scaleX : scaleY;
-        let viewBoxDim = Math.round(this.drawingWidth > this.drawingHeight ? this.drawingWidth : this.drawingHeight);
-
-        this.svg.setAttributeNS(null, 'viewBox', `0 0 ${viewBoxDim} ${viewBoxDim}`);
-
         this.offsetX = -minX;
         this.offsetY = -minY;
 
+        var scaleX = this.opts.width / this.drawingWidth;
+        var scaleY = this.opts.height / this.drawingHeight;
+        var scale = (scaleX < scaleY) ? scaleX : scaleY;
+
+        // TODO aneb: find how to scale svg during construction properly
+        // dividing by ratio makes all images roughly equal, but still too small
+        this.svg.setAttributeNS(null, 'viewBox', `0 0 ${this.opts.width / scale} ${this.opts.height / scale}`);
+
         // Center
         if (scaleX < scaleY) {
-            this.offsetY += this.svg.clientHeight / (2.0 * scale) - this.drawingHeight / 2.0;
+            this.offsetY += this.opts.height / (2.0 * scale) - this.drawingHeight / 2.0;
         } else {
-            this.offsetX += this.svg.clientWidth / (2.0 * scale) - this.drawingWidth / 2.0;
+            this.offsetX += this.opts.width / (2.0 * scale) - this.drawingWidth / 2.0;
         }
     }
 
