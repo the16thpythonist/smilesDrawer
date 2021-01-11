@@ -68,6 +68,34 @@ if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir)
 }
 
+const propertiesFromXmlString = xml => {
+    const dom = new JSDOM(xml).window.document
+    const lines = dom.querySelectorAll("line[edge-id]")
+
+    const edges = {}
+
+    for (const line of lines) {
+        const edgeId = line.attributes["edge-id"].value
+
+        const x1 = line.attributes["x1"].value
+        const y1 = line.attributes["y1"].value
+
+        const x2 = line.attributes["x2"].value
+        const y2 = line.attributes["y2"].value
+
+        if (!edges[edgeId]) {
+            edges[edgeId] = Array(4).fill(0)
+        }
+
+        const a = edges[edgeId]
+        a[0] = a[0] > x1 ? a[0] : x1
+        a[1] = a[1] > y1 ? a[1] : y1
+
+        a[2] = a[2] > x2 ? a[2] : x2
+        a[3] = a[3] > y2 ? a[3] : y2
+    }
+}
+
 for (const [i, smiles] of smilesList.entries()) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const svgId = `svg-${i}`
@@ -85,7 +113,7 @@ for (const [i, smiles] of smilesList.entries()) {
     svgDrawer.draw(tree, svg, 'light', false);
 
     const xml = new XMLSerializer().serializeToString(svg);
-
+    propertiesFromXmlString(xml)
     fs.writeFileSync(`${outputDir}/${svgId}.svg`, xml)
     debugger
 }
