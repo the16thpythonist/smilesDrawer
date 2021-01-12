@@ -7,27 +7,10 @@
   "author": "Daniel Probst, Reymond Group, University of Berne",
   "license": "MIT",
   "private": false,
-  "devDependencies": {
-    "babel-core": ">=6.26.3",
-    "babel-preset-env": ">=1.7.0",
-    "babelify": "^10.0.0",
-    "browserify": ">=16.2.3",
-    "docdash": "^1.0.3",
-    "gulp": "^4.0.0",
-    "gulp-babel-minify": "^0.5.0",
-    "gulp-concat": ">=2.6.1",
-    "gulp-exit": "0.0.2",
-    "gulp-jsdoc3": ">=2.0.0",
-    "gulp-rename": ">=1.4.0",
-    "gulp-sourcemaps": "^2.6.5",
-    "puppeteer": "^5.5.0",
-    "vinyl-buffer": ">=1.0.1",
-    "vinyl-source-stream": ">=2.0.0",
-    "watchify": "^3.11.1",
-    "webpack-stream": "^5.2.1"
-  },
+  "devDependencies": {},
   "dependencies": {
-    "canvas": "^2.6.1",
-    "jsdom": "^16.4.0"
+    "puppeteer": "^5.5.0",
+    "jsdom": "^16.4.0",
+    "lodash": "^4.17.20"
   }
 }
