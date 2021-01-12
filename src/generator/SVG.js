@@ -11,13 +11,19 @@ SVG.prototype.update = function (element, attributes) {
 }
 
 SVG.prototype.createElement = function (type, attributes = null) {
-    const el = this.document.createElementNS('http://www.w3.org/2000/svg', type)
+    const element = this.document.createElementNS('http://www.w3.org/2000/svg', type)
     if (!attributes) {
-        return el
+        return element
     }
 
-    this.update(el, attributes)
-    return el
+    this.update(element, attributes)
+    return element
+}
+
+SVG.prototype.appendChildren = function(element, children){
+    for (const child of children){
+        element.appendChild(child)
+    }
 }
 
 

@@ -6,11 +6,15 @@ const Line = require('./Line');
 const Vector2 = require('./Vector2');
 
 const jsdom = require("jsdom");
+const SVG = require("../generator/SVG");
 const {JSDOM} = jsdom;
 const {document} = (new JSDOM(``)).window;
 
 class SvgWrapper {
     constructor(themeManager, target, options) {
+        // TODO change naming everywhere and give this a proper name
+        this.svgHelper = new SVG()
+
         this.svg = target;
         this.opts = options;
         this.gradientId = 0;
@@ -36,29 +40,21 @@ class SvgWrapper {
         // create the mask
         this.maskElements = [];
 
-        let mask = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        mask.setAttributeNS(null, 'x', 0);
-        mask.setAttributeNS(null, 'y', 0);
-        mask.setAttributeNS(null, 'width', '100%');
-        mask.setAttributeNS(null, 'height', '100%');
-        mask.setAttributeNS(null, 'fill', 'white');
+        const mask = this.svgHelper.createElement('rect', {
+            x: 0, y: 0,
+            width: '100%', height: '100%',
+            fill: 'white',
+        })
 
         this.maskElements.push(mask);
     }
 
     constructSvg() {
-        // TODO: add the defs element to put gradients in
-        let defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs'),
-            masks = document.createElementNS('http://www.w3.org/2000/svg', 'mask'),
-            style = document.createElementNS('http://www.w3.org/2000/svg', 'style'),
-            paths = document.createElementNS('http://www.w3.org/2000/svg', 'g'),
-            vertices = document.createElementNS('http://www.w3.org/2000/svg', 'g'),
-            pathChildNodes = this.paths;
+        const pathChildNodes = this.paths;
+        const [defs, style, vertices] = ['defs', 'style', 'g'].map(el => this.svgHelper.createElement(el))
+        const masks = this.svgHelper.createElement("mask", {id: "text-mask"})
+        const paths = this.svgHelper.createElement("g", {mask: 'url(#text-mask)'})
 
-        // give the mask an id
-        masks.setAttributeNS(null, 'id', 'text-mask');
-
-        // create the css styles
         style.appendChild(document.createTextNode(`
                 .element {
                     font: ${this.opts.fontSizeLarge}pt Helvetica, Arial, sans-serif;
@@ -69,37 +65,14 @@ class SvgWrapper {
                 }
             `));
 
-        for (let path of pathChildNodes) {
-            paths.appendChild(path);
-        }
-        for (let vertex of this.vertices) {
-            vertices.appendChild(vertex);
-        }
-        for (let mask of this.maskElements) {
-            masks.appendChild(mask);
-        }
-        for (let gradient of this.gradients) {
-            defs.appendChild(gradient);
-        }
+        this.svgHelper.appendChildren(paths, pathChildNodes)
+        this.svgHelper.appendChildren(vertices, this.vertices)
+        this.svgHelper.appendChildren(masks, this.maskElements)
+        this.svgHelper.appendChildren(defs, this.gradients)
 
-        paths.setAttributeNS(null, 'mask', 'url(#text-mask)');
+        this.svgHelper.appendChildren(this.svg, [defs, masks, style, paths, vertices])
 
-        if (this.svg) {
-            this.svg.appendChild(defs);
-            this.svg.appendChild(masks);
-            this.svg.appendChild(style);
-            this.svg.appendChild(paths);
-            this.svg.appendChild(vertices);
-            return this.svg;
-        } else {
-            let container = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            container.appendChild(defs);
-            container.appendChild(masks);
-            container.appendChild(style);
-            container.appendChild(paths);
-            container.appendChild(vertices);
-            return container;
-        }
+        return this.svg;
     }
 
     /**
@@ -191,6 +164,7 @@ class SvgWrapper {
 
         this.offsetX = -minX;
         this.offsetY = -minY;
+
 
         this.svg.setAttributeNS(null, "width", this.drawingWidth + 5)
         this.svg.setAttributeNS(null, "height", this.drawingHeight + 5)
