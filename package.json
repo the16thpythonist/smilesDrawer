@@ -9,8 +9,9 @@
   "private": false,
   "devDependencies": {},
   "dependencies": {
-    "puppeteer": "^5.5.0",
+    "fs-extra": "^9.0.1",
     "jsdom": "^16.4.0",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "puppeteer": "^5.5.0"
   }
 }

@@ -1,5 +1,12 @@
 const _ = require("lodash")
 
+const Parser = require("../drawer/Parser")
+const SvgDrawer = require("../drawer/SvgDrawer")
+
+const jsdom = require("jsdom");
+const {JSDOM} = jsdom;
+const {document: jsdomDocument, XMLSerializer} = (new JSDOM(``)).window
+
 const saveAsPngWithProperSize = async (browser, svg, size, fileName) => {
     const page = await browser.newPage();
     await page.setContent(svg, {waitUntil: 'domcontentloaded'})
@@ -40,7 +47,6 @@ const propertiesFromXmlString = async (browser, xml) => {
 
         return {nodes, edges}
     })
-
 
     return {dom, xml}
 }
@@ -83,4 +89,62 @@ const mergeBoundingBoxes = function (boxes) {
     return Object.values(groups).map(getBoxWithMaxArea)
 }
 
-module.exports = {saveAsPngWithProperSize, propertiesFromXmlString, makeBoundingBox, mergeBoundingBoxes}
+const correctBoundingBox = (x, y, width, height) => {
+    const minValue = 0.5
+    const newValue = 2
+    let [xCorr, yCorr, widthCorr, heightCorr] = [x, y, width, height]
+
+    if (heightCorr < minValue) {
+        heightCorr = newValue
+        yCorr -= newValue / 2
+    }
+
+    if (widthCorr < minValue) {
+        widthCorr = newValue
+        xCorr -= newValue / 2
+    }
+
+    return {x: xCorr, y: yCorr, width: widthCorr, height: heightCorr}
+}
+
+const createRawSvgFromSmiles = (smiles) => {
+    const svg = jsdomDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const size = 500
+
+    svg.setAttributeNS(null, "smiles", smiles)
+    svg.setAttributeNS(null, "width", size)
+    svg.setAttributeNS(null, "height", size)
+
+    const svgDrawer = new SvgDrawer({height: size, width: size});
+    const tree = Parser.parse(smiles)
+    svgDrawer.draw(tree, svg, 'light', false);
+
+    return new XMLSerializer().serializeToString(svg);
+}
+
+const addBoundingBoxesToSvg = ({dom, xml}) => {
+    const svg = new JSDOM(xml).window.document.documentElement.querySelector("svg")
+    const bbContainer = jsdomDocument.createElementNS('http://www.w3.org/2000/svg', 'g')
+
+    for (const {id, x, y, width, height} of dom.nodes) {
+        const bb = makeBoundingBox(jsdomDocument, id, x, y, width, height)
+        bbContainer.appendChild(bb)
+    }
+
+    const correctedEdges = dom.edges.map(({id, x, y, width, height}) => Object.assign({id: id}, correctBoundingBox(x, y, width, height)))
+    const merged = mergeBoundingBoxes(correctedEdges)
+    for (let {id, x, y, width, height} of merged) {
+        const bb = makeBoundingBox(jsdomDocument, id, x, y, width, height)
+        bbContainer.appendChild(bb)
+    }
+
+    svg.appendChild(bbContainer)
+
+    return new XMLSerializer().serializeToString(svg)
+}
+
+module.exports = {
+    saveAsPngWithProperSize, propertiesFromXmlString, makeBoundingBox,
+    mergeBoundingBoxes, correctBoundingBox, createRawSvgFromSmiles,
+    addBoundingBoxesToSvg
+}
