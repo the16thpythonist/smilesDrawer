@@ -1,3 +1,5 @@
+const _ = require("lodash")
+
 const saveAsPngWithProperSize = async (browser, svg, size, fileName) => {
     const page = await browser.newPage();
     await page.setContent(svg, {waitUntil: 'domcontentloaded'})
@@ -10,6 +12,7 @@ const saveAsPngWithProperSize = async (browser, svg, size, fileName) => {
 
     const svgEl = await page.$('svg');
     await svgEl.screenshot({path: fileName, omitBackground: false});
+    await page.close()
 }
 
 const propertiesFromXmlString = async (browser, xml) => {
@@ -51,8 +54,33 @@ const makeBoundingBox = (document, id, x, y, width, height) => {
     bb.setAttributeNS(null, "y", y)
     bb.setAttributeNS(null, "width", width)
     bb.setAttributeNS(null, "height", height)
-    bb.setAttributeNS(null, "style", `fill: none; stroke: #72${randomColor}; stroke-width: 0.5`)
+    bb.setAttributeNS(null, "style", `fill: none; stroke: #a2${randomColor}; stroke-width: 0.5`)
     return bb
 }
 
-module.exports = {saveAsPngWithProperSize, propertiesFromXmlString, makeBoundingBox}
+const boundingBoxToRect = (bb) => {
+    const {x, y, width: w, height: h} = bb
+    return {top: y, bottom: y + h, left: x, right: x + w}
+}
+
+const getBoxWithMaxArea = (bond) => {
+    if (bond.length === 1) {
+        return bond[0]
+    }
+    const id = bond[0].id
+    const rects = bond.map(bb => boundingBoxToRect(bb))
+
+    const minY = Math.min(...rects.map(r => r.top))
+    const maxY = Math.max(...rects.map(r => r.bottom))
+    const minX = Math.min(...rects.map(r => r.left))
+    const maxX = Math.max(...rects.map(r => r.right))
+
+    return {id: id, x: minX, y: minY, width: maxX - minX, height: maxY - minY}
+}
+
+const mergeBoundingBoxes = function (boxes) {
+    const groups = _.groupBy(boxes, "id")
+    return Object.values(groups).map(getBoxWithMaxArea)
+}
+
+module.exports = {saveAsPngWithProperSize, propertiesFromXmlString, makeBoundingBox, mergeBoundingBoxes}

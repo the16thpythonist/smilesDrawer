@@ -1,5 +1,6 @@
 (async () => {
     const fs = require('fs')
+    const fsP = require('fs/promises')
 
     const puppeteer = require('puppeteer');
 
@@ -15,7 +16,7 @@
     const SvgDrawer = require("./src/drawer/SvgDrawer")
 
     const {smilesList} = require("./src/generator/misc")
-    const {saveAsPngWithProperSize, propertiesFromXmlString, makeBoundingBox} = require("./src/generator/svg")
+    const {saveAsPngWithProperSize, propertiesFromXmlString, makeBoundingBox, mergeBoundingBoxes} = require("./src/generator/svg")
 
     const outputDir = "png-data"
     if (!fs.existsSync(outputDir)) {
@@ -27,7 +28,7 @@
     for (const [i, smiles] of smilesList.entries()) {
         const svg = jsdomDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
         const svgId = `svg-${i}`
-        const size = 100
+        const size = 500
 
         svg.setAttributeNS(null, "id", svgId)
         svg.setAttributeNS(null, "smiles", smiles)
@@ -40,11 +41,26 @@
 
         const xml = new XMLSerializer().serializeToString(svg);
         xmlFiles.push(xml)
-
     }
 
     const infos = await Promise.all(xmlFiles.map(xml => propertiesFromXmlString(browser, xml)))
+    const correctBoundingBox = (x, y, width, height) => {
+        const minValue = 0.5
+        const newValue = 2
+        let [xCorr, yCorr, widthCorr, heightCorr] = [x, y, width, height]
 
+        if (heightCorr < minValue) {
+            heightCorr = newValue
+            yCorr -= newValue / 2
+        }
+
+        if (widthCorr < minValue) {
+            widthCorr = newValue
+            xCorr -= newValue / 2
+        }
+
+        return {x: xCorr, y: yCorr, width: widthCorr, height: heightCorr}
+    }
     const svgsWithBBs = []
     for (const {dom, xml} of infos) {
         const svg = new JSDOM(xml).window.document.documentElement.querySelector("svg")
@@ -55,8 +71,10 @@
             bbContainer.appendChild(bb)
         }
 
-        for (const {id, x, y, width, height} of dom.edges) {
-            const bb = makeBoundingBox(jsdomDocument,id, x, y, width, height)
+        const correctedEdges = dom.edges.map(({id, x, y, width, height}) => Object.assign({id: id}, correctBoundingBox(x, y, width, height)))
+        const merged = mergeBoundingBoxes(correctedEdges)
+        for (let {id, x, y, width, height} of merged) {
+            const bb = makeBoundingBox(jsdomDocument, id, x, y, width, height)
             bbContainer.appendChild(bb)
         }
 
@@ -64,6 +82,7 @@
 
         svgsWithBBs.push(new XMLSerializer().serializeToString(svg))
     }
+    // await Promise.all(svgsWithBBs.map((svg, i) => fsP.writeFile(`${outputDir}/svg-bb-${i}.svg`, svg)))
 
     await Promise.all(svgsWithBBs.map((svg, i) => saveAsPngWithProperSize(browser, svg, 1000, `${outputDir}/svg-bb-${i}.png`)))
 
