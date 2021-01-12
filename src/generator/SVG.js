@@ -10,13 +10,17 @@ SVG.prototype.update = function (element, attributes) {
     }
 }
 
-SVG.prototype.createElement = function (type, attributes = null) {
+SVG.prototype.createElement = function (type, attributes = null, children = null) {
     const element = this.document.createElementNS('http://www.w3.org/2000/svg', type)
-    if (!attributes) {
-        return element
+    if (attributes) {
+        this.update(element, attributes)
     }
 
-    this.update(element, attributes)
+    if (children){
+        this.appendChildren(element,children)
+    }
+
+
     return element
 }
 

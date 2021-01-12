@@ -80,33 +80,22 @@ class SvgWrapper {
      * @param {Line} line the line to apply the gradiation to.
      */
     createGradient(line) {
-        // create the gradient and add it
-        let gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient'),
-            gradientUrl = `line-${this.gradientId++}`,
-            l = line.getLeftVector(),
-            r = line.getRightVector(),
-            fromX = l.x + this.offsetX,
-            fromY = l.y + this.offsetY,
-            toX = r.x + this.offsetX,
-            toY = r.y + this.offsetY;
+        const gradientUrl = `line-${this.gradientId++}`
+        const l = line.getLeftVector()
+        const r = line.getRightVector()
+        const fromX = l.x + this.offsetX
+        const fromY = l.y + this.offsetY
+        const toX = r.x + this.offsetX
+        const toY = r.y + this.offsetY
 
-        gradient.setAttributeNS(null, 'id', gradientUrl);
-        gradient.setAttributeNS(null, 'gradientUnits', 'userSpaceOnUse');
-        gradient.setAttributeNS(null, 'x1', fromX);
-        gradient.setAttributeNS(null, 'y1', fromY);
-        gradient.setAttributeNS(null, 'x2', toX);
-        gradient.setAttributeNS(null, 'y2', toY);
+        const firstStopColor = this.themeManager.getColor(line.getLeftElement()) || this.themeManager.getColor('C')
+        const firstStop = this.svgHelper.createElement('stop', {'stop-color': firstStopColor, offset: '20%'})
 
-        let firstStop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        firstStop.setAttributeNS(null, 'stop-color', this.themeManager.getColor(line.getLeftElement()) || this.themeManager.getColor('C'));
-        firstStop.setAttributeNS(null, 'offset', '20%');
+        const secondStopColor = this.themeManager.getColor(line.getRightElement() || this.themeManager.getColor('C'))
+        const secondStop = this.svgHelper.createElement('stop', {'stop-color': secondStopColor, offset: '100%'})
 
-        let secondStop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        secondStop.setAttributeNS(null, 'stop-color', this.themeManager.getColor(line.getRightElement() || this.themeManager.getColor('C')));
-        secondStop.setAttributeNS(null, 'offset', '100%');
-
-        gradient.appendChild(firstStop);
-        gradient.appendChild(secondStop);
+        const gradientAttributes = {id: gradientUrl, gradientUnits: 'userSpaceOnUse', x1: fromX, y1: fromY, x2: toX, y2: toY,}
+        const gradient = this.svgHelper.createElement('linearGradient', gradientAttributes, [firstStop, secondStop])
 
         this.gradients.push(gradient);
 
@@ -120,12 +109,9 @@ class SvgWrapper {
      * @param {String} shift the type of text, either 'sub', or 'super'
      */
     createSubSuperScripts(text, shift) {
-        let elem = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-        elem.setAttributeNS(null, 'baseline-shift', shift);
-        elem.appendChild(document.createTextNode(text));
-        elem.setAttributeNS(null, 'class', 'sub');
-
-        return elem;
+        const attributes = {'baseline-shift': shift, class: 'sub'}
+        const textNode = document.createTextNode(text)
+        return this.svgHelper.createElement('tspan', attributes, [textNode])
     }
 
     /**
@@ -152,12 +138,10 @@ class SvgWrapper {
             if (minY > p.y) minY = p.y;
         }
 
-        // Add padding
-        let padding = this.opts.padding;
-        maxX += padding;
-        maxY += padding;
-        minX -= padding;
-        minY -= padding;
+        maxX += this.opts.padding
+        maxY += this.opts.padding
+        minX -= this.opts.padding
+        minY -= this.opts.padding
 
         this.drawingWidth = Math.ceil(maxX - minX);
         this.drawingHeight = Math.ceil(maxY - minY);
@@ -165,10 +149,11 @@ class SvgWrapper {
         this.offsetX = -minX;
         this.offsetY = -minY;
 
-
-        this.svg.setAttributeNS(null, "width", this.drawingWidth + 5)
-        this.svg.setAttributeNS(null, "height", this.drawingHeight + 5)
-        this.svg.setAttributeNS(null, 'viewBox', `0 0 ${this.drawingWidth} ${this.drawingHeight}`);
+        this.svgHelper.update(this.svg, {
+            width: this.drawingWidth + 5,
+            height: this.drawingHeight + 5,
+            viewBox: `0 0 ${this.drawingWidth} ${this.drawingHeight}`
+        })
     }
 
     /**
@@ -180,12 +165,13 @@ class SvgWrapper {
      * @param {String} elementName The name of the element (single-letter).
      */
     drawBall(vertexIdLabel, vertexIdValue, x, y, elementName) {
-        let ball = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        ball.setAttributeNS(null, vertexIdLabel, vertexIdValue);
-        ball.setAttributeNS(null, 'cx', x + this.offsetX);
-        ball.setAttributeNS(null, 'cy', y + this.offsetY);
-        ball.setAttributeNS(null, 'r', this.opts.bondLength / 4.5);
-        ball.setAttributeNS(null, 'fill', this.themeManager.getColor(elementName));
+        const ball = this.svgHelper.createElement('circle', {
+            [vertexIdLabel]: vertexIdValue,
+            cx: x + this.offsetX,
+            cy: y + this.offsetY,
+            r: this.opts.bondLength / 4.5,
+            fill: this.themeManager.getColor(elementName)
+        })
 
         this.vertices.push(ball);
     }
@@ -197,12 +183,13 @@ class SvgWrapper {
      * @param {Number} r Radius of ring
      */
     drawRing(x, y, r) {
-        let ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        ring.setAttributeNS(null, 'cx', x + this.offsetX);
-        ring.setAttributeNS(null, 'cy', y + this.offsetY);
-        ring.setAttributeNS(null, 'r', r);
-        ring.setAttributeNS(null, 'fill', 'none');
-        ring.setAttributeNS(null, 'stroke', this.themeManager.getColor("C"));
+        const ring = this.svgHelper.createElement('circle', {
+            cx: x + this.offsetX,
+            cy: y + this.offsetY,
+            r: r,
+            fill: 'none',
+            stroke: this.themeManager.getColor("C")
+        })
 
         this.vertices.push(ring);
     }
@@ -219,39 +206,30 @@ class SvgWrapper {
             return;
         }
 
-        let l = line.getLeftVector().clone(),
-            r = line.getRightVector().clone(),
-            normals = Vector2.normals(l, r);
+        const l = line.getLeftVector().clone()
+        const r = line.getRightVector().clone()
+        const normals = Vector2.normals(l, r)
 
         normals[0].normalize();
         normals[1].normalize();
 
-        let isRightChiralCenter = line.getRightChiral(),
-            start,
-            end;
+        const isRightChiralCenter = line.getRightChiral()
+        const [start, end] = isRightChiralCenter ? [r, l] : [l, r]
 
-        if (isRightChiralCenter) {
-            start = r;
-            end = l;
-        } else {
-            start = l;
-            end = r;
-        }
+        const dir = Vector2.subtract(end, start).normalize()
+        const length = line.getLength()
+        const step = 1.25 / (length / (this.opts.bondThickness * 3.0))
 
-        let dir = Vector2.subtract(end, start).normalize(),
-            length = line.getLength(),
-            step = 1.25 / (length / (this.opts.bondThickness * 3.0));
-
-        let gradient = this.createGradient(line);
+        const gradient = this.createGradient(line);
 
         for (let t = 0.0; t < 1.0; t += step) {
-            let to = Vector2.multiplyScalar(dir, t * length),
-                startDash = Vector2.add(start, to),
-                width = 1.5 * t,
-                dashOffset = Vector2.multiplyScalar(normals[0], width);
+            const to = Vector2.multiplyScalar(dir, t * length)
+            const startDash = Vector2.add(start, to)
+            const width = 1.5 * t
+            const dashOffset = Vector2.multiplyScalar(normals[0], width)
 
             startDash.subtract(dashOffset);
-            let endDash = startDash.clone();
+            const endDash = startDash.clone();
             endDash.add(Vector2.multiplyScalar(dashOffset, 2.0));
 
             this.drawLine(idLabel, idValue, new Line(startDash, endDash), null, gradient);

@@ -7,7 +7,7 @@
     const outputDir = "png-data"
     const smilesFile = "molecules.csv"
 
-    const smilesList = await readSmilesFromCsv(smilesFile, 1, 50)
+    const smilesList = await readSmilesFromCsv(smilesFile, 1, 100)
     const renderer = new Renderer(outputDir)
     await renderer.init()
 
@@ -19,7 +19,14 @@
 
     // await Promise.all(svgsWithBBs.map((svg, i) => fs.writeFile(`${outputDir}/svg-bb-${i}.svg`, svg)))
 
-    await Promise.all(svgsWithBBs.map((svg, i) => renderer.saveAsPngWithProperSize(svg, 8, `${outputDir}/svg-bb-${i}.png`)))
+    const n = 5
+    let batch = 0
+    while (svgsWithBBs.length) {
+        const current = svgsWithBBs.splice(0, 5)
+        await Promise.all(current.map((svg, i) => renderer.saveAsPngWithProperSize(svg, 8, `${outputDir}/svg-bb-${batch * n + i}.png`)))
+        console.log("left:", svgsWithBBs.length)
+        ++batch
+    }
 
     await renderer.done()
 })()
