@@ -15,7 +15,7 @@
     const Parser = require("./src/drawer/Parser")
     const SvgDrawer = require("./src/drawer/SvgDrawer")
 
-    const {smilesList} = require("./src/generator/misc")
+    const {readSmilesFromCsv} = require("./src/generator/misc")
     const {saveAsPngWithProperSize, propertiesFromXmlString, makeBoundingBox, mergeBoundingBoxes} = require("./src/generator/svg")
 
     const outputDir = "png-data"
@@ -23,6 +23,8 @@
         fs.mkdirSync(outputDir)
     }
 
+    const smilesFile = "molecules.csv"
+    const smilesList = await readSmilesFromCsv(smilesFile, 1, 100)
     const xmlFiles = []
 
     for (const [i, smiles] of smilesList.entries()) {
