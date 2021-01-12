@@ -4,19 +4,23 @@ const _ = require('lodash');
 
 const Parser = require("../drawer/Parser")
 const SvgDrawer = require("../drawer/SvgDrawer")
+const SVG = require("./SVG");
 const {JSDOM} = require("jsdom");
 
 function Renderer(directory) {
+    // TODO make own browser class?
     this.browser = null
     this.document = null
     this.XMLSerializer = null
 
     this.parser = Parser
 
+    this.directory = directory
+
     // TODO define options?
     this.drawer = new SvgDrawer({})
+    this.svg = new SVG()
 
-    this.directory = directory
 }
 
 Renderer.prototype.init = async function () {
@@ -64,8 +68,9 @@ Renderer.prototype.propertiesFromXmlString = async function (xml) {
 Renderer.prototype.createRawSvgFromSmiles = function (smiles) {
     const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const tree = this.parser.parse(smiles)
+
     this.drawer.draw(tree, svg, 'light', false);
-    svg.setAttributeNS(null, "smiles", smiles)
+    this.svg.update(svg, {smiles})
 
     return this.XMLSerializer.serializeToString(svg);
 }
@@ -82,7 +87,6 @@ Renderer.prototype.saveAsPngWithProperSize = async function (svg, scale, fileNam
         svg.setAttributeNS(null, "height", Math.ceil(height * scale))
         svg.setAttributeNS(null, "width", Math.ceil(width * scale))
         svg.setAttributeNS(null, "viewbox", `${boxX} ${boxY} ${boxWidth * scale} ${boxHeight * scale} `)
-
     }, scale)
 
     const svgEl = await page.$('svg');
@@ -91,16 +95,13 @@ Renderer.prototype.saveAsPngWithProperSize = async function (svg, scale, fileNam
 }
 
 Renderer.prototype.makeBoundingBox = function (id, x, y, width, height) {
-    const bb = this.document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-    // don't use all bits, otherwise sometimes bb might be white
     const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
-    bb.setAttributeNS(null, "id", `${id}-bb`)
-    bb.setAttributeNS(null, "x", x)
-    bb.setAttributeNS(null, "y", y)
-    bb.setAttributeNS(null, "width", width)
-    bb.setAttributeNS(null, "height", height)
-    bb.setAttributeNS(null, "style", `fill: none; stroke: #a2${randomColor}; stroke-width: 0.5`)
-    return bb
+    return this.svg.createElement('rect', {
+        id: `${id}-bb`,
+        x: x, y: y,
+        width: width, height: height,
+        style: `fill: none; stroke: #a2${randomColor}; stroke-width: 0.5`
+    })
 }
 
 Renderer.prototype.mergeBoundingBoxes = function (boxes) {
@@ -148,7 +149,7 @@ Renderer.prototype.correctBoundingBox = function (x, y, width, height) {
 
 Renderer.prototype.addBoundingBoxesToSvg = function ({dom, xml}) {
     const svg = new JSDOM(xml).window.document.documentElement.querySelector("svg")
-    const bbContainer = this.document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    const bbContainer = this.svg.createElement("g")
 
     for (const {id, x, y, width, height} of dom.nodes) {
         const bb = this.makeBoundingBox(id, x, y, width, height)
