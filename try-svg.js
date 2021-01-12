@@ -1,31 +1,25 @@
 (async () => {
-    const fs = require('fs-extra')
-    const puppeteer = require('puppeteer');
+    const fs = require("fs-extra")
 
-    const {
-        saveAsPngWithProperSize, propertiesFromXmlString, createRawSvgFromSmiles, addBoundingBoxesToSvg
-    } = require("./src/generator/svg")
-
-    const browser = await puppeteer.launch({headless: true, devtools: false});
-
+    const Renderer = require("./src/generator/Renderer")
     const {readSmilesFromCsv} = require("./src/generator/misc")
 
     const outputDir = "png-data"
-    if (! await fs.exists(outputDir)) {
-        await fs.mkdir(outputDir)
-    }
-
     const smilesFile = "molecules.csv"
+
     const smilesList = await readSmilesFromCsv(smilesFile, 1, 10)
-    const xmlFiles = smilesList.map(createRawSvgFromSmiles)
+    const renderer = new Renderer(outputDir)
+    await renderer.init()
 
-    const infos = await Promise.all(xmlFiles.map(xml => propertiesFromXmlString(browser, xml)))
+    const xmlFiles = smilesList.map(smiles => renderer.createRawSvgFromSmiles(smiles))
 
-    const svgsWithBBs = infos.map(b => addBoundingBoxesToSvg(b))
+    const infos = await Promise.all(xmlFiles.map(xml => renderer.propertiesFromXmlString(xml)))
 
-    // await Promise.all(svgsWithBBs.map((svg, i) => fsP.writeFile(`${outputDir}/svg-bb-${i}.svg`, svg)))
+    const svgsWithBBs = infos.map(b => renderer.addBoundingBoxesToSvg(b))
 
-    await Promise.all(svgsWithBBs.map((svg, i) => saveAsPngWithProperSize(browser, svg, 1000, `${outputDir}/svg-bb-${i}.png`)))
+    await Promise.all(svgsWithBBs.map((svg, i) => fs.writeFile(`${outputDir}/svg-bb-${i}.svg`, svg)))
 
-    await browser.close()
+    await Promise.all(svgsWithBBs.map((svg, i) => renderer.saveAsPngWithProperSize(svg, 1000, `${outputDir}/svg-bb-${i}.png`)))
+
+    await renderer.done()
 })()
