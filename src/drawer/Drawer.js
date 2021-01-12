@@ -35,6 +35,7 @@ class Drawer {
         this.totalOverlapScore = 0;
 
         this.defaultOptions = {
+            // TODO remove if not used here, get scaled in browser anyways
             width: 500,
             height: 500,
             bondThickness: 0.6,
@@ -50,7 +51,7 @@ class Drawer {
             compactDrawing: true,
             fontSizeLarge: 5,
             fontSizeSmall: 3,
-            padding: 20.0,
+            padding: 5,
             experimentalSSSR: false,
             kkThreshold: 0.1,
             kkInnerThreshold: 0.1,

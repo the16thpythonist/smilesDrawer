@@ -63,27 +63,27 @@ Renderer.prototype.propertiesFromXmlString = async function (xml) {
 
 Renderer.prototype.createRawSvgFromSmiles = function (smiles) {
     const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    const size = 500
-
-    svg.setAttributeNS(null, "smiles", smiles)
-    svg.setAttributeNS(null, "width", size)
-    svg.setAttributeNS(null, "height", size)
-
     const tree = this.parser.parse(smiles)
     this.drawer.draw(tree, svg, 'light', false);
+    svg.setAttributeNS(null, "smiles", smiles)
 
     return this.XMLSerializer.serializeToString(svg);
 }
 
-Renderer.prototype.saveAsPngWithProperSize = async function (svg, size, fileName) {
+Renderer.prototype.saveAsPngWithProperSize = async function (svg, scale, fileName) {
     const page = await this.browser.newPage();
     await page.setContent(svg, {waitUntil: 'domcontentloaded'})
 
-    await page.evaluate((size) => {
+    await page.evaluate((scale) => {
         const svg = document.querySelector("svg")
-        svg.setAttributeNS(null, "width", size)
-        svg.setAttributeNS(null, "height", size)
-    }, size)
+        const [height, width, viewbox] = ["height", "width", "viewBox"].map(property => svg.getAttributeNS(null, property))
+        const [boxX, boxY, boxWidth, boxHeight] = viewbox.split(" ")
+
+        svg.setAttributeNS(null, "height", Math.ceil(height * scale))
+        svg.setAttributeNS(null, "width", Math.ceil(width * scale))
+        svg.setAttributeNS(null, "viewbox", `${boxX} ${boxY} ${boxWidth * scale} ${boxHeight * scale} `)
+
+    }, scale)
 
     const svgEl = await page.$('svg');
     await svgEl.screenshot({path: fileName, omitBackground: false});

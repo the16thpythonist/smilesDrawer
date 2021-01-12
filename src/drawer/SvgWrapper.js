@@ -44,12 +44,6 @@ class SvgWrapper {
         mask.setAttributeNS(null, 'fill', 'white');
 
         this.maskElements.push(mask);
-
-        // clear the svg element
-        // TODO aneb: remove block since svg comes clean
-        while (this.svg.firstChild) {
-            this.svg.removeChild(this.svg.firstChild);
-        }
     }
 
     constructSvg() {
@@ -192,27 +186,15 @@ class SvgWrapper {
         minX -= padding;
         minY -= padding;
 
-        this.drawingWidth = maxX - minX;
-        this.drawingHeight = maxY - minY;
+        this.drawingWidth = Math.ceil(maxX - minX);
+        this.drawingHeight = Math.ceil(maxY - minY);
 
         this.offsetX = -minX;
         this.offsetY = -minY;
 
-        const scaleX = this.opts.width / this.drawingWidth;
-        const scaleY = this.opts.height / this.drawingHeight;
-        const scale = (scaleX < scaleY) ? scaleX : scaleY;
-
-        // TODO aneb: find how to scale svg during construction properly
-        // dividing by ratio makes all images roughly equal, but still too small
-        this.svg.setAttributeNS(null, 'viewBox', `0 0 ${this.opts.width / scale} ${this.opts.height / scale}`);
-        // this.svg.setAttributeNS(null, 'viewBox', `0 0 ${this.opts.width} ${this.opts.height}`);
-
-        // Center
-        if (scaleX < scaleY) {
-            this.offsetY += this.opts.height / (2.0 * scale) - this.drawingHeight / 2.0;
-        } else {
-            this.offsetX += this.opts.width / (2.0 * scale) - this.drawingWidth / 2.0;
-        }
+        this.svg.setAttributeNS(null, "width", this.drawingWidth + 5)
+        this.svg.setAttributeNS(null, "height", this.drawingHeight + 5)
+        this.svg.setAttributeNS(null, 'viewBox', `0 0 ${this.drawingWidth} ${this.drawingHeight}`);
     }
 
     /**
