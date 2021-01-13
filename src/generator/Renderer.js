@@ -97,7 +97,7 @@ Renderer.prototype.saveAsPngWithProperSize = async function (svg, scale, fileNam
 Renderer.prototype.makeBoundingBox = function (id, x, y, width, height) {
     const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
     return this.svg.createElement('rect', {
-        id: `${id}-bb`,
+        "bb-id": `${id}-bb`,
         x: x, y: y,
         width: width, height: height,
         style: `fill: none; stroke: #a2${randomColor}; stroke-width: 0.5`

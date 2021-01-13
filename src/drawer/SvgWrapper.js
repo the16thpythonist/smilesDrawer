@@ -245,29 +245,27 @@ class SvgWrapper {
      * @param {String} gradient gradient url. Defaults to null.
      */
     drawLine(idLabel, idValue, line, dashed = false, gradient = null) {
-        let stylesArr = [
-                ['stroke-linecap', 'round'],
-                ['stroke-dasharray', dashed ? '5, 5' : 'none'],
-            ],
-            l = line.getLeftVector(),
-            r = line.getRightVector(),
-            fromX = l.x + this.offsetX,
-            fromY = l.y + this.offsetY,
-            toX = r.x + this.offsetX,
-            toY = r.y + this.offsetY;
+        const styles = [
+            ['stroke-linecap', 'round'],
+            ['stroke-dasharray', dashed ? '5, 5' : 'none'],
+        ].map(sub => sub.join(':')).join(';')
 
-        let styles = stylesArr.map(sub => sub.join(':')).join(';'),
-            lineElem = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        const l = line.getLeftVector()
+        const r = line.getRightVector()
+        const fromX = l.x + this.offsetX
+        const fromY = l.y + this.offsetY
+        const toX = r.x + this.offsetX
+        const toY = r.y + this.offsetY
 
         gradient = gradient || this.createGradient(line);
 
-        lineElem.setAttributeNS(null, idLabel, idValue);
-        lineElem.setAttributeNS(null, 'x1', fromX);
-        lineElem.setAttributeNS(null, 'y1', fromY);
-        lineElem.setAttributeNS(null, 'x2', toX);
-        lineElem.setAttributeNS(null, 'y2', toY);
-        lineElem.setAttributeNS(null, 'style', styles);
-        lineElem.setAttributeNS(null, 'stroke', `url('#${gradient}')`);
+        const lineElem = this.svgHelper.createElement('line', {
+            [idLabel]: idValue,
+            x1: fromX, y1: fromY,
+            x2: toX, y2: toY,
+            style: styles,
+            stroke: `url('#${gradient}')`,
+        })
 
         this.paths.push(lineElem);
     }
@@ -281,25 +279,23 @@ class SvgWrapper {
      * @param {String} elementName The name of the element (single-letter).
      */
     drawPoint(vertexIdLabel, vertexIdValue, x, y, elementName) {
-        let offsetX = this.offsetX;
-        let offsetY = this.offsetY;
+        const mask = this.svgHelper.createElement('circle', {
+            [`mask-${vertexIdLabel}`]: vertexIdValue,
+            cx: x + this.offsetX,
+            cy: y + this.offsetY,
+            r: '1.5',
+            fill: 'black',
+        })
 
-        // first create a mask
-        let mask = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        mask.setAttributeNS(null, `mask-${vertexIdLabel}`, vertexIdValue);
-        mask.setAttributeNS(null, 'cx', x + offsetX);
-        mask.setAttributeNS(null, 'cy', y + offsetY);
-        mask.setAttributeNS(null, 'r', '1.5');
-        mask.setAttributeNS(null, 'fill', 'black');
+        const point = this.svgHelper.createElement('circle', {
+            [`point-${vertexIdLabel}`]: vertexIdValue,
+            cx: x + this.offsetX,
+            cy: y + this.offsetY,
+            r: '0.75',
+            fill: this.themeManager.getColor(elementName),
+        })
+
         this.maskElements.push(mask);
-
-        // now create the point
-        let point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        mask.setAttributeNS(null, `point-${vertexIdLabel}`, vertexIdValue);
-        point.setAttributeNS(null, 'cx', x + offsetX);
-        point.setAttributeNS(null, 'cy', y + offsetY);
-        point.setAttributeNS(null, 'r', '0.75');
-        point.setAttributeNS(null, 'fill', this.themeManager.getColor(elementName));
         this.vertices.push(point);
     }
 
@@ -321,28 +317,27 @@ class SvgWrapper {
      * @param {Number} attachedPseudoElement.hyrogenCount The number of hydrogens attached to each atom matching the key.
      */
     drawText(vertexIdLabel, vertexIdValue, x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
-        let offsetX = this.offsetX,
-            offsetY = this.offsetY,
-            pos = {
-                x: x + offsetX,
-                y: y + offsetY,
-            },
-            textElem = document.createElementNS('http://www.w3.org/2000/svg', 'text'),
-            writingMode = 'horizontal-tb',
-            letterSpacing = 'normal',
-            textOrientation = 'mixed',
-            textDirection = 'direction: ltr;',
-            xShift = -2,
-            yShift = 2.5;
+        // TODO aneb: clean up this mess ...
+        const pos = {x: x + this.offsetX, y: y + this.offsetY}
 
-        let mask = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        mask.setAttributeNS(null, `text-mask-${vertexIdLabel}`, vertexIdValue);
-        mask.setAttributeNS(null, 'cx', pos.x);
-        mask.setAttributeNS(null, 'cy', pos.y);
-        mask.setAttributeNS(null, 'r', '3.5');
-        mask.setAttributeNS(null, 'fill', 'black');
+        let writingMode = 'horizontal-tb'
+        let letterSpacing = 'normal'
+        let textOrientation = 'mixed'
+        let textDirection = 'direction: ltr;'
+        let xShift = -2
+        let yShift = 2.5
+
+        const mask = this.svgHelper.createElement('circle', {
+            [`text-mask-${vertexIdLabel}`]: vertexIdValue,
+            cx: pos.x,
+            cy: pos.y,
+            r: '3.5',
+            fill: 'black',
+        })
+
         this.maskElements.push(mask);
 
+        // TODO aneb simplify this, possibly make method
         // determine writing mode
         if (/up|down/.test(direction) && !isTerminal) {
             writingMode = 'vertical-rl';
@@ -363,35 +358,35 @@ class SvgWrapper {
             textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
         }
 
-        // now the text element
-        // TODO aneb: make naming consistent, this is the actual label, so it gets the passed idLabel
-        textElem.setAttributeNS(null, `${vertexIdLabel}`, vertexIdValue);
-        textElem.setAttributeNS(null, 'x', pos.x + xShift);
-        textElem.setAttributeNS(null, 'y', pos.y + yShift);
-        textElem.setAttributeNS(null, 'class', 'element');
-        textElem.setAttributeNS(null, 'fill', this.themeManager.getColor(elementName));
-        textElem.setAttributeNS(null, 'style', `text-anchor: start;writing-mode: ${writingMode};text-orientation: ${textOrientation};letter-spacing: ${letterSpacing};${textDirection}
-            `);
+        const textElem = this.svgHelper.createElement('text', {
+            [`${vertexIdLabel}`]: vertexIdValue,
+            x: pos.x + xShift,
+            y: pos.y + yShift,
+            class: 'element',
+            fill: this.themeManager.getColor(elementName),
+            style: `text-anchor: start;writing-mode: ${writingMode};text-orientation: ${textOrientation};letter-spacing: ${letterSpacing};${textDirection}`,
+        })
 
-        let textNode = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+        const textNode = this.svgHelper.createElement('tspan')
         // special case for element names that are 2 letters
         if (elementName.length > 1) {
-            let textAnchor = /up|down/.test(direction) ? 'middle' : 'start';
-            textNode.setAttributeNS(null, `text-node-${vertexIdLabel}`, vertexIdValue);
-            textNode.setAttributeNS(null, 'style', `unicode-bidi: plaintext;writing-mode: lr-tb;letter-spacing: normal;text-anchor: ${textAnchor};`);
+            const textAnchor = /up|down/.test(direction) ? 'middle' : 'start';
+            this.svgHelper.update(textNode, {
+                [`text-node-${vertexIdLabel}`]: vertexIdValue,
+                style: `unicode-bidi: plaintext;writing-mode: lr-tb;letter-spacing: normal;text-anchor: ${textAnchor};`,
+            })
         }
-        textNode.appendChild(document.createTextNode(elementName));
-        textElem.appendChild(textNode);
+
+        this.svgHelper.appendChildren(textNode, [document.createTextNode(elementName)])
+        this.svgHelper.appendChildren(textElem, [textNode])
 
         // Charge
         if (charge) {
-            let chargeElem = this.createSubSuperScripts(getChargeText(charge), 'super');
-            textNode.appendChild(chargeElem);
+            this.svgHelper.appendChildren(textNode, [this.createSubSuperScripts(getChargeText(charge), 'super')])
         }
 
         if (isotope > 0) {
-            let isotopeElem = this.createSubSuperScripts(isotope.toString(), 'super');
-            textNode.appendChild(isotopeElem);
+            this.svgHelper.appendChildren(textNode, [this.createSubSuperScripts(isotope.toString(), 'super')])
         }
 
         // TODO: Better handle exceptions
@@ -471,43 +466,36 @@ class SvgWrapper {
      * @param {Line} line the line object to create the wedge from
      */
     drawWedge(idLabel, idValue, line) {
-        let offsetX = this.offsetX,
-            offsetY = this.offsetY,
-            l = line.getLeftVector().clone(),
-            r = line.getRightVector().clone();
+        // TODO aneb: make method for this since it exists for every line
+        const l = line.getLeftVector().clone()
+        const r = line.getRightVector().clone()
 
-        l.x += offsetX;
-        l.y += offsetY;
+        l.x += this.offsetX;
+        l.y += this.offsetY;
 
-        r.x += offsetX;
-        r.y += offsetY;
+        r.x += this.offsetX;
+        r.y += this.offsetY;
 
-        let normals = Vector2.normals(l, r);
+        const normals = Vector2.normals(l, r);
 
         normals[0].normalize();
         normals[1].normalize();
 
-        let isRightChiralCenter = line.getRightChiral();
+        const isRightChiralCenter = line.getRightChiral();
+        const [start, end] = isRightChiralCenter ? [l, r] : [r, l]
 
-        let start = l,
-            end = r;
+        const t = Vector2.add(start, Vector2.multiplyScalar(normals[0], this.halfBondThickness))
+        const u = Vector2.add(end, Vector2.multiplyScalar(normals[0], 1.5 + this.halfBondThickness))
+        const v = Vector2.add(end, Vector2.multiplyScalar(normals[1], 1.5 + this.halfBondThickness))
+        const w = Vector2.add(start, Vector2.multiplyScalar(normals[1], this.halfBondThickness))
 
-        if (isRightChiralCenter) {
-            start = r;
-            end = l;
-        }
 
-        let t = Vector2.add(start, Vector2.multiplyScalar(normals[0], this.halfBondThickness)),
-            u = Vector2.add(end, Vector2.multiplyScalar(normals[0], 1.5 + this.halfBondThickness)),
-            v = Vector2.add(end, Vector2.multiplyScalar(normals[1], 1.5 + this.halfBondThickness)),
-            w = Vector2.add(start, Vector2.multiplyScalar(normals[1], this.halfBondThickness));
+        const polygon = this.svgHelper.createElement('polygon', {
+            [idLabel]: idValue,
+            points: `${t.x},${t.y} ${u.x},${u.y} ${v.x},${v.y} ${w.x},${w.y}`,
+            fill: `url('#${this.createGradient(line)}')`,
+        })
 
-        let polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-        let gradient = this.createGradient(line);
-
-        polygon.setAttributeNS(null, idLabel, idValue);
-        polygon.setAttributeNS(null, 'points', `${t.x},${t.y} ${u.x},${u.y} ${v.x},${v.y} ${w.x},${w.y}`);
-        polygon.setAttributeNS(null, 'fill', `url('#${gradient}')`);
         this.paths.push(polygon);
     }
 }
