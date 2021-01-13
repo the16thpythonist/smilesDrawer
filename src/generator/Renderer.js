@@ -103,13 +103,18 @@ Renderer.prototype.saveAsPngWithProperSize = async function (svg, fileName, qual
   }, this.scale)
 
   const svgElAfter = await page.$('svg')
-  labels = labels.map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
 
   await Promise.all([
     svgElAfter.screenshot({ path: `${fileName}.jpeg`, omitBackground: false, quality: quality }),
-    fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2)),
     fs.writeFile(`${fileName}.svg`, updatedSvg)
   ])
+
+  if (labels.length) {
+    labels = labels
+      .map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
+      .map(({ label, x, y, width, height }) => ({ label, x, y, width, height }))
+    await fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2))
+  }
 
   await page.close()
 }
