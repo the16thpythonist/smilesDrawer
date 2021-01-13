@@ -121,9 +121,6 @@ class SvgDrawer {
         const edgeIdLabel = "edge-id"
         const edgeIdValue = `edge-${edgeId}`
 
-        const wedgeIdLabel = "wedge-id"
-        const wedgeIdValue = `wedge-${edgeId}`
-
         let a = vertexA.position,
             b = vertexB.position,
             normals = preprocessor.getEdgeNormals(edge),
@@ -209,9 +206,9 @@ class SvgDrawer {
             let isChiralCenterB = vertexB.value.isStereoCenter;
 
             if (edge.wedge === 'up') {
-                svgWrapper.drawWedge(wedgeIdLabel, wedgeIdValue, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB));
+                svgWrapper.drawWedge(edgeIdLabel, edgeIdValue, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB));
             } else if (edge.wedge === 'down') {
-                svgWrapper.drawDashedWedge(wedgeIdLabel, wedgeIdValue, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB));
+                svgWrapper.drawDashedWedge(edgeIdLabel, edgeIdValue, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB));
             } else {
                 svgWrapper.drawLine(edgeIdLabel, edgeIdValue, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB));
             }
