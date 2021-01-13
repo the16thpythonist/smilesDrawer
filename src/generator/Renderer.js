@@ -73,7 +73,7 @@ Renderer.prototype.createRawSvgFromSmiles = function (smiles) {
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const tree = this.parser.parse(smiles)
 
-  this.drawer.draw(tree, svg, 'light', false)
+  this.drawer.draw(tree, svg)
   this.svg.update(svg, { smiles })
 
   return this.XMLSerializer.serializeToString(svg)
