@@ -165,7 +165,10 @@ class SvgDrawer {
         // The shortened edge
         svgWrapper.drawLine(edgeIdLabel, edgeIdValue, aromaticBondLabel, line, edge.isPartOfAromaticRing)
         svgWrapper.drawLine(edgeIdLabel, edgeIdValue, aromaticBondLabel, new Line(a, b, elementA, elementB))
-      } else if ((edge.center ||
+        return
+      }
+
+      if ((edge.center ||
           (vertexA.isTerminal() && vertexB.isTerminal())) ||
           ((s.anCount === 0 && s.bnCount > 1) || (s.bnCount === 0 && s.anCount > 1))) {
         this.multiplyNormals(normals, opts.halfBondSpacing)
@@ -175,7 +178,10 @@ class SvgDrawer {
 
         svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, lineA)
         svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, lineB)
-      } else if ((s.sideCount[0] > s.sideCount[1]) ||
+        return
+      }
+
+      if ((s.sideCount[0] > s.sideCount[1]) ||
                 (s.totalSideCount[0] > s.totalSideCount[1])) {
         this.multiplyNormals(normals, opts.bondSpacing)
 
@@ -185,7 +191,10 @@ class SvgDrawer {
 
         svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, line)
         svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, new Line(a, b, elementA, elementB))
-      } else if ((s.sideCount[0] < s.sideCount[1]) ||
+        return
+      }
+
+      if ((s.sideCount[0] < s.sideCount[1]) ||
                 (s.totalSideCount[0] <= s.totalSideCount[1])) {
         this.multiplyNormals(normals, opts.bondSpacing)
 
@@ -194,8 +203,11 @@ class SvgDrawer {
         line.shorten(opts.bondLength - opts.shortBondLength * opts.bondLength)
         svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, line)
         svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, new Line(a, b, elementA, elementB))
+        return
       }
-    } else if (edge.bondType === '#') {
+    }
+
+    if (edge.bondType === '#') {
       normals[0].multiplyScalar(opts.bondSpacing / 1.5)
       normals[1].multiplyScalar(opts.bondSpacing / 1.5)
 
@@ -205,20 +217,29 @@ class SvgDrawer {
       svgWrapper.drawLine(edgeIdLabel, edgeIdValue, tripleBondLabel, lineA)
       svgWrapper.drawLine(edgeIdLabel, edgeIdValue, tripleBondLabel, lineB)
       svgWrapper.drawLine(edgeIdLabel, edgeIdValue, tripleBondLabel, new Line(a, b, elementA, elementB))
-    } else if (edge.bondType === '.') {
-      // TODO: Something... maybe... version 2?
-    } else {
-      const isChiralCenterA = vertexA.value.isStereoCenter
-      const isChiralCenterB = vertexB.value.isStereoCenter
-
-      if (edge.wedge === 'up') {
-        svgWrapper.drawWedge(edgeIdLabel, edgeIdValue, wedgeSolidBondLabel, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
-      } else if (edge.wedge === 'down') {
-        svgWrapper.drawDashedWedge(edgeIdLabel, edgeIdValue, wedgeDashedBondLabel, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
-      } else {
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, singleBondLabel, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
-      }
+      return
     }
+
+    if (edge.bondType === '.') {
+      return
+    }
+
+    // aneb: from here on everything is a "single" bond
+    const isChiralCenterA = vertexA.value.isStereoCenter
+    const isChiralCenterB = vertexB.value.isStereoCenter
+
+    if (edge.wedge === 'up') {
+      svgWrapper.drawWedge(edgeIdLabel, edgeIdValue, wedgeSolidBondLabel, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
+      return
+    }
+
+    if (edge.wedge === 'down') {
+      svgWrapper.drawDashedWedge(edgeIdLabel, edgeIdValue, wedgeDashedBondLabel, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
+      return
+    }
+
+    const label = preprocessor.areVerticesInSameRing(vertexA, vertexB) ? aromaticBondLabel : singleBondLabel
+    svgWrapper.drawLine(edgeIdLabel, edgeIdValue, label, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
   }
 
   /**
