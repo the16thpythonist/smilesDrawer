@@ -7,7 +7,7 @@ const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
 const { JSDOM } = require('jsdom')
 
-function Renderer (directory) {
+function Renderer ({ directory, quality, scale, colors }) {
   // TODO make own browser class?
   this.browser = null
   this.document = null
@@ -16,9 +16,11 @@ function Renderer (directory) {
   this.parser = Parser
 
   this.directory = directory
+  this.quality = quality
+  this.scale = scale
 
   // TODO define options?
-  this.drawer = new SvgDrawer({})
+  this.drawer = new SvgDrawer({ colors })
   this.svg = new SVG()
 }
 
@@ -77,7 +79,7 @@ Renderer.prototype.createRawSvgFromSmiles = function (smiles) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.saveAsPngWithProperSize = async function (svg, scale, fileName) {
+Renderer.prototype.saveAsPngWithProperSize = async function (svg, fileName) {
   const page = await this.browser.newPage()
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
 
@@ -89,10 +91,10 @@ Renderer.prototype.saveAsPngWithProperSize = async function (svg, scale, fileNam
     svg.setAttributeNS(null, 'height', Math.ceil(height * scale))
     svg.setAttributeNS(null, 'width', Math.ceil(width * scale))
     svg.setAttributeNS(null, 'viewbox', `${boxX} ${boxY} ${boxWidth * scale} ${boxHeight * scale} `)
-  }, scale)
+  }, this.scale)
 
   const svgEl = await page.$('svg')
-  await svgEl.screenshot({ path: fileName, omitBackground: false })
+  await svgEl.screenshot({ path: `${fileName}.jpeg`, omitBackground: false, quality: this.quality })
   await page.close()
 }
 

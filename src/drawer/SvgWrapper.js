@@ -11,12 +11,13 @@ const { JSDOM } = jsdom
 const { document } = (new JSDOM('')).window
 
 class SvgWrapper {
-  constructor (themeManager, target, options) {
+  constructor (target, options, colors) {
     // TODO change naming everywhere and give this a proper name
     this.svgHelper = new SVG()
 
     this.svg = target
     this.opts = options
+    this.colors = colors
     this.gradientId = 0
 
     // maintain a list of line elements and their corresponding gradients
@@ -34,9 +35,6 @@ class SvgWrapper {
     this.drawingHeight = 0
     this.halfBondThickness = this.opts.bondThickness / 2.0
 
-    // for managing color schemes
-    this.themeManager = themeManager
-
     // create the mask
     this.maskElements = []
 
@@ -49,6 +47,10 @@ class SvgWrapper {
     })
 
     this.maskElements.push(mask)
+  }
+
+  getColor (element) {
+    return this.colors[element] || this.colors.C
   }
 
   constructSvg () {
@@ -90,10 +92,10 @@ class SvgWrapper {
     const toX = r.x + this.offsetX
     const toY = r.y + this.offsetY
 
-    const firstStopColor = this.themeManager.getColor(line.getLeftElement()) || this.themeManager.getColor('C')
+    const firstStopColor = this.getColor(line.getLeftElement()) || this.getColor('C')
     const firstStop = this.svgHelper.createElement('stop', { 'stop-color': firstStopColor, offset: '20%' })
 
-    const secondStopColor = this.themeManager.getColor(line.getRightElement() || this.themeManager.getColor('C'))
+    const secondStopColor = this.getColor(line.getRightElement() || this.getColor('C'))
     const secondStop = this.svgHelper.createElement('stop', { 'stop-color': secondStopColor, offset: '100%' })
 
     const gradientAttributes = { id: gradientUrl, gradientUnits: 'userSpaceOnUse', x1: fromX, y1: fromY, x2: toX, y2: toY }
@@ -174,7 +176,7 @@ class SvgWrapper {
       cx: x + this.offsetX,
       cy: y + this.offsetY,
       r: this.opts.bondLength / 4.5,
-      fill: this.themeManager.getColor(elementName)
+      fill: this.getColor(elementName)
     })
 
     this.vertices.push(ball)
@@ -192,7 +194,7 @@ class SvgWrapper {
       cy: y + this.offsetY,
       r: r,
       fill: 'none',
-      stroke: this.themeManager.getColor('C')
+      stroke: this.getColor('C')
     })
 
     this.vertices.push(ring)
@@ -303,7 +305,7 @@ class SvgWrapper {
       cx: x + this.offsetX,
       cy: y + this.offsetY,
       r: '0.75',
-      fill: this.themeManager.getColor(elementName)
+      fill: this.getColor(elementName)
     })
 
     this.maskElements.push(mask)
@@ -376,7 +378,7 @@ class SvgWrapper {
       x: pos.x + xShift,
       y: pos.y + yShift,
       class: 'element',
-      fill: this.themeManager.getColor(elementName),
+      fill: this.getColor(elementName),
       style: `text-anchor: start;writing-mode: ${writingMode};text-orientation: ${textOrientation};letter-spacing: ${letterSpacing};${textDirection}`
     })
 
@@ -442,7 +444,7 @@ class SvgWrapper {
 
       pseudoElementElem.setAttributeNS(null, 'style', 'unicode-bidi: plaintext;')
       pseudoElementElem.appendChild(document.createTextNode(element))
-      pseudoElementElem.setAttributeNS(null, 'fill', this.themeManager.getColor(element))
+      pseudoElementElem.setAttributeNS(null, 'fill', this.getColor(element))
 
       if (elementCharge !== 0) {
         const elementChargeElem = this.createSubSuperScripts(getChargeText(elementCharge), 'super')

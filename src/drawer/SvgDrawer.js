@@ -3,17 +3,16 @@
 const ArrayHelper = require('./ArrayHelper')
 const Atom = require('./Atom')
 const Drawer = require('./Drawer')
-const Graph = require('./Graph')
 const Line = require('./Line')
 const SvgWrapper = require('./SvgWrapper')
 const MathHelper = require('./MathHelper')
-const ThemeManager = require('./ThemeManager')
 const Vector2 = require('./Vector2')
 
 class SvgDrawer {
-  constructor (options) {
-    // TODO aneb: properly handle config
-    this.preprocessor = new Drawer(options)
+  constructor ({ colors }) {
+    // TODO aneb: if this gets too annoying, change the whole parameter passing, it's too much ...
+    this.colors = colors
+    this.preprocessor = new Drawer({ })
     this.opts = this.preprocessor.opts
   }
 
@@ -22,20 +21,15 @@ class SvgDrawer {
      *
      * @param {Object} data The tree returned by the smiles parser.
      * @param {(String|HTMLElement)} target The id of the HTML svg element the structure is drawn to - or the element itself.
-     * @param {String} themeName='dark' The name of the theme to use. Built-in themes are 'light' and 'dark'.
-     * @param {Boolean} infoOnly=false Only output info on the molecule without drawing anything to the canvas.
 
      * @returns {Object} The dimensions of the drawing in { width, height }
      */
-  draw (data, target, themeName = 'light', infoOnly = false) {
+  draw (data, target) {
     const preprocessor = this.preprocessor
 
-    preprocessor.initDraw(data, themeName, infoOnly)
+    preprocessor.initDraw(data)
 
-    if (!infoOnly) {
-      this.themeManager = new ThemeManager(this.preprocessor.opts.themes, themeName)
-      this.svgWrapper = new SvgWrapper(this.themeManager, target, this.preprocessor.opts)
-    }
+    this.svgWrapper = new SvgWrapper(target, this.preprocessor.opts, this.colors)
 
     preprocessor.processGraph()
 
