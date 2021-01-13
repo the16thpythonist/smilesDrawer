@@ -79,11 +79,11 @@ Renderer.prototype.createRawSvgFromSmiles = function (smiles) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.saveAsPngWithProperSize = async function (svg, fileName) {
+Renderer.prototype.saveAsPngWithProperSize = async function (svg, fileName, quality = this.quality) {
   const page = await this.browser.newPage()
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
 
-  await page.evaluate((scale) => {
+  let [updatedSvg, labels] = await page.evaluate((scale) => {
     const svg = document.querySelector('svg')
     const [height, width, viewbox] = ['height', 'width', 'viewBox'].map(property => svg.getAttributeNS(null, property))
     const [boxX, boxY, boxWidth, boxHeight] = viewbox.split(' ')
@@ -91,10 +91,26 @@ Renderer.prototype.saveAsPngWithProperSize = async function (svg, fileName) {
     svg.setAttributeNS(null, 'height', Math.ceil(height * scale))
     svg.setAttributeNS(null, 'width', Math.ceil(width * scale))
     svg.setAttributeNS(null, 'viewbox', `${boxX} ${boxY} ${boxWidth * scale} ${boxHeight * scale} `)
+
+    const elements = document.documentElement.querySelectorAll('[bb-id]')
+    // aneb: find better way to do this?
+    const labels = Array.from(elements).map(e => Array.from(e.attributes).map(e => ({ [e.name]: e.nodeValue })))
+
+    // eslint-disable-next-line no-undef
+    const updatedSvg = new XMLSerializer().serializeToString(svg)
+
+    return [updatedSvg, labels]
   }, this.scale)
 
-  const svgEl = await page.$('svg')
-  await svgEl.screenshot({ path: `${fileName}.jpeg`, omitBackground: false, quality: this.quality })
+  const svgElAfter = await page.$('svg')
+  labels = labels.map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
+
+  await Promise.all([
+    svgElAfter.screenshot({ path: `${fileName}.jpeg`, omitBackground: false, quality: quality }),
+    fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2)),
+    fs.writeFile(`${fileName}.svg`, updatedSvg)
+  ])
+
   await page.close()
 }
 

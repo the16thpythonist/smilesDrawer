@@ -1,25 +1,23 @@
 
 (async () => {
-  // TODO
   // TODO curate list of interesting test SMILES
-  // TODO add color setting, try to emulate "paper" style with bad quality
+  // TODO add methods to renderer for generation of multiple types of labels, maybe params like atoms="box", bonds="ends"
 
-  const fs = require('fs-extra')
   const path = require('path')
   const Renderer = require('./src/generator/Renderer')
   const { readSmilesFromCsv } = require('./src/generator/misc')
   const colors = require('./src/generator/colors')
 
   // const [smilesFile, column, filePrefix] = ['data/molecules.csv', 1, 'fullerenes']
-  // const [smilesFile, column, filePrefix] = ['data/zinc_250k.csv', 0, 'zinc']
-  const [smilesFile, column, filePrefix] = ['data/drugbank.csv', 0, 'drugbank']
+  const [smilesFile, column, filePrefix] = ['data/zinc_250k.csv', 0, 'zinc']
+  // const [smilesFile, column, filePrefix] = ['data/drugbank.csv', 0, 'drugbank']
 
   const smilesList = await readSmilesFromCsv(smilesFile, column, 100)
 
   const options = {
     directory: path.resolve(`png-data/${filePrefix}`),
     quality: 1,
-    scale: 4,
+    scale: 5,
     colors: colors.mono
   }
 
@@ -34,13 +32,16 @@
     const xmlFiles = smilesBatch.map(smiles => renderer.createRawSvgFromSmiles(smiles))
 
     const infos = await Promise.all(xmlFiles.map(xml => renderer.propertiesFromXmlString(xml)))
-    const svgsWithBBs = infos.map(b => renderer.addBoundingBoxesToSvg(b))
+    const infosWithBoundingBoxes = infos.map(i => renderer.addBoundingBoxesToSvg(i))
 
-    await Promise.all(svgsWithBBs
-      .map((svg, i) => fs.writeFile(`${renderer.directory}/${filePrefix}-${batch * batchSize + i}.svg`, svg)))
+    await Promise.all(
+      infos.map((info, i) => renderer.saveAsPngWithProperSize(info.xml, `${renderer.directory}/${filePrefix}-${batch * batchSize + i}-no-bb`))
+    )
 
-    await Promise.all(svgsWithBBs
-      .map((svg, i) => renderer.saveAsPngWithProperSize(svg, `${renderer.directory}/${filePrefix}-${batch * batchSize + i}`)))
+    await Promise.all(
+      infosWithBoundingBoxes.map((info, i) => renderer.saveAsPngWithProperSize(info, `${renderer.directory}/${filePrefix}-${batch * batchSize + i}-bb`, 100))
+    )
+
     console.log('left:', smilesList.length)
     ++batch
   }
