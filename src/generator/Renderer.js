@@ -36,6 +36,7 @@ Renderer.prototype.done = async function () {
 }
 
 Renderer.prototype.propertiesFromXmlString = async function (xml) {
+  // aneb: need to open browser, getBBox is not available via jsdom as it does not render
   const page = await this.browser.newPage()
   await page.setContent(xml, { waitUntil: 'domcontentloaded' })
 
@@ -48,14 +49,16 @@ Renderer.prototype.propertiesFromXmlString = async function (xml) {
       const { x, y, width, height } = vertex.getBBox()
       const elements = Array.from(vertex.querySelectorAll('tspan')).map(c => c.textContent).filter(c => !!c)
       const id = vertex.getAttribute('vertex-id')
-      nodes.push({ id, elements, x, y, width, height })
+      const label = vertex.getAttribute('label')
+      nodes.push({ id, elements, x, y, width, height, label })
     }
 
     const bonds = document.documentElement.querySelectorAll('[edge-id]')
     for (const bond of bonds) {
       const { x, y, width, height } = bond.getBBox()
       const id = bond.getAttribute('edge-id')
-      edges.push({ id, x, y, width, height })
+      const label = bond.getAttribute('label')
+      edges.push({ id, x, y, width, height, label })
     }
 
     return { nodes, edges }
@@ -93,10 +96,11 @@ Renderer.prototype.saveAsPngWithProperSize = async function (svg, scale, fileNam
   await page.close()
 }
 
-Renderer.prototype.makeBoundingBox = function (id, x, y, width, height) {
+Renderer.prototype.makeBoundingBox = function (id, label, x, y, width, height) {
   const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
   return this.svg.createElement('rect', {
     'bb-id': `${id}-bb`,
+    label: label,
     x: x,
     y: y,
     width: width,
@@ -115,22 +119,19 @@ Renderer.prototype.boundingBoxToRect = function (bb) {
   return { top: y, bottom: y + h, left: x, right: x + w }
 }
 
-Renderer.prototype.getBoxWithMaxArea = function (bond) {
-  // TODO infer bond type, single, double, triple is clear
-  // solid wedge has length 1 and is polygon, dashed wedge has #elements > 3
-
-  if (bond.length === 1) {
-    return bond[0]
+Renderer.prototype.getBoxWithMaxArea = function (bonds) {
+  if (bonds.length === 1) {
+    return bonds[0]
   }
-  const id = bond[0].id
-  const rects = bond.map(bb => this.boundingBoxToRect(bb))
+
+  const rects = bonds.map(bb => this.boundingBoxToRect(bb))
 
   const minY = Math.min(...rects.map(r => r.top))
   const maxY = Math.max(...rects.map(r => r.bottom))
   const minX = Math.min(...rects.map(r => r.left))
   const maxX = Math.max(...rects.map(r => r.right))
-
-  return { id: id, x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+  const update = { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+  return Object.assign(bonds[0], update)
 }
 
 Renderer.prototype.correctBoundingBox = function (x, y, width, height) {
@@ -155,15 +156,15 @@ Renderer.prototype.addBoundingBoxesToSvg = function ({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
   const bbContainer = this.svg.createElement('g')
 
-  for (const { id, x, y, width, height } of dom.nodes) {
-    const bb = this.makeBoundingBox(id, x, y, width, height)
+  for (const { id, label, x, y, width, height } of dom.nodes) {
+    const bb = this.makeBoundingBox(id, label, x, y, width, height)
     bbContainer.appendChild(bb)
   }
 
-  const correctedEdges = dom.edges.map(({ id, x, y, width, height }) => Object.assign({ id: id }, this.correctBoundingBox(x, y, width, height)))
+  const correctedEdges = dom.edges.map(({ id, label, x, y, width, height }) => Object.assign({ id, label }, this.correctBoundingBox(x, y, width, height)))
   const merged = this.mergeBoundingBoxes(correctedEdges)
-  for (const { id, x, y, width, height } of merged) {
-    const bb = this.makeBoundingBox(id, x, y, width, height)
+  for (const { id, label, x, y, width, height } of merged) {
+    const bb = this.makeBoundingBox(id, label, x, y, width, height)
     bbContainer.appendChild(bb)
   }
 

@@ -159,16 +159,18 @@ class SvgWrapper {
   }
 
   /**
-     * Draw an svg ellipse as a ball.
-     * @param vertexIdLabel
-     * @param vertexIdValue
-     * @param {Number} x The x position of the text.
-     * @param {Number} y The y position of the text.
-     * @param {String} elementName The name of the element (single-letter).
-     */
-  drawBall (vertexIdLabel, vertexIdValue, x, y, elementName) {
+   * Draw an svg ellipse as a ball.
+   * @param vertexIdLabel
+   * @param vertexIdValue
+   * @param vertexLabel
+   * @param {Number} x The x position of the text.
+   * @param {Number} y The y position of the text.
+   * @param {String} elementName The name of the element (single-letter).
+   */
+  drawBall (vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName) {
     const ball = this.svgHelper.createElement('circle', {
       [vertexIdLabel]: vertexIdValue,
+      label: vertexLabel,
       cx: x + this.offsetX,
       cy: y + this.offsetY,
       r: this.opts.bondLength / 4.5,
@@ -197,12 +199,13 @@ class SvgWrapper {
   }
 
   /**
-     * Draw a dashed wedge on the canvas.
-     * @param idLabel
-     * @param idValue
-     * @param {Line} line A line.
-     */
-  drawDashedWedge (idLabel, idValue, line) {
+   * Draw a dashed wedge on the canvas.
+   * @param idLabel
+   * @param idValue
+   * @param bondLabel
+   * @param {Line} line A line.
+   */
+  drawDashedWedge (idLabel, idValue, bondLabel, line) {
     if (isNaN(line.from.x) || isNaN(line.from.y) ||
             isNaN(line.to.x) || isNaN(line.to.y)) {
       return
@@ -234,19 +237,20 @@ class SvgWrapper {
       const endDash = startDash.clone()
       endDash.add(Vector2.multiplyScalar(dashOffset, 2.0))
 
-      this.drawLine(idLabel, idValue, new Line(startDash, endDash), null, gradient)
+      this.drawLine(idLabel, idValue, bondLabel, new Line(startDash, endDash), null, gradient)
     }
   }
 
   /**
-     * Draws a line.
-     * @param idLabel
-     * @param idValue
-     * @param {Line} line A line.
-     * @param {Boolean} dashed defaults to false.
-     * @param {String} gradient gradient url. Defaults to null.
-     */
-  drawLine (idLabel, idValue, line, dashed = false, gradient = null) {
+   * Draws a line.
+   * @param idLabel
+   * @param idValue
+   * @param bondLabel
+   * @param {Line} line A line.
+   * @param {Boolean} dashed defaults to false.
+   * @param {String} gradient gradient url. Defaults to null.
+   */
+  drawLine (idLabel, idValue, bondLabel, line, dashed = false, gradient = null) {
     const styles = [
       ['stroke-linecap', 'round'],
       ['stroke-dasharray', dashed ? '5, 5' : 'none']
@@ -263,6 +267,7 @@ class SvgWrapper {
 
     const lineElem = this.svgHelper.createElement('line', {
       [idLabel]: idValue,
+      label: bondLabel,
       x1: fromX,
       y1: fromY,
       x2: toX,
@@ -275,16 +280,18 @@ class SvgWrapper {
   }
 
   /**
-     * Draw a point.
-     * @param vertexIdLabel
-     * @param vertexIdValue
-     * @param {Number} x The x position of the point.
-     * @param {Number} y The y position of the point.
-     * @param {String} elementName The name of the element (single-letter).
-     */
-  drawPoint (vertexIdLabel, vertexIdValue, x, y, elementName) {
+   * Draw a point.
+   * @param vertexIdLabel
+   * @param vertexIdValue
+   * @param vertexLabel
+   * @param {Number} x The x position of the point.
+   * @param {Number} y The y position of the point.
+   * @param {String} elementName The name of the element (single-letter).
+   */
+  drawPoint (vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName) {
     const mask = this.svgHelper.createElement('circle', {
       [`mask-${vertexIdLabel}`]: vertexIdValue,
+      label: vertexLabel,
       cx: x + this.offsetX,
       cy: y + this.offsetY,
       r: '1.5',
@@ -304,23 +311,24 @@ class SvgWrapper {
   }
 
   /**
-     * Draw a text to the canvas.
-     * @param vertexIdLabel
-     * @param vertexIdValue
-     * @param {Number} x The x position of the text.
-     * @param {Number} y The y position of the text.
-     * @param {String} elementName The name of the element (single-letter).
-     * @param {Number} hydrogens The number of hydrogen atoms.
-     * @param {String} direction The direction of the text in relation to the associated vertex.
-     * @param {Boolean} isTerminal A boolean indicating whether or not the vertex is terminal.
-     * @param {Number} charge The charge of the atom.
-     * @param {Number} isotope The isotope number.
-     * @param {Object} attachedPseudoElement A map with containing information for pseudo elements or concatinated elements. The key is comprised of the element symbol and the hydrogen count.
-     * @param {String} attachedPseudoElement.element The element symbol.
-     * @param {Number} attachedPseudoElement.count The number of occurences that match the key.
-     * @param {Number} attachedPseudoElement.hyrogenCount The number of hydrogens attached to each atom matching the key.
-     */
-  drawText (vertexIdLabel, vertexIdValue, x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
+   * Draw a text to the canvas.
+   * @param vertexIdLabel
+   * @param vertexIdValue
+   * @param vertexLabel
+   * @param {Number} x The x position of the text.
+   * @param {Number} y The y position of the text.
+   * @param {String} elementName The name of the element (single-letter).
+   * @param {Number} hydrogens The number of hydrogen atoms.
+   * @param {String} direction The direction of the text in relation to the associated vertex.
+   * @param {Boolean} isTerminal A boolean indicating whether or not the vertex is terminal.
+   * @param {Number} charge The charge of the atom.
+   * @param {Number} isotope The isotope number.
+   * @param {Object} attachedPseudoElement A map with containing information for pseudo elements or concatinated elements. The key is comprised of the element symbol and the hydrogen count.
+   * @param {String} attachedPseudoElement.element The element symbol.
+   * @param {Number} attachedPseudoElement.count The number of occurences that match the key.
+   * @param {Number} attachedPseudoElement.hyrogenCount The number of hydrogens attached to each atom matching the key.
+   */
+  drawText (vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
     // TODO aneb: clean up this mess ...
     const pos = { x: x + this.offsetX, y: y + this.offsetY }
 
@@ -364,6 +372,7 @@ class SvgWrapper {
 
     const textElem = this.svgHelper.createElement('text', {
       [`${vertexIdLabel}`]: vertexIdValue,
+      label: vertexLabel,
       x: pos.x + xShift,
       y: pos.y + yShift,
       class: 'element',
@@ -465,11 +474,12 @@ class SvgWrapper {
   }
 
   /**
-     * @param idLabel
-     * @param idValue
-     * @param {Line} line the line object to create the wedge from
-     */
-  drawWedge (idLabel, idValue, line) {
+   * @param idLabel
+   * @param idValue
+   * @param bondLabel
+   * @param {Line} line the line object to create the wedge from
+   */
+  drawWedge (idLabel, idValue, bondLabel, line) {
     // TODO aneb: make method for this since it exists for every line
     const l = line.getLeftVector().clone()
     const r = line.getRightVector().clone()
@@ -495,6 +505,7 @@ class SvgWrapper {
 
     const polygon = this.svgHelper.createElement('polygon', {
       [idLabel]: idValue,
+      label: bondLabel,
       points: `${t.x},${t.y} ${u.x},${u.y} ${v.x},${v.y} ${w.x},${w.y}`,
       fill: `url('#${this.createGradient(line)}')`
     })
