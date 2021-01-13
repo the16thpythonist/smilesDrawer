@@ -40,12 +40,6 @@ class SvgDrawer {
     this.drawEdges()
     this.drawVertices()
 
-    if (preprocessor.opts.debug) {
-      console.log(preprocessor.graph)
-      console.log(preprocessor.rings)
-      console.log(preprocessor.ringConnections)
-    }
-
     return this.svgWrapper.constructSvg()
   }
 

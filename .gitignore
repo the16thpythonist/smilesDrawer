@@ -3,4 +3,4 @@ yarn-error.log
 .idea
 *.png
 *.svg
-png-data/**/*
+generated-images/**/*
