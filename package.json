@@ -7,7 +7,12 @@
   "author": "Daniel Probst, Reymond Group, University of Berne",
   "license": "MIT",
   "private": false,
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^7.17.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1"
+  },
   "dependencies": {
     "fs-extra": "^9.0.1",
     "jsdom": "^16.4.0",
