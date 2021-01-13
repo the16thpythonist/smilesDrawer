@@ -115,6 +115,9 @@ Renderer.prototype.boundingBoxToRect = function (bb) {
 }
 
 Renderer.prototype.getBoxWithMaxArea = function (bond) {
+    // TODO infer bond type, single, double, triple is clear
+    // solid wedge has length 1 and is polygon, dashed wedge has #elements > 3
+
     if (bond.length === 1) {
         return bond[0]
     }

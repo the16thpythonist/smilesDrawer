@@ -4,10 +4,14 @@
     const Renderer = require("./src/generator/Renderer")
     const {readSmilesFromCsv} = require("./src/generator/misc")
 
-    const outputDir = "png-data"
-    const smilesFile = "molecules.csv"
 
-    const smilesList = await readSmilesFromCsv(smilesFile, 1, 100)
+    // const [smilesFile, column, filePrefix] = ["data/molecules.csv", 1, "fullerenes"]
+    const [smilesFile, column,filePrefix] = ["data/zinc_250k.csv", 0, "zinc"]
+    // const [smilesFile, column, filePrefix] = ["data/drugbank.csv", 0, "drugbank"]
+    const outputDir = `png-data/${filePrefix}`
+
+    const smilesList = await readSmilesFromCsv(smilesFile, column, 100)
+
     const renderer = new Renderer(outputDir)
     await renderer.init()
 
@@ -17,13 +21,14 @@
 
     const svgsWithBBs = infos.map(b => renderer.addBoundingBoxesToSvg(b))
 
-    // await Promise.all(svgsWithBBs.map((svg, i) => fs.writeFile(`${outputDir}/svg-bb-${i}.svg`, svg)))
-
-    const n = 5
+    const batchSize = 10
     let batch = 0
+
     while (svgsWithBBs.length) {
-        const current = svgsWithBBs.splice(0, 5)
-        await Promise.all(current.map((svg, i) => renderer.saveAsPngWithProperSize(svg, 8, `${outputDir}/svg-bb-${batch * n + i}.png`)))
+        const current = svgsWithBBs.splice(0, batchSize)
+
+        // await Promise.all(current.map((svg, i) => fs.writeFile(`${outputDir}/${filePrefix}-${batch * n + i}.svg`, svg)))
+        await Promise.all(current.map((svg, i) => renderer.saveAsPngWithProperSize(svg, 8, `${outputDir}/${filePrefix}-${batch * batchSize + i}.png`)))
         console.log("left:", svgsWithBBs.length)
         ++batch
     }
