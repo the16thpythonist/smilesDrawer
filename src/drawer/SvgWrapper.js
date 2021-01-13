@@ -1,7 +1,3 @@
-const {
-  getChargeText
-} = require('./UtilityFunctions')
-
 const Line = require('./Line')
 const Vector2 = require('./Vector2')
 
@@ -47,10 +43,20 @@ class SvgWrapper {
     })
 
     this.maskElements.push(mask)
+    this.charges = {
+      1: '+',
+      2: '2+',
+      '-1': '-',
+      '-2': '2-'
+    }
   }
 
   getColor (element) {
     return this.colors[element] || this.colors.C
+  }
+
+  getChargeText (charge) {
+    return this.charges[charge] || ''
   }
 
   constructSvg () {
@@ -397,7 +403,7 @@ class SvgWrapper {
 
     // Charge
     if (charge) {
-      this.svgHelper.appendChildren(textNode, [this.createSubSuperScripts(getChargeText(charge), 'super')])
+      this.svgHelper.appendChildren(textNode, [this.createSubSuperScripts(this.getChargeText(charge), 'super')])
     }
 
     if (isotope > 0) {
@@ -447,7 +453,7 @@ class SvgWrapper {
       pseudoElementElem.setAttributeNS(null, 'fill', this.getColor(element))
 
       if (elementCharge !== 0) {
-        const elementChargeElem = this.createSubSuperScripts(getChargeText(elementCharge), 'super')
+        const elementChargeElem = this.createSubSuperScripts(this.getChargeText(elementCharge), 'super')
         pseudoElementElem.appendChild(elementChargeElem)
       }
 
