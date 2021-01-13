@@ -1,12 +1,12 @@
-//@ts-check
+// @ts-check
 const MathHelper = require('./MathHelper')
 const ArrayHelper = require('./ArrayHelper')
 const Vector2 = require('./Vector2')
 const Atom = require('./Atom')
 
-/** 
+/**
  * A class representing a vertex.
- * 
+ *
  * @property {Number} id The id of this vertex.
  * @property {Atom} value The atom associated with this vertex.
  * @property {Vector2} position The position of this vertex.
@@ -32,56 +32,56 @@ class Vertex {
    * @param {Number} [x=0] The initial x coordinate of the positional vector of this vertex.
    * @param {Number} [y=0] The initial y coordinate of the positional vector of this vertex.
    */
-  constructor(value, x = 0, y = 0) {
-    this.id = null;
-    this.value = value;
-    this.position = new Vector2(x ? x : 0, y ? y : 0);
-    this.previousPosition = new Vector2(0, 0);
-    this.parentVertexId = null;
-    this.children = Array();
-    this.spanningTreeChildren = Array();
-    this.edges = Array();
-    this.positioned = false;
-    this.angle = null;
-    this.dir = 1.0;
-    this.neighbourCount = 0;
-    this.neighbours = Array();
-    this.neighbouringElements = Array();
-    this.forcePositioned = false;
+  constructor (value, x = 0, y = 0) {
+    this.id = null
+    this.value = value
+    this.position = new Vector2(x || 0, y || 0)
+    this.previousPosition = new Vector2(0, 0)
+    this.parentVertexId = null
+    this.children = Array()
+    this.spanningTreeChildren = Array()
+    this.edges = Array()
+    this.positioned = false
+    this.angle = null
+    this.dir = 1.0
+    this.neighbourCount = 0
+    this.neighbours = Array()
+    this.neighbouringElements = Array()
+    this.forcePositioned = false
   }
 
   /**
    * Set the 2D coordinates of the vertex.
-   * 
+   *
    * @param {Number} x The x component of the coordinates.
    * @param {Number} y The y component of the coordinates.
-   * 
+   *
    */
-  setPosition(x, y) {
-    this.position.x = x;
-    this.position.y = y;
+  setPosition (x, y) {
+    this.position.x = x
+    this.position.y = y
   }
 
   /**
    * Set the 2D coordinates of the vertex from a Vector2.
-   * 
+   *
    * @param {Vector2} v A 2D vector.
-   * 
+   *
    */
-  setPositionFromVector(v) {
-    this.position.x = v.x;
-    this.position.y = v.y;
+  setPositionFromVector (v) {
+    this.position.x = v.x
+    this.position.y = v.y
   }
 
   /**
    * Add a child vertex id to this vertex.
    * @param {Number} vertexId The id of a vertex to be added as a child to this vertex.
    */
-  addChild(vertexId) {
-    this.children.push(vertexId);
-    this.neighbours.push(vertexId);
+  addChild (vertexId) {
+    this.children.push(vertexId)
+    this.neighbours.push(vertexId)
 
-    this.neighbourCount++;
+    this.neighbourCount++
   }
 
   /**
@@ -92,57 +92,57 @@ class Vertex {
    * @param {Number} vertexId The id of a vertex to be added as a child to this vertex.
    * @param {Number} ringbondIndex The index of the ringbond.
    */
-  addRingbondChild(vertexId, ringbondIndex) {
-    this.children.push(vertexId);
+  addRingbondChild (vertexId, ringbondIndex) {
+    this.children.push(vertexId)
 
     if (this.value.bracket) {
-      let index = 1;
+      let index = 1
 
       if (this.id === 0 && this.value.bracket.hcount === 0) {
-        index = 0;
+        index = 0
       }
-      
+
       if (this.value.bracket.hcount === 1 && ringbondIndex === 0) {
-        index = 2;
+        index = 2
       }
 
       if (this.value.bracket.hcount === 1 && ringbondIndex === 1) {
         if (this.neighbours.length < 3) {
-          index = 2;
+          index = 2
         } else {
-          index = 3;
+          index = 3
         }
       }
 
       if (this.value.bracket.hcount === null && ringbondIndex === 0) {
-        index = 1;
+        index = 1
       }
 
       if (this.value.bracket.hcount === null && ringbondIndex === 1) {
         if (this.neighbours.length < 3) {
-          index = 1;
+          index = 1
         } else {
-          index = 2;
+          index = 2
         }
       }
-      
-      this.neighbours.splice(index, 0, vertexId);
+
+      this.neighbours.splice(index, 0, vertexId)
     } else {
-      this.neighbours.push(vertexId);
+      this.neighbours.push(vertexId)
     }
 
-    this.neighbourCount++;
+    this.neighbourCount++
   }
 
   /**
    * Set the vertex id of the parent.
-   * 
+   *
    * @param {Number} parentVertexId The parents vertex id.
    */
-  setParentVertexId(parentVertexId) {
-    this.neighbourCount++;
-    this.parentVertexId = parentVertexId;
-    this.neighbours.push(parentVertexId);
+  setParentVertexId (parentVertexId) {
+    this.neighbourCount++
+    this.parentVertexId = parentVertexId
+    this.neighbours.push(parentVertexId)
   }
 
   /**
@@ -150,12 +150,12 @@ class Vertex {
    *
    * @returns {Boolean} A boolean indicating whether or not this vertex is terminal.
    */
-  isTerminal() {
+  isTerminal () {
     if (this.value.hasAttachedPseudoElements) {
-      return true;
+      return true
     }
 
-    return (this.parentVertexId === null && this.children.length < 2) || this.children.length === 0;
+    return (this.parentVertexId === null && this.children.length < 2) || this.children.length === 0
   }
 
   /**
@@ -163,18 +163,18 @@ class Vertex {
    *
    * @returns {Vertex} A clone of this vertex.
    */
-  clone() {
-    let clone = new Vertex(this.value, this.position.x, this.position.y);
-    clone.id = this.id;
-    clone.previousPosition = new Vector2(this.previousPosition.x, this.previousPosition.y);
-    clone.parentVertexId = this.parentVertexId;
-    clone.children = ArrayHelper.clone(this.children);
-    clone.spanningTreeChildren = ArrayHelper.clone(this.spanningTreeChildren);
-    clone.edges = ArrayHelper.clone(this.edges);
-    clone.positioned = this.positioned;
-    clone.angle = this.angle;
-    clone.forcePositioned = this.forcePositioned;
-    return clone;
+  clone () {
+    const clone = new Vertex(this.value, this.position.x, this.position.y)
+    clone.id = this.id
+    clone.previousPosition = new Vector2(this.previousPosition.x, this.previousPosition.y)
+    clone.parentVertexId = this.parentVertexId
+    clone.children = ArrayHelper.clone(this.children)
+    clone.spanningTreeChildren = ArrayHelper.clone(this.spanningTreeChildren)
+    clone.edges = ArrayHelper.clone(this.edges)
+    clone.positioned = this.positioned
+    clone.angle = this.angle
+    clone.forcePositioned = this.forcePositioned
+    return clone
   }
 
   /**
@@ -183,8 +183,8 @@ class Vertex {
    * @param {Vertex} vertex The vertex to check.
    * @returns {Boolean} A boolean indicating whether or not the two vertices have the same id.
    */
-  equals(vertex) {
-    return this.id === vertex.id;
+  equals (vertex) {
+    return this.id === vertex.id
   }
 
   /**
@@ -194,20 +194,20 @@ class Vertex {
    * @param {Boolean} [returnAsDegrees=false] - If true, returns angle in degrees, else in radians.
    * @returns {Number} The angle of this vertex.
    */
-  getAngle(referenceVector = null, returnAsDegrees = false) {
-    let u = null;
+  getAngle (referenceVector = null, returnAsDegrees = false) {
+    let u = null
 
     if (!referenceVector) {
-      u = Vector2.subtract(this.position, this.previousPosition);
+      u = Vector2.subtract(this.position, this.previousPosition)
     } else {
-      u = Vector2.subtract(this.position, referenceVector);
+      u = Vector2.subtract(this.position, referenceVector)
     }
 
     if (returnAsDegrees) {
-      return MathHelper.toDeg(u.angle());
+      return MathHelper.toDeg(u.angle())
     }
 
-    return u.angle();
+    return u.angle()
   }
 
   /**
@@ -216,30 +216,30 @@ class Vertex {
    * @param {Vertex[]} vertices The array of vertices for the current molecule.
    * @returns {String} The suggested direction of the text.
    */
-  getTextDirection(vertices) {
-    let neighbours = this.getDrawnNeighbours(vertices);
-    let angles = Array();
+  getTextDirection (vertices) {
+    const neighbours = this.getDrawnNeighbours(vertices)
+    const angles = Array()
 
     for (let i = 0; i < neighbours.length; i++) {
-      angles.push(this.getAngle(vertices[neighbours[i]].position));
+      angles.push(this.getAngle(vertices[neighbours[i]].position))
     }
 
-    let textAngle = MathHelper.meanAngle(angles);
+    let textAngle = MathHelper.meanAngle(angles)
 
     // Round to 0, 90, 180 or 270 degree
-    let halfPi = Math.PI / 2.0;
-    textAngle = Math.round(Math.round(textAngle / halfPi) * halfPi);
+    const halfPi = Math.PI / 2.0
+    textAngle = Math.round(Math.round(textAngle / halfPi) * halfPi)
 
     if (textAngle === 2) {
-      return 'down';
+      return 'down'
     } else if (textAngle === -2) {
-      return 'up';
+      return 'up'
     } else if (textAngle === 0 || textAngle === -0) {
-      return 'right'; // is checking for -0 necessary?
+      return 'right' // is checking for -0 necessary?
     } else if (textAngle === 3 || textAngle === -3) {
-      return 'left';
+      return 'left'
     } else {
-      return 'down'; // default to down
+      return 'down' // default to down
     }
   }
 
@@ -249,38 +249,38 @@ class Vertex {
    * @param {Number} [vertexId=null] If a value is supplied, the vertex with this id is excluded from the returned indices.
    * @returns {Number[]} An array containing the ids of neighbouring vertices.
    */
-  getNeighbours(vertexId = null) {
+  getNeighbours (vertexId = null) {
     if (vertexId === null) {
-      return this.neighbours.slice();
+      return this.neighbours.slice()
     }
 
-    let arr = Array();
+    const arr = Array()
 
     for (let i = 0; i < this.neighbours.length; i++) {
       if (this.neighbours[i] !== vertexId) {
-        arr.push(this.neighbours[i]);
+        arr.push(this.neighbours[i])
       }
     }
 
-    return arr;
+    return arr
   }
 
   /**
    * Returns an array of ids of neighbouring vertices that will be drawn (vertex.value.isDrawn === true).
-   * 
+   *
    * @param {Vertex[]} vertices An array containing the vertices associated with the current molecule.
    * @returns {Number[]} An array containing the ids of neighbouring vertices that will be drawn.
    */
-  getDrawnNeighbours(vertices) {
-    let arr = Array();
+  getDrawnNeighbours (vertices) {
+    const arr = Array()
 
     for (let i = 0; i < this.neighbours.length; i++) {
       if (vertices[this.neighbours[i]].value.isDrawn) {
-        arr.push(this.neighbours[i]);
+        arr.push(this.neighbours[i])
       }
     }
 
-    return arr;
+    return arr
   }
 
   /**
@@ -288,8 +288,8 @@ class Vertex {
    *
    * @returns {Number} The number of neighbours.
    */
-  getNeighbourCount() {
-    return this.neighbourCount;
+  getNeighbourCount () {
+    return this.neighbourCount
   }
 
   /**
@@ -298,22 +298,22 @@ class Vertex {
    * @param {Number} [vertexId=null] If supplied, the vertex with this id is excluded from the array returned.
    * @returns {Number[]} An array containing the ids of the neighbouring vertices.
    */
-  getSpanningTreeNeighbours(vertexId = null) {
-    let neighbours = Array();
+  getSpanningTreeNeighbours (vertexId = null) {
+    const neighbours = Array()
 
     for (let i = 0; i < this.spanningTreeChildren.length; i++) {
       if (vertexId === undefined || vertexId != this.spanningTreeChildren[i]) {
-        neighbours.push(this.spanningTreeChildren[i]);
+        neighbours.push(this.spanningTreeChildren[i])
       }
     }
 
     if (this.parentVertexId != null) {
       if (vertexId === undefined || vertexId != this.parentVertexId) {
-        neighbours.push(this.parentVertexId);
+        neighbours.push(this.parentVertexId)
       }
     }
 
-    return neighbours;
+    return neighbours
   }
 
   /**
@@ -324,20 +324,20 @@ class Vertex {
    * @param {Number} previousVertexId The id of the previous vertex. The next vertex will be opposite from the vertex with this id as seen from this vertex.
    * @returns {Number} The id of the next vertex in the ring.
    */
-  getNextInRing(vertices, ringId, previousVertexId) {
-    let neighbours = this.getNeighbours();
+  getNextInRing (vertices, ringId, previousVertexId) {
+    const neighbours = this.getNeighbours()
 
     for (let i = 0; i < neighbours.length; i++) {
       if (ArrayHelper.contains(vertices[neighbours[i]].value.rings, {
-          value: ringId
-        }) &&
+        value: ringId
+      }) &&
         neighbours[i] != previousVertexId) {
-        return neighbours[i];
+        return neighbours[i]
       }
     }
 
-    return null;
+    return null
   }
 }
 
-module.exports = Vertex;
+module.exports = Vertex

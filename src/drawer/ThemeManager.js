@@ -1,7 +1,7 @@
 class ThemeManager {
-  constructor(colors, theme) {
-    this.colors = colors;
-    this.theme = this.colors[theme];
+  constructor (colors, theme) {
+    this.colors = colors
+    this.theme = this.colors[theme]
   }
 
   /**
@@ -10,16 +10,16 @@ class ThemeManager {
    * @param {String} key The color key in the theme (e.g. C, N, BACKGROUND, ...).
    * @returns {String} A color hex value.
    */
-  getColor(key) {
+  getColor (key) {
     if (key) {
-      key = key.toUpperCase();
+      key = key.toUpperCase()
 
       if (key in this.theme) {
-        return this.theme[key];
+        return this.theme[key]
       }
     }
 
-    return this.theme['C'];
+    return this.theme.C
   }
 
   /**
@@ -28,9 +28,9 @@ class ThemeManager {
    *
    * @param {String} theme the name of the theme to switch to
    */
-  setTheme(theme) {
+  setTheme (theme) {
     if (this.colors.hasOwnProperty(theme)) {
-      this.theme = this.colors[theme];
+      this.theme = this.colors[theme]
     }
 
     // TODO: this probably should notify those who are watching this theme
@@ -39,4 +39,4 @@ class ThemeManager {
   }
 }
 
-module.exports = ThemeManager;
+module.exports = ThemeManager

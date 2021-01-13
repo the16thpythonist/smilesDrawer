@@ -1,12 +1,12 @@
-//@ts-check
+// @ts-check
 const ArrayHelper = require('./ArrayHelper')
 const Vector2 = require('./Vector2')
 const Vertex = require('./Vertex')
 const RingConnection = require('./RingConnection')
 
-/** 
+/**
  * A class representing a ring.
- * 
+ *
  * @property {Number} id The id of this ring.
  * @property {Number[]} members An array containing the vertex ids of the ring members.
  * @property {Number[]} edges An array containing the edge ids of the edges between the ring members.
@@ -23,87 +23,87 @@ const RingConnection = require('./RingConnection')
  * @property {Boolean} canFlip A boolean indicating whether or not this ring allows flipping of attached vertices to the inside of the ring.
  */
 class Ring {
-    /**
+  /**
      * The constructor for the class Ring.
      *
      * @param {Number[]} members An array containing the vertex ids of the members of the ring to be created.
      */
-    constructor(members) {
-        this.id = null;
-        this.members = members;
-        this.edges = [];
-        this.insiders = [];
-        this.neighbours = [];
-        this.positioned = false;
-        this.center = new Vector2(0, 0);
-        this.rings = [];
-        this.isBridged = false;
-        this.isPartOfBridged = false;
-        this.isSpiro = false;
-        this.isFused = false;
-        this.centralAngle = 0.0;
-        this.canFlip = true;
-    }
-    
-    /**
+  constructor (members) {
+    this.id = null
+    this.members = members
+    this.edges = []
+    this.insiders = []
+    this.neighbours = []
+    this.positioned = false
+    this.center = new Vector2(0, 0)
+    this.rings = []
+    this.isBridged = false
+    this.isPartOfBridged = false
+    this.isSpiro = false
+    this.isFused = false
+    this.centralAngle = 0.0
+    this.canFlip = true
+  }
+
+  /**
      * Clones this ring and returns the clone.
      *
      * @returns {Ring} A clone of this ring.
      */
-    clone() {
-        let clone = new Ring(this.members);
+  clone () {
+    const clone = new Ring(this.members)
 
-        clone.id = this.id;
-        clone.insiders = ArrayHelper.clone(this.insiders);
-        clone.neighbours = ArrayHelper.clone(this.neighbours);
-        clone.positioned = this.positioned;
-        clone.center = this.center.clone();
-        clone.rings = ArrayHelper.clone(this.rings);
-        clone.isBridged = this.isBridged;
-        clone.isPartOfBridged = this.isPartOfBridged;
-        clone.isSpiro = this.isSpiro;
-        clone.isFused = this.isFused;
-        clone.centralAngle = this.centralAngle;
-        clone.canFlip = this.canFlip;
+    clone.id = this.id
+    clone.insiders = ArrayHelper.clone(this.insiders)
+    clone.neighbours = ArrayHelper.clone(this.neighbours)
+    clone.positioned = this.positioned
+    clone.center = this.center.clone()
+    clone.rings = ArrayHelper.clone(this.rings)
+    clone.isBridged = this.isBridged
+    clone.isPartOfBridged = this.isPartOfBridged
+    clone.isSpiro = this.isSpiro
+    clone.isFused = this.isFused
+    clone.centralAngle = this.centralAngle
+    clone.canFlip = this.canFlip
 
-        return clone;
-    }
+    return clone
+  }
 
-    /**
+  /**
      * Returns the size (number of members) of this ring.
      *
      * @returns {Number} The size (number of members) of this ring.
      */
-    getSize() {
-        return this.members.length;
-    }
+  getSize () {
+    return this.members.length
+  }
 
-    /**
+  /**
      * Gets the polygon representation (an array of the ring-members positional vectors) of this ring.
      *
      * @param {Vertex[]} vertices An array of vertices representing the current molecule.
      * @returns {Vector2[]} An array of the positional vectors of the ring members.
      */
-    getPolygon(vertices) {
-        let polygon = [];
+  getPolygon (vertices) {
+    const polygon = []
 
-        for (let i = 0; i < this.members.length; i++) {
-            polygon.push(vertices[this.members[i]].position);
-        }
-
-        return polygon;
+    for (let i = 0; i < this.members.length; i++) {
+      polygon.push(vertices[this.members[i]].position)
     }
 
-    /**
+    return polygon
+  }
+
+  /**
      * Returns the angle of this ring in relation to the coordinate system.
      *
      * @returns {Number} The angle in radians.
      */
-    getAngle() {
-        return Math.PI - this.centralAngle;
-    }
+  getAngle () {
+    return Math.PI - this.centralAngle
+  }
 
-    /**
+  /**
      * Loops over the members of this ring from a given start position in a direction opposite to the vertex id passed as the previousId.
      *
      * @param {Vertex[]} vertices The vertices associated with the current molecule.
@@ -111,102 +111,102 @@ class Ring {
      * @param {Number} startVertexId The vertex id of the start vertex.
      * @param {Number} previousVertexId The vertex id of the previous vertex (the loop calling the callback function will run in the opposite direction of this vertex).
      */
-    eachMember(vertices, callback, startVertexId, previousVertexId) {
-        startVertexId = startVertexId || startVertexId === 0 ? startVertexId : this.members[0];
-        let current = startVertexId;
-        let max = 0;
+  eachMember (vertices, callback, startVertexId, previousVertexId) {
+    startVertexId = startVertexId || startVertexId === 0 ? startVertexId : this.members[0]
+    let current = startVertexId
+    let max = 0
 
-        while (current != null && max < 100) {
-            let prev = current;
-            
-            callback(prev);
-            current = vertices[current].getNextInRing(vertices, this.id, previousVertexId);
-            previousVertexId = prev;
-            
-            // Stop while loop when arriving back at the start vertex
-            if (current == startVertexId) {
-                current = null;
-            }
+    while (current != null && max < 100) {
+      const prev = current
 
-            max++;
-        }
+      callback(prev)
+      current = vertices[current].getNextInRing(vertices, this.id, previousVertexId)
+      previousVertexId = prev
+
+      // Stop while loop when arriving back at the start vertex
+      if (current == startVertexId) {
+        current = null
+      }
+
+      max++
     }
+  }
 
-    /**
+  /**
      * Returns an array containing the neighbouring rings of this ring ordered by ring size.
      *
      * @param {RingConnection[]} ringConnections An array of ring connections associated with the current molecule.
      * @returns {Object[]} An array of neighbouring rings sorted by ring size. Example: { n: 5, neighbour: 1 }.
      */
-    getOrderedNeighbours(ringConnections) {
-        let orderedNeighbours = Array(this.neighbours.length);
-        
-        for (let i = 0; i < this.neighbours.length; i++) {
-            let vertices = RingConnection.getVertices(ringConnections, this.id, this.neighbours[i]);
-            
-            orderedNeighbours[i] = {
-                n: vertices.length,
-                neighbour: this.neighbours[i]
-            };
-        }
+  getOrderedNeighbours (ringConnections) {
+    const orderedNeighbours = Array(this.neighbours.length)
 
-        orderedNeighbours.sort(function (a, b) {
-            // Sort highest to lowest
-            return b.n - a.n;
-        });
+    for (let i = 0; i < this.neighbours.length; i++) {
+      const vertices = RingConnection.getVertices(ringConnections, this.id, this.neighbours[i])
 
-        return orderedNeighbours;
+      orderedNeighbours[i] = {
+        n: vertices.length,
+        neighbour: this.neighbours[i]
+      }
     }
 
-    /**
+    orderedNeighbours.sort(function (a, b) {
+      // Sort highest to lowest
+      return b.n - a.n
+    })
+
+    return orderedNeighbours
+  }
+
+  /**
      * Check whether this ring is an implicitly defined benzene-like (e.g. C1=CC=CC=C1) with 6 members and 3 double bonds.
      *
      * @param {Vertex[]} vertices An array of vertices associated with the current molecule.
      * @returns {Boolean} A boolean indicating whether or not this ring is an implicitly defined benzene-like.
      */
-    isBenzeneLike(vertices) {
-        let db = this.getDoubleBondCount(vertices);
-        let length = this.members.length;
+  isBenzeneLike (vertices) {
+    const db = this.getDoubleBondCount(vertices)
+    const length = this.members.length
 
-        return db === 3 && length === 6 ||
-               db === 2 && length === 5 ;
-    }
+    return db === 3 && length === 6 ||
+               db === 2 && length === 5
+  }
 
-    /**
+  /**
      * Get the number of double bonds inside this ring.
      *
      * @param {Vertex[]} vertices An array of vertices associated with the current molecule.
      * @returns {Number} The number of double bonds inside this ring.
      */
-    getDoubleBondCount(vertices) {
-        let doubleBondCount = 0;
+  getDoubleBondCount (vertices) {
+    let doubleBondCount = 0
 
-        for (let i = 0; i < this.members.length; i++) {
-            let atom = vertices[this.members[i]].value;
+    for (let i = 0; i < this.members.length; i++) {
+      const atom = vertices[this.members[i]].value
 
-            if (atom.bondType === '=' || atom.branchBond === '=') {
-                doubleBondCount++;
-            }
-        }
-
-        return doubleBondCount;
+      if (atom.bondType === '=' || atom.branchBond === '=') {
+        doubleBondCount++
+      }
     }
 
-    /**
+    return doubleBondCount
+  }
+
+  /**
      * Checks whether or not this ring contains a member with a given vertex id.
      *
      * @param {Number} vertexId A vertex id.
      * @returns {Boolean} A boolean indicating whether or not this ring contains a member with the given vertex id.
      */
-    contains(vertexId) {
-        for (let i = 0; i < this.members.length; i++) {
-            if (this.members[i] == vertexId) {
-                return true;
-            }
-        }
-
-        return false;
+  contains (vertexId) {
+    for (let i = 0; i < this.members.length; i++) {
+      if (this.members[i] == vertexId) {
+        return true
+      }
     }
+
+    return false
+  }
 }
 
-module.exports = Ring;
+module.exports = Ring
