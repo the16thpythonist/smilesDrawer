@@ -49,14 +49,14 @@ function resizeImage(scale) {
   return [updatedSvg, labels]
 }
 
-function Renderer({ directory, quality, scale, colors }) {
+function Renderer({ outputDirectory, quality, scale, colors }) {
   this.browser = null
   this.document = null
   this.XMLSerializer = null
 
   this.parser = Parser
 
-  this.directory = directory
+  this.directory = outputDirectory
   this.quality = quality
   this.scale = scale
 
@@ -197,24 +197,18 @@ Renderer.prototype.addBoundingBoxesToSvg = function({ dom, xml }) {
 
   return this.XMLSerializer.serializeToString(svg)
 }
+Renderer.prototype.imageFromSmiles = async function(smiles, filePrefix, fileIndex) {
+  const svgXmlWithoutBoundingBoxes = this.smilesToSvgXml(smiles)
+  const { dom, xml } = await this.boundingBoxesFromSvgXml(svgXmlWithoutBoundingBoxes)
+  const svgXmlWithBoundingBoxes = this.addBoundingBoxesToSvg({ dom, xml }) // TODO aneb: define different styles of labels, then make style configurable
 
-Renderer.prototype.smilesToImage = async function(smilesList, filePrefix = 'img') {
-  const svgXmlFilesWithoutBoundingBoxes = smilesList.map(s => this.smilesToSvgXml(s))
-  const boundingBoxes = await Promise.all(svgXmlFilesWithoutBoundingBoxes.map(xml => this.boundingBoxesFromSvgXml(xml)))
-  const svgXmlFilesWithBoundingBoxes = boundingBoxes.map(i => this.addBoundingBoxesToSvg(i)) // TODO aneb: define different styles of labels, then make style configurable
+  const fileName = `${this.directory}/${filePrefix}-${fileIndex}`
+  await this.saveResizedImage(svgXmlWithoutBoundingBoxes, `${fileName}-x-quality-${this.quality}`, this.quality)
+  await this.saveResizedImage(svgXmlWithBoundingBoxes, `${fileName}-y-quality-${this.quality}`, 100)
+}
 
-  const fileNames = _.range(smilesList.length)
-
-  const fileNamesWithBoundingBox = fileNames.map((f, i) => `${this.directory}/${filePrefix}-${i}-quality-${this.quality}`)
-  await Promise.all(_.zip(svgXmlFilesWithBoundingBoxes, fileNamesWithBoundingBox).map(([svg, fileName]) => this.saveResizedImage(svg, fileName, this.quality)))
-
-  if (this.quality === 100) {
-    return
-  }
-
-  // aneb: if changing quality, save a high-quality version of the image, too
-  const fileNamesWithOutBoundingBox = fileNames.map((f, i) => `${this.directory}/${filePrefix}-${i}-quality-100`)
-  await Promise.all(_.zip(svgXmlFilesWithoutBoundingBoxes, fileNamesWithOutBoundingBox).map(([svg, fileName]) => this.saveResizedImage(svg, fileName, 100)))
+Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix = 'img') {
+  await Promise.all(smilesList.map((s, i) => this.imageFromSmiles(s, filePrefix, i)))
 }
 
 module.exports = Renderer

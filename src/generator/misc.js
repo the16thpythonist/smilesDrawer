@@ -28,7 +28,7 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100, header = 1) => {
 
 const cliParams = () => {
   const {
-    filePrefix, directory, amount, quality, scale,
+    outputDirectory, amount, quality, scale,
     colors: colorMap,
     fromCsvFile: csvFile,
     fromCsvColumn: csvColumn
@@ -37,9 +37,8 @@ const cliParams = () => {
   const config = {
     csvFile: path.resolve(csvFile),
     csvColumn: csvColumn,
-    filePrefix: filePrefix,
     amount: Number(amount) || null,
-    directory: path.join(directory, filePrefix),
+    outputDirectory: path.resolve(outputDirectory),
     colors: colors[colorMap] || null,
     quality: Number(quality) || null,
     scale: Number(scale) || null
