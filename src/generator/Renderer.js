@@ -7,8 +7,49 @@ const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
 const { JSDOM } = require('jsdom')
 
+function evaluateXmlProperties () {
+  const nodes = []
+  const edges = []
+
+  const vertices = document.documentElement.querySelectorAll('[vertex-id]')
+  for (const vertex of vertices) {
+    const { x, y, width, height } = vertex.getBBox()
+    const elements = Array.from(vertex.querySelectorAll('tspan')).map(c => c.textContent).filter(c => !!c)
+    const id = vertex.getAttribute('vertex-id')
+    const label = vertex.getAttribute('label')
+    nodes.push({ id, elements, x, y, width, height, label })
+  }
+
+  const bonds = document.documentElement.querySelectorAll('[edge-id]')
+  for (const bond of bonds) {
+    const { x, y, width, height } = bond.getBBox()
+    const id = bond.getAttribute('edge-id')
+    const label = bond.getAttribute('label')
+    edges.push({ id, x, y, width, height, label })
+  }
+
+  return { nodes, edges }
+}
+function resizeImage (scale) {
+  const svg = document.querySelector('svg')
+  const [height, width, viewbox] = ['height', 'width', 'viewBox'].map(property => svg.getAttributeNS(null, property))
+  const [boxX, boxY, boxWidth, boxHeight] = viewbox.split(' ')
+
+  svg.setAttributeNS(null, 'height', Math.ceil(height * scale))
+  svg.setAttributeNS(null, 'width', Math.ceil(width * scale))
+  svg.setAttributeNS(null, 'viewbox', `${boxX} ${boxY} ${boxWidth * scale} ${boxHeight * scale} `)
+
+  const elements = document.documentElement.querySelectorAll('[bb-id]')
+  // aneb: find better way to do this?
+  const labels = Array.from(elements).map(e => Array.from(e.attributes).map(e => ({ [e.name]: e.nodeValue })))
+
+  // eslint-disable-next-line no-undef
+  const updatedSvg = new XMLSerializer().serializeToString(svg)
+
+  return [updatedSvg, labels]
+}
+
 function Renderer ({ directory, quality, scale, colors }) {
-  // TODO make own browser class?
   this.browser = null
   this.document = null
   this.XMLSerializer = null
@@ -42,29 +83,7 @@ Renderer.prototype.propertiesFromXmlString = async function (xml) {
   const page = await this.browser.newPage()
   await page.setContent(xml, { waitUntil: 'domcontentloaded' })
 
-  const dom = await page.evaluate(() => {
-    const nodes = []
-    const edges = []
-
-    const vertices = document.documentElement.querySelectorAll('[vertex-id]')
-    for (const vertex of vertices) {
-      const { x, y, width, height } = vertex.getBBox()
-      const elements = Array.from(vertex.querySelectorAll('tspan')).map(c => c.textContent).filter(c => !!c)
-      const id = vertex.getAttribute('vertex-id')
-      const label = vertex.getAttribute('label')
-      nodes.push({ id, elements, x, y, width, height, label })
-    }
-
-    const bonds = document.documentElement.querySelectorAll('[edge-id]')
-    for (const bond of bonds) {
-      const { x, y, width, height } = bond.getBBox()
-      const id = bond.getAttribute('edge-id')
-      const label = bond.getAttribute('label')
-      edges.push({ id, x, y, width, height, label })
-    }
-
-    return { nodes, edges }
-  })
+  const dom = await page.evaluate(evaluateXmlProperties)
 
   return { dom, xml }
 }
@@ -83,24 +102,7 @@ Renderer.prototype.saveAsPngWithProperSize = async function (svg, fileName, qual
   const page = await this.browser.newPage()
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
 
-  let [updatedSvg, labels] = await page.evaluate((scale) => {
-    const svg = document.querySelector('svg')
-    const [height, width, viewbox] = ['height', 'width', 'viewBox'].map(property => svg.getAttributeNS(null, property))
-    const [boxX, boxY, boxWidth, boxHeight] = viewbox.split(' ')
-
-    svg.setAttributeNS(null, 'height', Math.ceil(height * scale))
-    svg.setAttributeNS(null, 'width', Math.ceil(width * scale))
-    svg.setAttributeNS(null, 'viewbox', `${boxX} ${boxY} ${boxWidth * scale} ${boxHeight * scale} `)
-
-    const elements = document.documentElement.querySelectorAll('[bb-id]')
-    // aneb: find better way to do this?
-    const labels = Array.from(elements).map(e => Array.from(e.attributes).map(e => ({ [e.name]: e.nodeValue })))
-
-    // eslint-disable-next-line no-undef
-    const updatedSvg = new XMLSerializer().serializeToString(svg)
-
-    return [updatedSvg, labels]
-  }, this.scale)
+  let [updatedSvg, labels] = await page.evaluate(resizeImage, this.scale)
 
   const svgElAfter = await page.$('svg')
 
