@@ -28,7 +28,7 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100, header = 1) => {
 
 const cliParams = () => {
   const {
-    outputDirectory, amount, quality, scale,
+    outputDirectory, amount, quality, scale, concurrency,
     colors: colorMap,
     fromCsvFile: csvFile,
     fromCsvColumn: csvColumn
@@ -41,7 +41,8 @@ const cliParams = () => {
     outputDirectory: path.resolve(outputDirectory),
     colors: colors[colorMap] || null,
     quality: Number(quality) || null,
-    scale: Number(scale) || null
+    scale: Number(scale) || null,
+    concurrency: Number(concurrency) || 4
   }
 
   const invalid = Object.entries(config).filter(([key, value]) => value === null)

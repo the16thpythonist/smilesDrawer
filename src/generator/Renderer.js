@@ -9,8 +9,9 @@ const SVG = require('./SVG')
 
 const { boundingBoxesFromSvg, resizeImage } = require('./browser')
 
-function Renderer({ outputDirectory, quality, scale, colors }) {
+function Renderer({ outputDirectory, quality, scale, colors, concurrency }) {
   this.browser = null
+  this.pages = null
   this.document = null
   this.XMLSerializer = null
 
@@ -19,6 +20,7 @@ function Renderer({ outputDirectory, quality, scale, colors }) {
   this.directory = outputDirectory
   this.quality = quality
   this.scale = scale
+  this.concurrency = concurrency
 
   // TODO define options?
   this.drawer = new SvgDrawer({ colors })
@@ -29,7 +31,9 @@ Renderer.prototype.init = async function() {
   const { document, XMLSerializer } = (new JSDOM('')).window
   this.document = document
   this.XMLSerializer = new XMLSerializer()
+
   this.browser = await puppeteer.launch({ headless: true, devtools: false })
+  this.pages = await Promise.all(Array(this.concurrency).fill(null).map(() => this.browser.newPage()))
 
   await fs.ensureDir(this.directory)
 }
@@ -38,9 +42,8 @@ Renderer.prototype.done = async function() {
   this.browser.close()
 }
 
-Renderer.prototype.boundingBoxesFromSvgXml = async function(xml) {
+Renderer.prototype.boundingBoxesFromSvgXml = async function(page, xml) {
   // aneb: need to open browser, getBBox is not available via jsdom as it does not render
-  const page = await this.browser.newPage()
   await page.setContent(xml, { waitUntil: 'domcontentloaded' })
 
   const dom = await page.evaluate(boundingBoxesFromSvg)
@@ -48,18 +51,7 @@ Renderer.prototype.boundingBoxesFromSvgXml = async function(xml) {
   return { dom, xml }
 }
 
-Renderer.prototype.smilesToSvgXml = function(smiles) {
-  const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-  const tree = this.parser.parse(smiles)
-
-  this.drawer.draw(tree, svg)
-  this.svg.update(svg, { smiles })
-
-  return this.XMLSerializer.serializeToString(svg)
-}
-
-Renderer.prototype.saveResizedImage = async function(svg, fileName, quality) {
-  const page = await this.browser.newPage()
+Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality) {
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
 
   let [updatedSvg, labels] = await page.evaluate(resizeImage, this.scale)
@@ -77,8 +69,16 @@ Renderer.prototype.saveResizedImage = async function(svg, fileName, quality) {
       .map(({ label, x, y, width, height }) => ({ label, x, y, width, height }))
     await fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2))
   }
+}
 
-  await page.close()
+Renderer.prototype.smilesToSvgXml = function(smiles) {
+  const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  const tree = this.parser.parse(smiles)
+
+  this.drawer.draw(tree, svg)
+  this.svg.update(svg, { smiles })
+
+  return this.XMLSerializer.serializeToString(svg)
 }
 
 Renderer.prototype.makeBoundingBox = function(id, label, x, y, width, height) {
@@ -158,18 +158,31 @@ Renderer.prototype.addBoundingBoxesToSvg = function({ dom, xml }) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.imageFromSmiles = async function(smiles, filePrefix, fileIndex) {
+Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePrefix, fileIndex) {
   const svgXmlWithoutBoundingBoxes = this.smilesToSvgXml(smiles)
-  const { dom, xml } = await this.boundingBoxesFromSvgXml(svgXmlWithoutBoundingBoxes)
-  const svgXmlWithBoundingBoxes = this.addBoundingBoxesToSvg({ dom, xml }) // TODO aneb: define different styles of labels, then make style configurable
+  const { dom, xml } = await this.boundingBoxesFromSvgXml(page, svgXmlWithoutBoundingBoxes)
+
+  // TODO aneb: define different styles of labels, then make style configurable
+  const svgXmlWithBoundingBoxes = this.addBoundingBoxesToSvg({ dom, xml })
 
   const fileName = `${this.directory}/${filePrefix}-${fileIndex}`
-  await this.saveResizedImage(svgXmlWithoutBoundingBoxes, `${fileName}-x-quality-${this.quality}`, this.quality)
-  await this.saveResizedImage(svgXmlWithBoundingBoxes, `${fileName}-y-quality-${this.quality}`, 100)
+  await this.saveResizedImage(page, svgXmlWithoutBoundingBoxes, `${fileName}-x-quality-${this.quality}`, this.quality)
+  await this.saveResizedImage(page, svgXmlWithBoundingBoxes, `${fileName}-y-quality-${this.quality}`, 100)
 }
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix = 'img') {
-  await Promise.all(smilesList.map((s, i) => this.imageFromSmiles(s, filePrefix, i)))
+  const n = this.concurrency
+
+  let i = 0
+
+  while (i < smilesList.length) {
+    console.log(`processing items ${i} to ${i + n}`)
+
+    const current = _.zip(this.pages, smilesList.slice(i, i + n)).filter(([_, smiles]) => !!smiles)
+    await Promise.all(current.map(([page, smiles], fileIndex) => this.imageFromSmilesString(page, smiles, filePrefix, fileIndex + i)))
+
+    i += n
+  }
 }
 
 module.exports = Renderer
