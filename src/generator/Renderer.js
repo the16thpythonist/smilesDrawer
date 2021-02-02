@@ -7,7 +7,7 @@ const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
 const { JSDOM } = require('jsdom')
 
-function evaluateXmlProperties () {
+function boundingBoxesFromSvg() {
   const nodes = []
   const edges = []
 
@@ -30,7 +30,7 @@ function evaluateXmlProperties () {
 
   return { nodes, edges }
 }
-function resizeImage (scale) {
+function resizeImage(scale) {
   const svg = document.querySelector('svg')
   const [height, width, viewbox] = ['height', 'width', 'viewBox'].map(property => svg.getAttributeNS(null, property))
   const [boxX, boxY, boxWidth, boxHeight] = viewbox.split(' ')
@@ -49,7 +49,7 @@ function resizeImage (scale) {
   return [updatedSvg, labels]
 }
 
-function Renderer ({ directory, quality, scale, colors }) {
+function Renderer({ directory, quality, scale, colors }) {
   this.browser = null
   this.document = null
   this.XMLSerializer = null
@@ -65,7 +65,7 @@ function Renderer ({ directory, quality, scale, colors }) {
   this.svg = new SVG()
 }
 
-Renderer.prototype.init = async function () {
+Renderer.prototype.init = async function() {
   const { document, XMLSerializer } = (new JSDOM('')).window
   this.document = document
   this.XMLSerializer = new XMLSerializer()
@@ -74,21 +74,21 @@ Renderer.prototype.init = async function () {
   await fs.ensureDir(this.directory)
 }
 
-Renderer.prototype.done = async function () {
+Renderer.prototype.done = async function() {
   this.browser.close()
 }
 
-Renderer.prototype.propertiesFromXmlString = async function (xml) {
+Renderer.prototype.propertiesFromXmlString = async function(xml) {
   // aneb: need to open browser, getBBox is not available via jsdom as it does not render
   const page = await this.browser.newPage()
   await page.setContent(xml, { waitUntil: 'domcontentloaded' })
 
-  const dom = await page.evaluate(evaluateXmlProperties)
+  const dom = await page.evaluate(boundingBoxesFromSvg)
 
   return { dom, xml }
 }
 
-Renderer.prototype.createRawSvgFromSmiles = function (smiles) {
+Renderer.prototype.smilesToSvgXml = function(smiles) {
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const tree = this.parser.parse(smiles)
 
@@ -98,7 +98,7 @@ Renderer.prototype.createRawSvgFromSmiles = function (smiles) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.saveAsPngWithProperSize = async function (svg, fileName, quality = this.quality) {
+Renderer.prototype.saveAsPngWithProperSize = async function(svg, fileName, quality = this.quality) {
   const page = await this.browser.newPage()
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
 
@@ -121,7 +121,7 @@ Renderer.prototype.saveAsPngWithProperSize = async function (svg, fileName, qual
   await page.close()
 }
 
-Renderer.prototype.makeBoundingBox = function (id, label, x, y, width, height) {
+Renderer.prototype.makeBoundingBox = function(id, label, x, y, width, height) {
   const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
   return this.svg.createElement('rect', {
     'bb-id': `${id}-bb`,
@@ -134,17 +134,17 @@ Renderer.prototype.makeBoundingBox = function (id, label, x, y, width, height) {
   })
 }
 
-Renderer.prototype.mergeBoundingBoxes = function (boxes) {
+Renderer.prototype.mergeBoundingBoxes = function(boxes) {
   const groups = _.groupBy(boxes, 'id')
   return Object.values(groups).map(g => this.getBoxWithMaxArea(g))
 }
 
-Renderer.prototype.boundingBoxToRect = function (bb) {
+Renderer.prototype.boundingBoxToRect = function(bb) {
   const { x, y, width: w, height: h } = bb
   return { top: y, bottom: y + h, left: x, right: x + w }
 }
 
-Renderer.prototype.getBoxWithMaxArea = function (bonds) {
+Renderer.prototype.getBoxWithMaxArea = function(bonds) {
   if (bonds.length === 1) {
     return bonds[0]
   }
@@ -159,7 +159,7 @@ Renderer.prototype.getBoxWithMaxArea = function (bonds) {
   return Object.assign(bonds[0], update)
 }
 
-Renderer.prototype.correctBoundingBox = function (x, y, width, height) {
+Renderer.prototype.correctBoundingBox = function(x, y, width, height) {
   const minValue = 0.5
   const newValue = 2
   let [xCorr, yCorr, widthCorr, heightCorr] = [x, y, width, height]
@@ -177,7 +177,7 @@ Renderer.prototype.correctBoundingBox = function (x, y, width, height) {
   return { x: xCorr, y: yCorr, width: widthCorr, height: heightCorr }
 }
 
-Renderer.prototype.addBoundingBoxesToSvg = function ({ dom, xml }) {
+Renderer.prototype.addBoundingBoxesToSvg = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
   const bbContainer = this.svg.createElement('g')
 
@@ -196,6 +196,10 @@ Renderer.prototype.addBoundingBoxesToSvg = function ({ dom, xml }) {
   svg.appendChild(bbContainer)
 
   return this.XMLSerializer.serializeToString(svg)
+}
+
+Renderer.prototype.smilesToImage = async function(smilesList) {
+  const svgXmlFiles = smilesList.map(s => this.smilesToSvgXml(s))
 }
 
 module.exports = Renderer

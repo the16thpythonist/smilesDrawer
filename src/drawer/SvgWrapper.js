@@ -7,7 +7,7 @@ const { JSDOM } = jsdom
 const { document } = (new JSDOM('')).window
 
 class SvgWrapper {
-  constructor (target, options, colors) {
+  constructor(target, options, colors) {
     // TODO change naming everywhere and give this a proper name
     this.svgHelper = new SVG()
 
@@ -51,15 +51,15 @@ class SvgWrapper {
     }
   }
 
-  getColor (element) {
+  getColor(element) {
     return this.colors[element] || this.colors.C
   }
 
-  getChargeText (charge) {
+  getChargeText(charge) {
     return this.charges[charge] || ''
   }
 
-  constructSvg () {
+  constructSvg() {
     const pathChildNodes = this.paths
     const [defs, style, vertices] = ['defs', 'style', 'g'].map(el => this.svgHelper.createElement(el))
     const masks = this.svgHelper.createElement('mask', { id: 'text-mask' })
@@ -89,7 +89,7 @@ class SvgWrapper {
      * Create a linear gradient to apply to a line
      * @param {Line} line the line to apply the gradiation to.
      */
-  createGradient (line) {
+  createGradient(line) {
     const gradientUrl = `line-${this.gradientId++}`
     const l = line.getLeftVector()
     const r = line.getRightVector()
@@ -118,7 +118,7 @@ class SvgWrapper {
      * @param {String} text the actual text
      * @param {String} shift the type of text, either 'sub', or 'super'
      */
-  createSubSuperScripts (text, shift) {
+  createSubSuperScripts(text, shift) {
     const attributes = { 'baseline-shift': shift, class: 'sub' }
     const textNode = document.createTextNode(text)
     return this.svgHelper.createElement('tspan', attributes, [textNode])
@@ -128,7 +128,7 @@ class SvgWrapper {
      * Determine drawing dimensiosn based on vertex positions.
      * @param {Vertex[]} vertices An array of vertices containing the vertices associated with the current molecule.
      */
-  determineDimensions (vertices) {
+  determineDimensions(vertices) {
     // Figure out the final size of the image
     let maxX = -Number.MAX_VALUE
     let maxY = -Number.MAX_VALUE
@@ -175,7 +175,7 @@ class SvgWrapper {
    * @param {Number} y The y position of the text.
    * @param {String} elementName The name of the element (single-letter).
    */
-  drawBall (vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName) {
+  drawBall(vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName) {
     const ball = this.svgHelper.createElement('circle', {
       [vertexIdLabel]: vertexIdValue,
       label: vertexLabel,
@@ -194,7 +194,7 @@ class SvgWrapper {
      * @param {Number} y The y position of the text.
      * @param {Number} r Radius of ring
      */
-  drawRing (x, y, r) {
+  drawRing(x, y, r) {
     const ring = this.svgHelper.createElement('circle', {
       cx: x + this.offsetX,
       cy: y + this.offsetY,
@@ -213,7 +213,7 @@ class SvgWrapper {
    * @param bondLabel
    * @param {Line} line A line.
    */
-  drawDashedWedge (idLabel, idValue, bondLabel, line) {
+  drawDashedWedge(idLabel, idValue, bondLabel, line) {
     if (isNaN(line.from.x) || isNaN(line.from.y) ||
             isNaN(line.to.x) || isNaN(line.to.y)) {
       return
@@ -258,7 +258,7 @@ class SvgWrapper {
    * @param {Boolean} dashed defaults to false.
    * @param {String} gradient gradient url. Defaults to null.
    */
-  drawLine (idLabel, idValue, bondLabel, line, dashed = false, gradient = null) {
+  drawLine(idLabel, idValue, bondLabel, line, dashed = false, gradient = null) {
     const styles = [
       ['stroke-linecap', 'round'],
       ['stroke-dasharray', dashed ? '5, 5' : 'none']
@@ -296,7 +296,7 @@ class SvgWrapper {
    * @param {Number} y The y position of the point.
    * @param {String} elementName The name of the element (single-letter).
    */
-  drawPoint (vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName) {
+  drawPoint(vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName) {
     const mask = this.svgHelper.createElement('circle', {
       [`mask-${vertexIdLabel}`]: vertexIdValue,
       label: vertexLabel,
@@ -336,7 +336,7 @@ class SvgWrapper {
    * @param {Number} attachedPseudoElement.count The number of occurences that match the key.
    * @param {Number} attachedPseudoElement.hyrogenCount The number of hydrogens attached to each atom matching the key.
    */
-  drawText (vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
+  drawText(vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
     // TODO aneb: clean up this mess ...
     const pos = { x: x + this.offsetX, y: y + this.offsetY }
 
@@ -487,7 +487,7 @@ class SvgWrapper {
    * @param bondLabel
    * @param {Line} line the line object to create the wedge from
    */
-  drawWedge (idLabel, idValue, bondLabel, line) {
+  drawWedge(idLabel, idValue, bondLabel, line) {
     // TODO aneb: make method for this since it exists for every line
     const l = line.getLeftVector().clone()
     const r = line.getRightVector().clone()

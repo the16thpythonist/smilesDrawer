@@ -11,7 +11,7 @@ class ArrayHelper {
      * @param {*} arr The array or object to be cloned.
      * @returns {*} A clone of the array or object.
      */
-  static clone (arr) {
+  static clone(arr) {
     const out = Array.isArray(arr) ? Array() : {}
 
     for (const key in arr) {
@@ -36,7 +36,7 @@ class ArrayHelper {
      * @param {Array} arrB An array.
      * @returns {Boolean} A boolean indicating whether or not the two arrays contain the same elements.
      */
-  static equals (arrA, arrB) {
+  static equals(arrA, arrB) {
     if (arrA.length !== arrB.length) {
       return false
     }
@@ -61,7 +61,7 @@ class ArrayHelper {
      * @param {*} arr[].id If the array contains an object with the property 'id', the properties value is printed. Else, the array elements value is printend.
      * @returns {String} A string representation of the array.
      */
-  static print (arr) {
+  static print(arr) {
     if (arr.length == 0) {
       return ''
     }
@@ -84,7 +84,7 @@ class ArrayHelper {
      * @param {Array} arr An array.
      * @param {Function} callback The callback function that is called for each element.
      */
-  static each (arr, callback) {
+  static each(arr, callback) {
     for (let i = 0; i < arr.length; i++) {
       callback(arr[i])
     }
@@ -99,7 +99,7 @@ class ArrayHelper {
      * @param {(String|Number)} value The value of the property.
      * @returns {*} The array element matching the value.
      */
-  static get (arr, property, value) {
+  static get(arr, property, value) {
     for (let i = 0; i < arr.length; i++) {
       if (arr[i][property] == value) {
         return arr[i]
@@ -118,7 +118,7 @@ class ArrayHelper {
      * @param {Function} [options.func=undefined] A custom property function.
      * @returns {Boolean} A boolean whether or not the array contains a value.
      */
-  static contains (arr, options) {
+  static contains(arr, options) {
     if (!options.property && !options.func) {
       for (let i = 0; i < arr.length; i++) {
         if (arr[i] == options.value) {
@@ -150,7 +150,7 @@ class ArrayHelper {
      * @param {Array} arrB An array.
      * @returns {Array} The intersecting vlaues.
      */
-  static intersection (arrA, arrB) {
+  static intersection(arrA, arrB) {
     const intersection = new Array()
 
     for (let i = 0; i < arrA.length; i++) {
@@ -171,9 +171,9 @@ class ArrayHelper {
      * @param {Array} arr An array.
      * @returns {Array} An array of unique elements contained within the array supplied as an argument.
      */
-  static unique (arr) {
+  static unique(arr) {
     const contains = {}
-    return arr.filter(function (i) {
+    return arr.filter(function(i) {
       // using !== instead of hasOwnProperty (http://andrew.hedges.name/experiments/in/)
       return contains[i] !== undefined ? false : (contains[i] = true)
     })
@@ -187,7 +187,7 @@ class ArrayHelper {
      * @param {*} value A value to be counted.
      * @returns {Number} The number of occurences of a value in the array.
      */
-  static count (arr, value) {
+  static count(arr, value) {
     let count = 0
 
     for (let i = 0; i < arr.length; i++) {
@@ -207,7 +207,7 @@ class ArrayHelper {
      * @param {*} value A value to be toggled.
      * @returns {Array} The toggled array.
      */
-  static toggle (arr, value) {
+  static toggle(arr, value) {
     const newArr = Array()
 
     let removed = false
@@ -239,7 +239,7 @@ class ArrayHelper {
      * @param {*} value A value to be removed.
      * @returns {Array} A new array with the element with a given value removed.
      */
-  static remove (arr, value) {
+  static remove(arr, value) {
     const tmp = Array()
 
     for (let i = 0; i < arr.length; i++) {
@@ -259,7 +259,7 @@ class ArrayHelper {
      * @param {*} value A value to be removed.
      * @returns {Array} An array with the element with a given value removed.
      */
-  static removeUnique (arr, value) {
+  static removeUnique(arr, value) {
     const index = arr.indexOf(value)
 
     if (index > -1) {
@@ -277,8 +277,8 @@ class ArrayHelper {
      * @param {Array} arrB The array containing elements that will be removed from the other array.
      * @returns {Array} The filtered array.
      */
-  static removeAll (arrA, arrB) {
-    return arrA.filter(function (item) {
+  static removeAll(arrA, arrB) {
+    return arrA.filter(function(item) {
       return arrB.indexOf(item) === -1
     })
   }
@@ -291,7 +291,7 @@ class ArrayHelper {
      * @param {Array} arrB An array.
      * @returns {Array} The merged array.
      */
-  static merge (arrA, arrB) {
+  static merge(arrA, arrB) {
     const arr = new Array(arrA.length + arrB.length)
 
     for (let i = 0; i < arrA.length; i++) {
@@ -313,7 +313,7 @@ class ArrayHelper {
      * @param {Array} arrB An array.
      * @returns {Boolean} A boolean indicating whether or not both array contain the same elements.
      */
-  static containsAll (arrA, arrB) {
+  static containsAll(arrA, arrB) {
     let containing = 0
     for (let i = 0; i < arrA.length; i++) {
       for (let j = 0; j < arrB.length; j++) {
@@ -334,12 +334,12 @@ class ArrayHelper {
      * @param {String} arr[].atomicNumber The atomic number associated with the vertex id.
      * @returns {Object[]} The array sorted by atomic number. Example of an array entry: { atomicNumber: 2, vertexId: 5 }.
      */
-  static sortByAtomicNumberDesc (arr) {
-    const map = arr.map(function (e, i) {
+  static sortByAtomicNumberDesc(arr) {
+    const map = arr.map(function(e, i) {
       return { index: i, value: e.atomicNumber.split('.').map(Number) }
     })
 
-    map.sort(function (a, b) {
+    map.sort(function(a, b) {
       const min = Math.min(b.value.length, a.value.length)
       let i = 0
 
@@ -350,7 +350,7 @@ class ArrayHelper {
       return i === min ? b.value.length - a.value.length : b.value[i] - a.value[i]
     })
 
-    return map.map(function (e) {
+    return map.map(function(e) {
       return arr[e.index]
     })
   }
@@ -361,7 +361,7 @@ class ArrayHelper {
      * @param {Array} arr The array to be copied.
      * @returns {Array} The copy.
      */
-  static deepCopy (arr) {
+  static deepCopy(arr) {
     const newArr = Array()
 
     for (let i = 0; i < arr.length; i++) {

@@ -10,7 +10,7 @@ class MathHelper {
      * @param {Number} decimals The number of decimals.
      * @returns {Number} A number rounded to a given number of decimals.
      */
-  static round (value, decimals) {
+  static round(value, decimals) {
     decimals = decimals || 1
     return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals)
   }
@@ -22,7 +22,7 @@ class MathHelper {
      * @param {Number[]} arr An array containing angles (in radians).
      * @returns {Number} The mean angle in radians.
      */
-  static meanAngle (arr) {
+  static meanAngle(arr) {
     let sin = 0.0
     let cos = 0.0
 
@@ -41,7 +41,7 @@ class MathHelper {
      * @param {Number} n Number of sides of a regular polygon.
      * @returns {Number} The inner angle of a given regular polygon.
      */
-  static innerAngle (n) {
+  static innerAngle(n) {
     return MathHelper.toRad((n - 2) * 180 / n)
   }
 
@@ -53,7 +53,7 @@ class MathHelper {
      * @param {Number} n The number of sides.
      * @returns {Number} The circumradius of the regular polygon.
      */
-  static polyCircumradius (s, n) {
+  static polyCircumradius(s, n) {
     return s / (2 * Math.sin(Math.PI / n))
   }
 
@@ -65,11 +65,11 @@ class MathHelper {
      * @param {Number} n The number of edges of the regular polygon.
      * @returns {Number} The apothem of a n-sided polygon based on its radius.
      */
-  static apothem (r, n) {
+  static apothem(r, n) {
     return r * Math.cos(Math.PI / n)
   }
 
-  static apothemFromSideLength (s, n) {
+  static apothemFromSideLength(s, n) {
     const r = MathHelper.polyCircumradius(s, n)
 
     return MathHelper.apothem(r, n)
@@ -82,7 +82,7 @@ class MathHelper {
      * @param {Number} n The number of sides of the regular polygon.
      * @returns {Number} The central angle of the n-sided polygon in radians.
      */
-  static centralAngle (n) {
+  static centralAngle(n) {
     return MathHelper.toRad(360 / n)
   }
 
@@ -93,7 +93,7 @@ class MathHelper {
      * @param {Number} rad An angle in radians.
      * @returns {Number} The angle in degrees.
      */
-  static toDeg (rad) {
+  static toDeg(rad) {
     return rad * MathHelper.degFactor
   }
 
@@ -104,7 +104,7 @@ class MathHelper {
      * @param {Number} deg An angle in degrees.
      * @returns {Number} The angle in radians.
      */
-  static toRad (deg) {
+  static toRad(deg) {
     return deg * MathHelper.radFactor
   }
 
@@ -113,11 +113,11 @@ class MathHelper {
      * @param {(Array|Uint8Array)} arr An array containing the permutation.
      * @returns {Number} The parity of the permutation (1 or -1), where 1 means even and -1 means odd.
      */
-  static parityOfPermutation (arr) {
+  static parityOfPermutation(arr) {
     const visited = new Uint8Array(arr.length)
     let evenLengthCycleCount = 0
 
-    const traverseCycle = function (i, cycleLength = 0) {
+    const traverseCycle = function(i, cycleLength = 0) {
       if (visited[i] === 1) {
         return cycleLength
       }
@@ -141,17 +141,17 @@ class MathHelper {
   }
 
   /** The factor to convert degrees to radians. */
-  static get radFactor () {
+  static get radFactor() {
     return Math.PI / 180.0
   }
 
   /** The factor to convert radians to degrees. */
-  static get degFactor () {
+  static get degFactor() {
     return 180.0 / Math.PI
   }
 
   /** Two times PI. */
-  static get twoPI () {
+  static get twoPI() {
     return 2.0 * Math.PI
   }
 }

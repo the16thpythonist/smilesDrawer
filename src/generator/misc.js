@@ -6,7 +6,7 @@ const colors = require('./colors')
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 
-const readSmilesFromCsv = async (file, smilesCol, n = 100, header = 1) => {
+const readSmilesFromCsv = async(file, smilesCol, n = 100, header = 1) => {
   const stream = fs.createReadStream(file)
   const rl = readline.createInterface({
     input: stream,

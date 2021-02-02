@@ -21,7 +21,7 @@ class Graph {
    * @param {Object} parseTree A SMILES parse tree.
    * @param {Boolean} [isomeric=false] A boolean specifying whether or not the SMILES is isomeric.
    */
-  constructor (parseTree, isomeric = false) {
+  constructor(parseTree, isomeric = false) {
     this.vertices = Array()
     this.edges = Array()
     this.vertexIdsToEdgeId = {}
@@ -39,7 +39,7 @@ class Graph {
    * @param {Number} parentVertexId=null The id of the previous vertex.
    * @param {Boolean} isBranch=false Whether or not the bond leading to this vertex is a branch bond. Branches are represented by parentheses in smiles (e.g. CC(O)C).
    */
-  _init (node, order = 0, parentVertexId = null, isBranch = false) {
+  _init(node, order = 0, parentVertexId = null, isBranch = false) {
     // Create a new vertex object
     const atom = new Atom(node.atom.element ? node.atom.element : node.atom, node.bond)
 
@@ -117,7 +117,7 @@ class Graph {
   /**
    * Clears all the elements in this graph (edges and vertices).
    */
-  clear () {
+  clear() {
     this.vertices = Array()
     this.edges = Array()
     this.vertexIdsToEdgeId = {}
@@ -129,7 +129,7 @@ class Graph {
    * @param {Vertex} vertex A new vertex.
    * @returns {Number} The vertex id of the new vertex.
    */
-  addVertex (vertex) {
+  addVertex(vertex) {
     vertex.id = this.vertices.length
     this.vertices.push(vertex)
 
@@ -142,7 +142,7 @@ class Graph {
    * @param {Edge} edge A new edge.
    * @returns {Number} The edge id of the new edge.
    */
-  addEdge (edge) {
+  addEdge(edge) {
     const source = this.vertices[edge.sourceId]
     const target = this.vertices[edge.targetId]
 
@@ -169,7 +169,7 @@ class Graph {
    * @param {Number} vertexIdB A vertex id.
    * @returns {(Edge|null)} The edge or, if no edge can be found, null.
    */
-  getEdge (vertexIdA, vertexIdB) {
+  getEdge(vertexIdA, vertexIdB) {
     const edgeId = this.vertexIdsToEdgeId[vertexIdA + '_' + vertexIdB]
 
     return edgeId === undefined ? null : this.edges[edgeId]
@@ -181,7 +181,7 @@ class Graph {
    * @param {Number} vertexId A vertex id.
    * @returns {Number[]} An array containing the ids of edges connected to the vertex.
    */
-  getEdges (vertexId) {
+  getEdges(vertexId) {
     const edgeIds = Array()
     const vertex = this.vertices[vertexId]
 
@@ -199,7 +199,7 @@ class Graph {
    * @param {Number} vertexIdB A vertex id.
    * @returns {Boolean} A boolean indicating whether or not two vertices are connected by an edge.
    */
-  hasEdge (vertexIdA, vertexIdB) {
+  hasEdge(vertexIdA, vertexIdB) {
     return this.vertexIdsToEdgeId[vertexIdA + '_' + vertexIdB] !== undefined
   }
 
@@ -208,7 +208,7 @@ class Graph {
    *
    * @returns {Number[]} An array containing all vertex ids of this graph.
    */
-  getVertexList () {
+  getVertexList() {
     const arr = [this.vertices.length]
 
     for (let i = 0; i < this.vertices.length; i++) {
@@ -223,7 +223,7 @@ class Graph {
    *
    * @returns {Array[]} An array containing source, target arrays of this graphs edges. Example: [ [ 2, 5 ], [ 6, 9 ] ].
    */
-  getEdgeList () {
+  getEdgeList() {
     const arr = Array(this.edges.length)
 
     for (let i = 0; i < this.edges.length; i++) {
@@ -238,7 +238,7 @@ class Graph {
    *
    * @returns {Array[]} The adjancency matrix of the molecular graph.
    */
-  getAdjacencyMatrix () {
+  getAdjacencyMatrix() {
     const length = this.vertices.length
     const adjacencyMatrix = Array(length)
 
@@ -262,7 +262,7 @@ class Graph {
    *
    * @returns {Array[]} The adjancency matrix of the molecular graph with all bridges removed.
    */
-  getComponentsAdjacencyMatrix () {
+  getComponentsAdjacencyMatrix() {
     const length = this.vertices.length
     const adjacencyMatrix = Array(length)
     const bridges = this.getBridges()
@@ -293,7 +293,7 @@ class Graph {
    * @param {Number[]} vertexIds An array containing the vertex ids contained within the subgraph.
    * @returns {Array[]} The adjancency matrix of the subgraph.
    */
-  getSubgraphAdjacencyMatrix (vertexIds) {
+  getSubgraphAdjacencyMatrix(vertexIds) {
     const length = vertexIds.length
     const adjacencyMatrix = Array(length)
 
@@ -320,7 +320,7 @@ class Graph {
    *
    * @returns {Array[]} The distance matrix of the graph.
    */
-  getDistanceMatrix () {
+  getDistanceMatrix() {
     const length = this.vertices.length
     const adja = this.getAdjacencyMatrix()
     const dist = Array(length)
@@ -357,7 +357,7 @@ class Graph {
    * @param {Number[]} vertexIds An array containing the vertex ids contained within the subgraph.
    * @returns {Array[]} The distance matrix of the subgraph.
    */
-  getSubgraphDistanceMatrix (vertexIds) {
+  getSubgraphDistanceMatrix(vertexIds) {
     const length = vertexIds.length
     const adja = this.getSubgraphAdjacencyMatrix(vertexIds)
     const dist = Array(length)
@@ -393,7 +393,7 @@ class Graph {
    *
    * @returns {Array[]} The adjancency list of the graph.
    */
-  getAdjacencyList () {
+  getAdjacencyList() {
     const length = this.vertices.length
     const adjacencyList = Array(length)
 
@@ -420,7 +420,7 @@ class Graph {
    * @param {Number[]} vertexIds An array containing the vertex ids contained within the subgraph.
    * @returns {Array[]} The adjancency list of the subgraph.
    */
-  getSubgraphAdjacencyList (vertexIds) {
+  getSubgraphAdjacencyList(vertexIds) {
     const length = vertexIds.length
     const adjacencyList = Array(length)
 
@@ -446,7 +446,7 @@ class Graph {
    *
    * @returns {Number[]} An array containing the edge ids of the bridges.
    */
-  getBridges () {
+  getBridges() {
     const length = this.vertices.length
     const visited = new Array(length)
     const disc = new Array(length)
@@ -474,7 +474,7 @@ class Graph {
    * @param {Number} startVertexId The id of the starting vertex.
    * @param {Function} callback The callback function to be called on every vertex.
    */
-  traverseBF (startVertexId, callback) {
+  traverseBF(startVertexId, callback) {
     const length = this.vertices.length
     const visited = new Array(length)
 
@@ -506,7 +506,7 @@ class Graph {
    * @param {Number} parentVertexId The id of a neighbouring vertex.
    * @returns {Number} The depth of the sub-tree.
    */
-  getTreeDepth (vertexId, parentVertexId) {
+  getTreeDepth(vertexId, parentVertexId) {
     if (vertexId === null || parentVertexId === null) {
       return 0
     }
@@ -537,7 +537,7 @@ class Graph {
    * @param {Number} [depth=1] The current depth in the tree.
    * @param {Uint8Array} [visited=null] An array holding a flag on whether or not a node has been visited.
    */
-  traverseTree (vertexId, parentVertexId, callback, maxDepth = 999999, ignoreFirst = false, depth = 1, visited = null) {
+  traverseTree(vertexId, parentVertexId, callback, maxDepth = 999999, ignoreFirst = false, depth = 1, visited = null) {
     if (visited === null) {
       visited = new Uint8Array(this.vertices.length)
     }
@@ -569,7 +569,7 @@ class Graph {
    * @param {Number} startVertexId A vertex id. Should be the starting vertex - e.g. the first to be positioned and connected to a previously place vertex.
    * @param {Ring} ring The bridged ring associated with this force-based layout.
    */
-  kkLayout (vertexIds, center, startVertexId, ring, bondLength,
+  kkLayout(vertexIds, center, startVertexId, ring, bondLength,
     threshold = 0.1, innerThreshold = 0.1, maxIteration = 2000,
     maxInnerIteration = 50, maxEnergy = 1e9) {
     const edgeStrength = bondLength
@@ -666,11 +666,11 @@ class Graph {
     }
 
     // Utility functions, maybe inline them later
-    const energy = function (index) {
+    const energy = function(index) {
       return [arrEnergySumX[index] * arrEnergySumX[index] + arrEnergySumY[index] * arrEnergySumY[index], arrEnergySumX[index], arrEnergySumY[index]]
     }
 
-    const highestEnergy = function () {
+    const highestEnergy = function() {
       let maxEnergy = 0.0
       let maxEnergyId = 0
       let maxDEX = 0.0
@@ -691,7 +691,7 @@ class Graph {
       return [maxEnergyId, maxEnergy, maxDEX, maxDEY]
     }
 
-    const update = function (index, dEX, dEY) {
+    const update = function(index, dEX, dEY) {
       let dxx = 0.0
       let dyy = 0.0
       let dxy = 0.0
@@ -806,7 +806,7 @@ class Graph {
   /**
    * PRIVATE FUNCTION used by getBridges().
    */
-  _bridgeDfs (u, visited, disc, low, parent, adj, outBridges) {
+  _bridgeDfs(u, visited, disc, low, parent, adj, outBridges) {
     visited[u] = true
     disc[u] = low[u] = ++this._time
 
@@ -836,7 +836,7 @@ class Graph {
    * @param {Array[]} adjacencyMatrix An adjacency matrix.
    * @returns {Set[]} Connected components as sets.
    */
-  static getConnectedComponents (adjacencyMatrix) {
+  static getConnectedComponents(adjacencyMatrix) {
     const length = adjacencyMatrix.length
     const visited = new Array(length)
     const components = new Array()
@@ -866,7 +866,7 @@ class Graph {
    * @param {Array[]} adjacencyMatrix An adjacency matrix.
    * @returns {Number} The number of connected components of the supplied graph.
    */
-  static getConnectedComponentCount (adjacencyMatrix) {
+  static getConnectedComponentCount(adjacencyMatrix) {
     const length = adjacencyMatrix.length
     const visited = new Array(length)
     let count = 0
@@ -887,7 +887,7 @@ class Graph {
   /**
    * PRIVATE FUNCTION used by getConnectedComponentCount().
    */
-  static _ccCountDfs (u, visited, adjacencyMatrix) {
+  static _ccCountDfs(u, visited, adjacencyMatrix) {
     for (let v = 0; v < adjacencyMatrix[u].length; v++) {
       const c = adjacencyMatrix[u][v]
 
@@ -903,7 +903,7 @@ class Graph {
   /**
    * PRIVATE FUNCTION used by getConnectedComponents().
    */
-  static _ccGetDfs (u, visited, adjacencyMatrix, component) {
+  static _ccGetDfs(u, visited, adjacencyMatrix, component) {
     for (let v = 0; v < adjacencyMatrix[u].length; v++) {
       const c = adjacencyMatrix[u][v]
 

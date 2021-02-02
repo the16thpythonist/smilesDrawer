@@ -13,7 +13,7 @@ class Vector2 {
      * @param {(Number|Vector2)} x The initial x coordinate value or, if the single argument, a Vector2 object.
      * @param {Number} y The initial y coordinate value.
      */
-  constructor (x, y) {
+  constructor(x, y) {
     if (arguments.length == 0) {
       this.x = 0
       this.y = 0
@@ -31,7 +31,7 @@ class Vector2 {
      *
      * @returns {Vector2} The clone of this vector.
      */
-  clone () {
+  clone() {
     return new Vector2(this.x, this.y)
   }
 
@@ -40,7 +40,7 @@ class Vector2 {
      *
      * @returns {String} A string representation of this vector.
      */
-  toString () {
+  toString() {
     return '(' + this.x + ',' + this.y + ')'
   }
 
@@ -50,7 +50,7 @@ class Vector2 {
      * @param {Vector2} vec Another vector.
      * @returns {Vector2} Returns itself.
      */
-  add (vec) {
+  add(vec) {
     this.x += vec.x
     this.y += vec.y
 
@@ -63,7 +63,7 @@ class Vector2 {
      * @param {Vector2} vec Another vector.
      * @returns {Vector2} Returns itself.
      */
-  subtract (vec) {
+  subtract(vec) {
     this.x -= vec.x
     this.y -= vec.y
 
@@ -76,7 +76,7 @@ class Vector2 {
      * @param {Number} scalar The scalar.
      * @returns {Vector2} Returns itself.
      */
-  divide (scalar) {
+  divide(scalar) {
     this.x /= scalar
     this.y /= scalar
 
@@ -89,7 +89,7 @@ class Vector2 {
      * @param {Vector2} v A vector.
      * @returns {Vector2} Returns itself.
      */
-  multiply (v) {
+  multiply(v) {
     this.x *= v.x
     this.y *= v.y
 
@@ -102,7 +102,7 @@ class Vector2 {
      * @param {Number} scalar The scalar.
      * @returns {Vector2} Returns itself.
      */
-  multiplyScalar (scalar) {
+  multiplyScalar(scalar) {
     this.x *= scalar
     this.y *= scalar
 
@@ -114,7 +114,7 @@ class Vector2 {
      *
      * @returns {Vector2} Returns itself.
      */
-  invert () {
+  invert() {
     this.x = -this.x
     this.y = -this.y
 
@@ -126,7 +126,7 @@ class Vector2 {
      *
      * @returns {Number} The angle in radians.
      */
-  angle () {
+  angle() {
     return Math.atan2(this.y, this.x)
   }
 
@@ -136,7 +136,7 @@ class Vector2 {
      * @param {Vector2} vec A vector.
      * @returns {Number} The euclidean distance between the two vectors.
      */
-  distance (vec) {
+  distance(vec) {
     return Math.sqrt((vec.x - this.x) * (vec.x - this.x) + (vec.y - this.y) * (vec.y - this.y))
   }
 
@@ -146,7 +146,7 @@ class Vector2 {
      * @param {Vector2} vec Another vector.
      * @returns {Number} The squared euclidean distance of the two vectors.
      */
-  distanceSq (vec) {
+  distanceSq(vec) {
     return (vec.x - this.x) * (vec.x - this.x) + (vec.y - this.y) * (vec.y - this.y)
   }
 
@@ -156,7 +156,7 @@ class Vector2 {
      * @param {Vector2} vec Another vector.
      * @returns {Number} Returns -1, 0 or 1 if the vector supplied as an argument is clockwise, neutral or counter-clockwise respectively to this vector in relation to the coordinate system.
      */
-  clockwise (vec) {
+  clockwise(vec) {
     const a = this.y * vec.x
     const b = this.x * vec.y
 
@@ -176,7 +176,7 @@ class Vector2 {
      * @param {Vector2} vec Another vector.
      * @returns {Number} Returns -1, 0 or 1 if the vector supplied as an argument is clockwise, neutral or counter-clockwise respectively to this vector in relation to an arbitrary third vector.
      */
-  relativeClockwise (center, vec) {
+  relativeClockwise(center, vec) {
     const a = (this.y - center.y) * (vec.x - center.x)
     const b = (this.x - center.x) * (vec.y - center.y)
 
@@ -195,7 +195,7 @@ class Vector2 {
      * @param {Number} angle The angle in radians to rotate the vector.
      * @returns {Vector2} Returns itself.
      */
-  rotate (angle) {
+  rotate(angle) {
     const tmp = new Vector2(0, 0)
     const cosAngle = Math.cos(angle)
     const sinAngle = Math.sin(angle)
@@ -216,7 +216,7 @@ class Vector2 {
      * @param {Vector2} vec The vector which is used as the rotational center.
      * @returns {Vector2} Returns itself.
      */
-  rotateAround (angle, vec) {
+  rotateAround(angle, vec) {
     const s = Math.sin(angle)
     const c = Math.cos(angle)
 
@@ -240,7 +240,7 @@ class Vector2 {
      * @param {Number} [offsetAngle=0.0] An additional amount of radians to rotate the vector.
      * @returns {Vector2} Returns itself.
      */
-  rotateTo (vec, center, offsetAngle = 0.0) {
+  rotateTo(vec, center, offsetAngle = 0.0) {
     // Problem if this is first position
     this.x += 0.001
     this.y -= 0.001
@@ -261,7 +261,7 @@ class Vector2 {
      * @param {Vector2} center The rotational center.
      * @param {Number} angle The angle by which to rotate.
      */
-  rotateAwayFrom (vec, center, angle) {
+  rotateAwayFrom(vec, center, angle) {
     this.rotateAround(angle, center)
 
     const distSqA = this.distanceSq(vec)
@@ -284,7 +284,7 @@ class Vector2 {
      * @param {Number} angle The angle by which to rotate.
      * @returns {Number} The angle in radians.
      */
-  getRotateAwayFromAngle (vec, center, angle) {
+  getRotateAwayFromAngle(vec, center, angle) {
     const tmp = this.clone()
 
     tmp.rotateAround(angle, center)
@@ -310,7 +310,7 @@ class Vector2 {
      * @param {Number} angle The angle by which to rotate.
      * @returns {Number} The angle in radians.
      */
-  getRotateTowardsAngle (vec, center, angle) {
+  getRotateTowardsAngle(vec, center, angle) {
     const tmp = this.clone()
 
     tmp.rotateAround(angle, center)
@@ -335,7 +335,7 @@ class Vector2 {
      * @param {Vector2} center The center of rotation.
      * @returns {Number} The angle between this vector and another vector around a center of rotation in radians.
      */
-  getRotateToAngle (vec, center) {
+  getRotateToAngle(vec, center) {
     const a = Vector2.subtract(this, center)
     const b = Vector2.subtract(vec, center)
     const angle = Vector2.angle(b, a)
@@ -349,7 +349,7 @@ class Vector2 {
      * @param {Vector2[]} polygon An array of vectors spanning the polygon.
      * @returns {Boolean} A boolean indicating whether or not this vector is within a polygon.
      */
-  isInPolygon (polygon) {
+  isInPolygon(polygon) {
     let inside = false
 
     // Its not always a given, that the polygon is convex (-> sugars)
@@ -369,7 +369,7 @@ class Vector2 {
      *
      * @returns {Number} The length of this vector.
      */
-  length () {
+  length() {
     return Math.sqrt((this.x * this.x) + (this.y * this.y))
   }
 
@@ -378,7 +378,7 @@ class Vector2 {
      *
      * @returns {Number} The square of the length of this vector.
      */
-  lengthSq () {
+  lengthSq() {
     return (this.x * this.x) + (this.y * this.y)
   }
 
@@ -387,7 +387,7 @@ class Vector2 {
      *
      * @returns {Vector2} Returns itself.
      */
-  normalize () {
+  normalize() {
     this.divide(this.length())
 
     return this
@@ -398,7 +398,7 @@ class Vector2 {
      *
      * @returns {Vector2} A normalized copy of this vector.
      */
-  normalized () {
+  normalized() {
     return Vector2.divideScalar(this, this.length())
   }
 
@@ -409,7 +409,7 @@ class Vector2 {
      * @param {Vector2} vecB A vector.
      * @returns {Number} A number indicating the side of this vector, given a line spanned by two other vectors.
      */
-  whichSide (vecA, vecB) {
+  whichSide(vecA, vecB) {
     return (this.x - vecA.x) * (vecB.y - vecA.y) - (this.y - vecA.y) * (vecB.x - vecA.x)
   }
 
@@ -421,7 +421,7 @@ class Vector2 {
      * @param {Vector2} vecC A vector to check whether or not it is on the same side as this vector.
      * @returns {Boolean} Returns a boolean indicating whether or not this vector is on the same side as another vector.
      */
-  sameSideAs (vecA, vecB, vecC) {
+  sameSideAs(vecA, vecB, vecC) {
     const d = this.whichSide(vecA, vecB)
     const dRef = vecC.whichSide(vecA, vecB)
 
@@ -436,7 +436,7 @@ class Vector2 {
      * @param {Vector2} vecB A summand.
      * @returns {Vector2} Returns the sum of two vectors.
      */
-  static add (vecA, vecB) {
+  static add(vecA, vecB) {
     return new Vector2(vecA.x + vecB.x, vecA.y + vecB.y)
   }
 
@@ -448,7 +448,7 @@ class Vector2 {
      * @param {Vector2} vecB The subtrahend.
      * @returns {Vector2} Returns the difference of two vectors.
      */
-  static subtract (vecA, vecB) {
+  static subtract(vecA, vecB) {
     return new Vector2(vecA.x - vecB.x, vecA.y - vecB.y)
   }
 
@@ -460,7 +460,7 @@ class Vector2 {
      * @param {Vector2} vecB A vector.
      * @returns {Vector2} Returns the product of two vectors.
      */
-  static multiply (vecA, vecB) {
+  static multiply(vecA, vecB) {
     return new Vector2(vecA.x * vecB.x, vecA.y * vecB.y)
   }
 
@@ -472,7 +472,7 @@ class Vector2 {
      * @param {Number} scalar A scalar.
      * @returns {Vector2} Returns the product of two vectors.
      */
-  static multiplyScalar (vec, scalar) {
+  static multiplyScalar(vec, scalar) {
     return new Vector2(vec.x, vec.y).multiplyScalar(scalar)
   }
 
@@ -484,7 +484,7 @@ class Vector2 {
      * @param {Vector2} vecB A vector spanning the line.
      * @returns {Vector2} The midpoint of the line spanned by two vectors.
      */
-  static midpoint (vecA, vecB) {
+  static midpoint(vecA, vecB) {
     return new Vector2((vecA.x + vecB.x) / 2, (vecA.y + vecB.y) / 2)
   }
 
@@ -496,7 +496,7 @@ class Vector2 {
      * @param {Vector2} vecB A vector spanning the line.
      * @returns {Vector2[]} An array containing the two normals, each represented by a vector.
      */
-  static normals (vecA, vecB) {
+  static normals(vecA, vecB) {
     const delta = Vector2.subtract(vecB, vecA)
 
     return [
@@ -513,7 +513,7 @@ class Vector2 {
      * @param {Vector2} vecB A vector spanning the line.
      * @returns {Vector2[]} An array containing the two unit vectors.
      */
-  static units (vecA, vecB) {
+  static units(vecA, vecB) {
     const delta = Vector2.subtract(vecB, vecA)
 
     return [
@@ -530,7 +530,7 @@ class Vector2 {
      * @param {Vector2} vecB The divisor.
      * @returns {Vector2} The fraction of the two vectors.
      */
-  static divide (vecA, vecB) {
+  static divide(vecA, vecB) {
     return new Vector2(vecA.x / vecB.x, vecA.y / vecB.y)
   }
 
@@ -542,7 +542,7 @@ class Vector2 {
      * @param {Number} s The scalar.
      * @returns {Vector2} The fraction of the two vectors.
      */
-  static divideScalar (vecA, s) {
+  static divideScalar(vecA, s) {
     return new Vector2(vecA.x / s, vecA.y / s)
   }
 
@@ -554,7 +554,7 @@ class Vector2 {
      * @param {Vector2} vecB A vector.
      * @returns {Number} The dot product of two vectors.
      */
-  static dot (vecA, vecB) {
+  static dot(vecA, vecB) {
     return vecA.x * vecB.x + vecA.y * vecB.y
   }
 
@@ -566,7 +566,7 @@ class Vector2 {
      * @param {Vector2} vecB A vector.
      * @returns {Number} The angle between two vectors in radians.
      */
-  static angle (vecA, vecB) {
+  static angle(vecA, vecB) {
     const dot = Vector2.dot(vecA, vecB)
 
     return Math.acos(dot / (vecA.length() * vecB.length()))
@@ -581,7 +581,7 @@ class Vector2 {
      * @param {Vector2} vecC A vector.
      * @returns {Number} The angle in radians.
      */
-  static threePointangle (vecA, vecB, vecC) {
+  static threePointangle(vecA, vecB, vecC) {
     const ab = Vector2.subtract(vecB, vecA)
     const bc = Vector2.subtract(vecC, vecB)
     const abLength = vecA.distance(vecB)
@@ -598,7 +598,7 @@ class Vector2 {
      * @param {Vector2} vecB The vector to be projection upon.
      * @returns {Number} The scalar component.
      */
-  static scalarProjection (vecA, vecB) {
+  static scalarProjection(vecA, vecB) {
     const unit = vecB.normalized()
 
     return Vector2.dot(vecA, unit)
@@ -611,7 +611,7 @@ class Vector2 {
      * @param {Array} vecs An array containing vectors.
      * @returns {Vector2} The resulting vector (normalized).
      */
-  static averageDirection (vecs) {
+  static averageDirection(vecs) {
     const avg = new Vector2(0.0, 0.0)
 
     for (let i = 0; i < vecs.length; i++) {

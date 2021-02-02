@@ -9,7 +9,7 @@ const MathHelper = require('./MathHelper')
 const Vector2 = require('./Vector2')
 
 class SvgDrawer {
-  constructor ({ colors }) {
+  constructor({ colors }) {
     // TODO aneb: if this gets too annoying, change the whole parameter passing, it's too much ...
     this.colors = colors
     this.preprocessor = new Drawer({ })
@@ -24,7 +24,7 @@ class SvgDrawer {
 
      * @returns {Object} The dimensions of the drawing in { width, height }
      */
-  draw (data, target) {
+  draw(data, target) {
     const preprocessor = this.preprocessor
 
     preprocessor.initDraw(data)
@@ -47,7 +47,7 @@ class SvgDrawer {
      * Draws a ring inside a provided ring, indicating aromaticity.
      * @param {Ring} ring A ring.
      */
-  drawAromaticityRing (ring) {
+  drawAromaticityRing(ring) {
     const r = MathHelper.apothemFromSideLength(this.opts.bondLength, ring.getSize())
     this.svgWrapper.drawRing(ring.center.x, ring.center.y, r * 0.8)
   }
@@ -55,7 +55,7 @@ class SvgDrawer {
   /**
      * Draw the actual edges as bonds.
      */
-  drawEdges () {
+  drawEdges() {
     const preprocessor = this.preprocessor
     const graph = preprocessor.graph
     const rings = preprocessor.rings
@@ -89,7 +89,7 @@ class SvgDrawer {
    * Draw the an edge as a bond.
    * @param {Number} edgeId An edge id.
    */
-  drawEdge (edgeId) {
+  drawEdge(edgeId) {
     const preprocessor = this.preprocessor
     const opts = preprocessor.opts
     const svgWrapper = this.svgWrapper
@@ -234,7 +234,7 @@ class SvgDrawer {
      * Draws the vertices representing atoms to the canvas.
      *
      */
-  drawVertices () {
+  drawVertices() {
     const preprocessor = this.preprocessor
     const opts = preprocessor.opts
     const graph = preprocessor.graph
@@ -296,7 +296,7 @@ class SvgDrawer {
      * Returns the total overlap score of the current molecule.
      * @returns {Number} The overlap score.
      */
-  getTotalOverlapScore () {
+  getTotalOverlapScore() {
     return this.preprocessor.getTotalOverlapScore()
   }
 
@@ -304,7 +304,7 @@ class SvgDrawer {
      * Returns the molecular formula of the loaded molecule as a string.
      * @returns {String} The molecular formula.
      */
-  getMolecularFormula () {
+  getMolecularFormula() {
     return this.preprocessor.getMolecularFormula()
   }
 
@@ -312,7 +312,7 @@ class SvgDrawer {
      * @param {Array} normals list of normals to multiply
      * @param {Number} spacing value to multiply normals by
      */
-  multiplyNormals (normals, spacing) {
+  multiplyNormals(normals, spacing) {
     normals[0].multiplyScalar(spacing)
     normals[1].multiplyScalar(spacing)
   }

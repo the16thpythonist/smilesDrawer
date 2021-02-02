@@ -28,7 +28,7 @@ class Ring {
      *
      * @param {Number[]} members An array containing the vertex ids of the members of the ring to be created.
      */
-  constructor (members) {
+  constructor(members) {
     this.id = null
     this.members = members
     this.edges = []
@@ -50,7 +50,7 @@ class Ring {
      *
      * @returns {Ring} A clone of this ring.
      */
-  clone () {
+  clone() {
     const clone = new Ring(this.members)
 
     clone.id = this.id
@@ -74,7 +74,7 @@ class Ring {
      *
      * @returns {Number} The size (number of members) of this ring.
      */
-  getSize () {
+  getSize() {
     return this.members.length
   }
 
@@ -84,7 +84,7 @@ class Ring {
      * @param {Vertex[]} vertices An array of vertices representing the current molecule.
      * @returns {Vector2[]} An array of the positional vectors of the ring members.
      */
-  getPolygon (vertices) {
+  getPolygon(vertices) {
     const polygon = []
 
     for (let i = 0; i < this.members.length; i++) {
@@ -99,7 +99,7 @@ class Ring {
      *
      * @returns {Number} The angle in radians.
      */
-  getAngle () {
+  getAngle() {
     return Math.PI - this.centralAngle
   }
 
@@ -111,7 +111,7 @@ class Ring {
      * @param {Number} startVertexId The vertex id of the start vertex.
      * @param {Number} previousVertexId The vertex id of the previous vertex (the loop calling the callback function will run in the opposite direction of this vertex).
      */
-  eachMember (vertices, callback, startVertexId, previousVertexId) {
+  eachMember(vertices, callback, startVertexId, previousVertexId) {
     startVertexId = startVertexId || startVertexId === 0 ? startVertexId : this.members[0]
     let current = startVertexId
     let max = 0
@@ -138,7 +138,7 @@ class Ring {
      * @param {RingConnection[]} ringConnections An array of ring connections associated with the current molecule.
      * @returns {Object[]} An array of neighbouring rings sorted by ring size. Example: { n: 5, neighbour: 1 }.
      */
-  getOrderedNeighbours (ringConnections) {
+  getOrderedNeighbours(ringConnections) {
     const orderedNeighbours = Array(this.neighbours.length)
 
     for (let i = 0; i < this.neighbours.length; i++) {
@@ -150,7 +150,7 @@ class Ring {
       }
     }
 
-    orderedNeighbours.sort(function (a, b) {
+    orderedNeighbours.sort(function(a, b) {
       // Sort highest to lowest
       return b.n - a.n
     })
@@ -164,7 +164,7 @@ class Ring {
      * @param {Vertex[]} vertices An array of vertices associated with the current molecule.
      * @returns {Boolean} A boolean indicating whether or not this ring is an implicitly defined benzene-like.
      */
-  isBenzeneLike (vertices) {
+  isBenzeneLike(vertices) {
     const db = this.getDoubleBondCount(vertices)
     const length = this.members.length
 
@@ -178,7 +178,7 @@ class Ring {
      * @param {Vertex[]} vertices An array of vertices associated with the current molecule.
      * @returns {Number} The number of double bonds inside this ring.
      */
-  getDoubleBondCount (vertices) {
+  getDoubleBondCount(vertices) {
     let doubleBondCount = 0
 
     for (let i = 0; i < this.members.length; i++) {
@@ -198,7 +198,7 @@ class Ring {
      * @param {Number} vertexId A vertex id.
      * @returns {Boolean} A boolean indicating whether or not this ring contains a member with the given vertex id.
      */
-  contains (vertexId) {
+  contains(vertexId) {
     for (let i = 0; i < this.members.length; i++) {
       if (this.members[i] == vertexId) {
         return true

@@ -17,7 +17,7 @@ class RingConnection {
      * @param {Ring} firstRing A ring.
      * @param {Ring} secondRing A ring.
      */
-  constructor (firstRing, secondRing) {
+  constructor(firstRing, secondRing) {
     this.id = null
     this.firstRingId = firstRing.id
     this.secondRingId = secondRing.id
@@ -41,7 +41,7 @@ class RingConnection {
      *
      * @param {Number} vertexId A vertex id.
      */
-  addVertex (vertexId) {
+  addVertex(vertexId) {
     this.vertices.add(vertexId)
   }
 
@@ -51,7 +51,7 @@ class RingConnection {
      * @param {Number} ringId A ring id. The new ring id to be set.
      * @param {Number} otherRingId A ring id. The id that is NOT to be updated.
      */
-  updateOther (ringId, otherRingId) {
+  updateOther(ringId, otherRingId) {
     if (this.firstRingId === otherRingId) {
       this.secondRingId = ringId
     } else {
@@ -65,7 +65,7 @@ class RingConnection {
      * @param {Number} ringId A ring id.
      * @returns {Boolean} A boolean indicating whether or not a ring with a given id participates in this ring connection.
      */
-  containsRing (ringId) {
+  containsRing(ringId) {
     return this.firstRingId === ringId || this.secondRingId === ringId
   }
 
@@ -75,7 +75,7 @@ class RingConnection {
      * @param {Vertex[]} vertices The array of vertices associated with the current molecule.
      * @returns {Boolean} A boolean indicating whether or not this ring connection is a bridge.
      */
-  isBridge (vertices) {
+  isBridge(vertices) {
     if (this.vertices.size > 2) {
       return true
     }
@@ -99,7 +99,7 @@ class RingConnection {
      * @param {Number} secondRingId A ring id.
      * @returns {Boolean} A boolean indicating whether or not two rings ar connected by a bridged bond.
      */
-  static isBridge (ringConnections, vertices, firstRingId, secondRingId) {
+  static isBridge(ringConnections, vertices, firstRingId, secondRingId) {
     let ringConnection = null
 
     for (let i = 0; i < ringConnections.length; i++) {
@@ -122,7 +122,7 @@ class RingConnection {
      * @param {Number} ringId A ring id.
      * @returns {Number[]} An array of ring ids of neighbouring rings.
      */
-  static getNeighbours (ringConnections, ringId) {
+  static getNeighbours(ringConnections, ringId) {
     const neighbours = []
 
     for (let i = 0; i < ringConnections.length; i++) {
@@ -147,7 +147,7 @@ class RingConnection {
      * @param {Number} secondRingId A ring id.
      * @returns {Number[]} An array of vertex ids associated with the ring connection.
      */
-  static getVertices (ringConnections, firstRingId, secondRingId) {
+  static getVertices(ringConnections, firstRingId, secondRingId) {
     for (let i = 0; i < ringConnections.length; i++) {
       const ringConnection = ringConnections[i]
       if (ringConnection.firstRingId === firstRingId && ringConnection.secondRingId === secondRingId ||

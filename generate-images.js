@@ -1,4 +1,4 @@
-(async () => {
+(async() => {
   // TODO curate list of interesting test SMILES
   // TODO add methods to renderer for generation of multiple types of labels, maybe params like atoms="box", bonds="ends"
 
@@ -19,7 +19,7 @@
   while (smilesList.length) {
     console.log(`left: ${smilesList.length}/${conf.amount}`)
     const smilesBatch = smilesList.splice(0, batchSize)
-    const xmlFiles = smilesBatch.map(smiles => renderer.createRawSvgFromSmiles(smiles))
+    const xmlFiles = smilesBatch.map(smiles => renderer.smilesToSvgXml(smiles))
 
     const infos = await Promise.all(xmlFiles.map(xml => renderer.propertiesFromXmlString(xml)))
     const infosWithBoundingBoxes = infos.map(i => renderer.addBoundingBoxesToSvg(i))

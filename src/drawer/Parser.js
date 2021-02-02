@@ -1,7 +1,7 @@
 // WHEN REPLACING, CHECK FOR:
 // KEEP THIS WHEN REGENERATING THE PARSER !!
 
-module.exports = (function () {
+module.exports = (function() {
   'use strict'
 
   /*
@@ -10,15 +10,15 @@ module.exports = (function () {
    * http://pegjs.org/
    */
 
-  function peg$subclass (child, parent) {
-    function ctor () {
+  function peg$subclass(child, parent) {
+    function ctor() {
       this.constructor = child
     }
     ctor.prototype = parent.prototype
     child.prototype = new ctor()
   }
 
-  function peg$SyntaxError (message, expected, found, location) {
+  function peg$SyntaxError(message, expected, found, location) {
     this.message = message
     this.expected = expected
     this.found = found
@@ -32,13 +32,13 @@ module.exports = (function () {
 
   peg$subclass(peg$SyntaxError, Error)
 
-  peg$SyntaxError.buildMessage = function (expected, found) {
+  peg$SyntaxError.buildMessage = function(expected, found) {
     const DESCRIBE_EXPECTATION_FNS = {
-      literal: function (expectation) {
+      literal: function(expectation) {
         return '"' + literalEscape(expectation.text) + '"'
       },
 
-      class: function (expectation) {
+      class: function(expectation) {
         let escapedParts = ''
         let i
 
@@ -51,24 +51,24 @@ module.exports = (function () {
         return '[' + (expectation.inverted ? '^' : '') + escapedParts + ']'
       },
 
-      any: function (expectation) {
+      any: function(expectation) {
         return 'any character'
       },
 
-      end: function (expectation) {
+      end: function(expectation) {
         return 'end of input'
       },
 
-      other: function (expectation) {
+      other: function(expectation) {
         return expectation.description
       }
     }
 
-    function hex (ch) {
+    function hex(ch) {
       return ch.charCodeAt(0).toString(16).toUpperCase()
     }
 
-    function literalEscape (s) {
+    function literalEscape(s) {
       return s
         .replace(/\\/g, '\\\\')
         .replace(/"/g, '\\"')
@@ -76,15 +76,15 @@ module.exports = (function () {
         .replace(/\t/g, '\\t')
         .replace(/\n/g, '\\n')
         .replace(/\r/g, '\\r')
-        .replace(/[\x00-\x0F]/g, function (ch) {
+        .replace(/[\x00-\x0F]/g, function(ch) {
           return '\\x0' + hex(ch)
         })
-        .replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
+        .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) {
           return '\\x' + hex(ch)
         })
     }
 
-    function classEscape (s) {
+    function classEscape(s) {
       return s
         .replace(/\\/g, '\\\\')
         .replace(/\]/g, '\\]')
@@ -94,19 +94,19 @@ module.exports = (function () {
         .replace(/\t/g, '\\t')
         .replace(/\n/g, '\\n')
         .replace(/\r/g, '\\r')
-        .replace(/[\x00-\x0F]/g, function (ch) {
+        .replace(/[\x00-\x0F]/g, function(ch) {
           return '\\x0' + hex(ch)
         })
-        .replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
+        .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) {
           return '\\x' + hex(ch)
         })
     }
 
-    function describeExpectation (expectation) {
+    function describeExpectation(expectation) {
       return DESCRIBE_EXPECTATION_FNS[expectation.type](expectation)
     }
 
-    function describeExpected (expected) {
+    function describeExpected(expected) {
       const descriptions = new Array(expected.length)
       let i; let j
 
@@ -140,14 +140,14 @@ module.exports = (function () {
       }
     }
 
-    function describeFound (found) {
+    function describeFound(found) {
       return found ? '"' + literalEscape(found) + '"' : 'end of input'
     }
 
     return 'Expected ' + describeExpected(expected) + ' but ' + describeFound(found) + ' found.'
   }
 
-  function peg$parse (input, options) {
+  function peg$parse(input, options) {
     options = options !== void 0 ? options : {}
 
     // KEEP THIS WHEN REGENERATING THE PARSER !!
@@ -166,7 +166,7 @@ module.exports = (function () {
     }
     let peg$startRuleFunction = peg$parsechain
 
-    const peg$c0 = function (s) {
+    const peg$c0 = function(s) {
       const branches = []
       const rings = []
 
@@ -208,17 +208,17 @@ module.exports = (function () {
     const peg$c2 = peg$literalExpectation('(', false)
     const peg$c3 = ')'
     const peg$c4 = peg$literalExpectation(')', false)
-    const peg$c5 = function (b) {
+    const peg$c5 = function(b) {
       const bond = (b[1]) ? b[1] : '-'
       b[2].branchBond = bond
       return b[2]
     }
-    const peg$c6 = function (a) {
+    const peg$c6 = function(a) {
       return a
     }
     const peg$c7 = /^[\-=#$:\/\\.]/
     const peg$c8 = peg$classExpectation(['-', '=', '#', '$', ':', '/', '\\', '.'], false, false)
-    const peg$c9 = function (b) {
+    const peg$c9 = function(b) {
       return b
     }
     const peg$c10 = '['
@@ -229,7 +229,7 @@ module.exports = (function () {
     const peg$c15 = peg$literalExpectation('as', false)
     const peg$c16 = ']'
     const peg$c17 = peg$literalExpectation(']', false)
-    const peg$c18 = function (b) {
+    const peg$c18 = function(b) {
       return {
         isotope: b[1],
         element: b[2],
@@ -249,7 +249,7 @@ module.exports = (function () {
     const peg$c26 = peg$literalExpectation('l', false)
     const peg$c27 = /^[NOPSFI]/
     const peg$c28 = peg$classExpectation(['N', 'O', 'P', 'S', 'F', 'I'], false, false)
-    const peg$c29 = function (o) {
+    const peg$c29 = function(o) {
       if (o.length > 1) return o.join('')
       return o
     }
@@ -257,7 +257,7 @@ module.exports = (function () {
     const peg$c31 = peg$classExpectation(['b', 'c', 'n', 'o', 'p', 's'], false, false)
     const peg$c32 = '*'
     const peg$c33 = peg$literalExpectation('*', false)
-    const peg$c34 = function (w) {
+    const peg$c34 = function(w) {
       return w
     }
     const peg$c35 = /^[A-Z]/
@@ -268,7 +268,7 @@ module.exports = (function () {
     const peg$c38 = peg$classExpectation([
       ['a', 'z']
     ], false, false)
-    const peg$c39 = function (e) {
+    const peg$c39 = function(e) {
       return e.join('')
     }
     const peg$c40 = '%'
@@ -281,7 +281,7 @@ module.exports = (function () {
     const peg$c45 = peg$classExpectation([
       ['0', '9']
     ], false, false)
-    const peg$c46 = function (r) {
+    const peg$c46 = function(r) {
       if (r.length == 1) return Number(r)
       return Number(r.join('').replace('%', ''))
     }
@@ -303,32 +303,32 @@ module.exports = (function () {
     const peg$c60 = peg$literalExpectation('TB', false)
     const peg$c61 = 'OH'
     const peg$c62 = peg$literalExpectation('OH', false)
-    const peg$c63 = function (c) {
+    const peg$c63 = function(c) {
       if (!c[1]) return '@'
       if (c[1] == '@') return '@@'
 
       return c[1].join('').replace(',', '')
     }
-    const peg$c64 = function (c) {
+    const peg$c64 = function(c) {
       return c
     }
     const peg$c65 = '+'
     const peg$c66 = peg$literalExpectation('+', false)
-    const peg$c67 = function (c) {
+    const peg$c67 = function(c) {
       if (!c[1]) return 1
       if (c[1] != '+') return Number(c[1].join(''))
       return 2
     }
     const peg$c68 = '-'
     const peg$c69 = peg$literalExpectation('-', false)
-    const peg$c70 = function (c) {
+    const peg$c70 = function(c) {
       if (!c[1]) return -1
       if (c[1] != '-') return -Number(c[1].join(''))
       return -2
     }
     const peg$c71 = 'H'
     const peg$c72 = peg$literalExpectation('H', false)
-    const peg$c73 = function (h) {
+    const peg$c73 = function(h) {
       if (h[1]) return Number(h[1])
       return 1
     }
@@ -336,10 +336,10 @@ module.exports = (function () {
     const peg$c75 = peg$literalExpectation(':', false)
     const peg$c76 = /^[0]/
     const peg$c77 = peg$classExpectation(['0'], false, false)
-    const peg$c78 = function (c) {
+    const peg$c78 = function(c) {
       return Number(c[1][0] + c[1][1].join(''))
     }
-    const peg$c79 = function (i) {
+    const peg$c79 = function(i) {
       return Number(i.join(''))
     }
 
@@ -363,15 +363,15 @@ module.exports = (function () {
       peg$startRuleFunction = peg$startRuleFunctions[options.startRule]
     }
 
-    function text () {
+    function text() {
       return input.substring(peg$savedPos, peg$currPos)
     }
 
-    function location () {
+    function location() {
       return peg$computeLocation(peg$savedPos, peg$currPos)
     }
 
-    function expected (description, location) {
+    function expected(description, location) {
       location = location !== void 0 ? location : peg$computeLocation(peg$savedPos, peg$currPos)
 
       throw peg$buildStructuredError(
@@ -381,13 +381,13 @@ module.exports = (function () {
       )
     }
 
-    function error (message, location) {
+    function error(message, location) {
       location = location !== void 0 ? location : peg$computeLocation(peg$savedPos, peg$currPos)
 
       throw peg$buildSimpleError(message, location)
     }
 
-    function peg$literalExpectation (text, ignoreCase) {
+    function peg$literalExpectation(text, ignoreCase) {
       return {
         type: 'literal',
         text: text,
@@ -395,7 +395,7 @@ module.exports = (function () {
       }
     }
 
-    function peg$classExpectation (parts, inverted, ignoreCase) {
+    function peg$classExpectation(parts, inverted, ignoreCase) {
       return {
         type: 'class',
         parts: parts,
@@ -404,26 +404,26 @@ module.exports = (function () {
       }
     }
 
-    function peg$anyExpectation () {
+    function peg$anyExpectation() {
       return {
         type: 'any'
       }
     }
 
-    function peg$endExpectation () {
+    function peg$endExpectation() {
       return {
         type: 'end'
       }
     }
 
-    function peg$otherExpectation (description) {
+    function peg$otherExpectation(description) {
       return {
         type: 'other',
         description: description
       }
     }
 
-    function peg$computePosDetails (pos) {
+    function peg$computePosDetails(pos) {
       let details = peg$posDetailsCache[pos]
       let p
 
@@ -457,7 +457,7 @@ module.exports = (function () {
       }
     }
 
-    function peg$computeLocation (startPos, endPos) {
+    function peg$computeLocation(startPos, endPos) {
       const startPosDetails = peg$computePosDetails(startPos)
       const endPosDetails = peg$computePosDetails(endPos)
 
@@ -475,7 +475,7 @@ module.exports = (function () {
       }
     }
 
-    function peg$fail (expected) {
+    function peg$fail(expected) {
       if (peg$currPos < peg$maxFailPos) {
         return
       }
@@ -488,11 +488,11 @@ module.exports = (function () {
       peg$maxFailExpected.push(expected)
     }
 
-    function peg$buildSimpleError (message, location) {
+    function peg$buildSimpleError(message, location) {
       return new peg$SyntaxError(message, null, null, location)
     }
 
-    function peg$buildStructuredError (expected, found, location) {
+    function peg$buildStructuredError(expected, found, location) {
       return new peg$SyntaxError(
         peg$SyntaxError.buildMessage(expected, found),
         expected,
@@ -501,7 +501,7 @@ module.exports = (function () {
       )
     }
 
-    function peg$parsechain () {
+    function peg$parsechain() {
       let s0, s1, s2, s3, s4, s5, s6, s7, s8, s9
 
       s0 = peg$currPos
@@ -619,7 +619,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsebranch () {
+    function peg$parsebranch() {
       let s0, s1, s2, s3, s4, s5
 
       s0 = peg$currPos
@@ -678,7 +678,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parseatom () {
+    function peg$parseatom() {
       let s0, s1
 
       s0 = peg$currPos
@@ -701,7 +701,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsebond () {
+    function peg$parsebond() {
       let s0, s1
       s0 = peg$currPos
       if (peg$c7.test(input.charAt(peg$currPos))) {
@@ -734,7 +734,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsebracketatom () {
+    function peg$parsebracketatom() {
       let s0, s1, s2, s3, s4, s5, s6, s7, s8, s9
 
       s0 = peg$currPos
@@ -857,7 +857,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parseorganicsymbol () {
+    function peg$parseorganicsymbol() {
       let s0, s1, s2, s3
 
       s0 = peg$currPos
@@ -951,7 +951,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsearomaticsymbol () {
+    function peg$parsearomaticsymbol() {
       let s0, s1
 
       s0 = peg$currPos
@@ -973,7 +973,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsewildcard () {
+    function peg$parsewildcard() {
       let s0, s1
 
       s0 = peg$currPos
@@ -995,7 +995,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parseelementsymbol () {
+    function peg$parseelementsymbol() {
       let s0, s1, s2, s3
 
       s0 = peg$currPos
@@ -1042,7 +1042,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsering () {
+    function peg$parsering() {
       let s0, s1, s2, s3, s4
 
       s0 = peg$currPos
@@ -1111,7 +1111,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsechiral () {
+    function peg$parsechiral() {
       let s0, s1, s2, s3, s4, s5, s6
 
       s0 = peg$currPos
@@ -1357,7 +1357,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsecharge () {
+    function peg$parsecharge() {
       let s0, s1
 
       s0 = peg$currPos
@@ -1374,7 +1374,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parseposcharge () {
+    function peg$parseposcharge() {
       let s0, s1, s2, s3, s4, s5
 
       s0 = peg$currPos
@@ -1457,7 +1457,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsenegcharge () {
+    function peg$parsenegcharge() {
       let s0, s1, s2, s3, s4, s5
 
       s0 = peg$currPos
@@ -1540,7 +1540,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parsehcount () {
+    function peg$parsehcount() {
       let s0, s1, s2, s3
 
       s0 = peg$currPos
@@ -1587,7 +1587,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parseclass () {
+    function peg$parseclass() {
       let s0, s1, s2, s3, s4, s5, s6
 
       s0 = peg$currPos
@@ -1677,7 +1677,7 @@ module.exports = (function () {
       return s0
     }
 
-    function peg$parseisotope () {
+    function peg$parseisotope() {
       let s0, s1, s2, s3, s4
 
       s0 = peg$currPos

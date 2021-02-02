@@ -10,7 +10,7 @@ class SSSR {
      * @param {Boolean} [experimental=false] Whether or not to use experimental SSSR.
      * @returns {Array[]} An array containing arrays, each representing a ring from the smallest set of smallest rings in the group.
      */
-  static getRings (graph, experimental = false) {
+  static getRings(graph, experimental = false) {
     const adjacencyMatrix = graph.getComponentsAdjacencyMatrix()
     if (adjacencyMatrix.length === 0) {
       return null
@@ -101,7 +101,7 @@ class SSSR {
      * @param {Array[]} matrix A 2D array.
      * @returns {String} A string representing the matrix.
      */
-  static matrixToString (matrix) {
+  static matrixToString(matrix) {
     let str = ''
 
     for (let i = 0; i < matrix.length; i++) {
@@ -121,7 +121,7 @@ class SSSR {
      * @param {Array[]} adjacencyMatrix An adjacency matrix.
      * @returns {Object} The path-included distance matrices. { p1, p2 }
      */
-  static getPathIncludedDistanceMatrices (adjacencyMatrix) {
+  static getPathIncludedDistanceMatrices(adjacencyMatrix) {
     const length = adjacencyMatrix.length
     const d = Array(length)
     const pe = Array(length)
@@ -276,7 +276,7 @@ class SSSR {
      * @param {Array[]} pe_prime A matrix containing the shortest paths + one vertex.
      * @returns {Array[]} The ring candidates.
      */
-  static getRingCandidates (d, pe, pe_prime) {
+  static getRingCandidates(d, pe, pe_prime) {
     const length = d.length
     const candidates = Array()
     let c = 0
@@ -301,7 +301,7 @@ class SSSR {
     }
 
     // Candidates have to be sorted by c
-    candidates.sort(function (a, b) {
+    candidates.sort(function(a, b) {
       return a[0] - b[0]
     })
 
@@ -321,7 +321,7 @@ class SSSR {
      * @param {Number} nsssr The theoretical number of rings in the graph.
      * @returns {Set[]} The smallest set of smallest rings.
      */
-  static getSSSR (c, d, adjacencyMatrix, pe, pe_prime, arrBondCount, arrRingCount, nsssr) {
+  static getSSSR(c, d, adjacencyMatrix, pe, pe_prime, arrBondCount, arrRingCount, nsssr) {
     const cSssr = Array()
     let allBonds = Array()
 
@@ -380,7 +380,7 @@ class SSSR {
      * @param {Array[]} adjacencyMatrix An adjacency matrix.
      * @returns {Number} The number of edges in the graph defined by the adjacency matrix.
      */
-  static getEdgeCount (adjacencyMatrix) {
+  static getEdgeCount(adjacencyMatrix) {
     let edgeCount = 0
     const length = adjacencyMatrix.length
 
@@ -403,7 +403,7 @@ class SSSR {
      * @param {Array[]} adjacencyMatrix An adjacency matrix.
      * @returns {Array[]} An edge list. E.g. [ [ 0, 1 ], ..., [ 16, 2 ] ]
      */
-  static getEdgeList (adjacencyMatrix) {
+  static getEdgeList(adjacencyMatrix) {
     const length = adjacencyMatrix.length
     const edgeList = Array()
 
@@ -426,7 +426,7 @@ class SSSR {
      * @param {Array} bonds An array of bonds. A bond is defined as [ sourceVertexId, targetVertexId ].
      * @returns {Set<Number>} An array of vertices.
      */
-  static bondsToAtoms (bonds) {
+  static bondsToAtoms(bonds) {
     const atoms = new Set()
 
     let i = bonds.length
@@ -444,7 +444,7 @@ class SSSR {
     * @param {Array[]} adjacencyMatrix An adjacency matrix.
     * @returns {Number} The number of bonds in a set of atoms.
     */
-  static getBondCount (atoms, adjacencyMatrix) {
+  static getBondCount(atoms, adjacencyMatrix) {
     let count = 0
     for (const u of atoms) {
       for (const v of atoms) {
@@ -469,7 +469,7 @@ class SSSR {
      * @param {Uint16Array} arrRingCount A matrix containing the number of rings associated with each vertex.
      * @returns {Boolean} A boolean indicating whether or not a give path is contained within a set.
      */
-  static pathSetsContain (pathSets, pathSet, bonds, allBonds, arrBondCount, arrRingCount) {
+  static pathSetsContain(pathSets, pathSet, bonds, allBonds, arrBondCount, arrRingCount) {
     let i = pathSets.length
     while (i--) {
       if (SSSR.isSupersetOf(pathSet, pathSets[i])) {
@@ -535,7 +535,7 @@ class SSSR {
      * @param {Set<Number>} setB A set.
      * @returns {Boolean} A boolean indicating whether or not the two sets are equal.
      */
-  static areSetsEqual (setA, setB) {
+  static areSetsEqual(setA, setB) {
     if (setA.size !== setB.size) {
       return false
     }
@@ -556,7 +556,7 @@ class SSSR {
      * @param {Set<Number>} setB A set.
      * @returns {Boolean} A boolean indicating whether or not setB is a superset of setA.
      */
-  static isSupersetOf (setA, setB) {
+  static isSupersetOf(setA, setB) {
     for (const element of setB) {
       if (!setA.has(element)) {
         return false
