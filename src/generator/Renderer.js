@@ -78,7 +78,7 @@ Renderer.prototype.done = async function() {
   this.browser.close()
 }
 
-Renderer.prototype.propertiesFromXmlString = async function(xml) {
+Renderer.prototype.boundingBoxesFromSvgXml = async function(xml) {
   // aneb: need to open browser, getBBox is not available via jsdom as it does not render
   const page = await this.browser.newPage()
   await page.setContent(xml, { waitUntil: 'domcontentloaded' })
@@ -98,7 +98,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.saveAsPngWithProperSize = async function(svg, fileName, quality = this.quality) {
+Renderer.prototype.saveResizedImage = async function(svg, fileName, quality) {
   const page = await this.browser.newPage()
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
 
@@ -198,8 +198,23 @@ Renderer.prototype.addBoundingBoxesToSvg = function({ dom, xml }) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.smilesToImage = async function(smilesList) {
-  const svgXmlFiles = smilesList.map(s => this.smilesToSvgXml(s))
+Renderer.prototype.smilesToImage = async function(smilesList, filePrefix = 'img') {
+  const svgXmlFilesWithoutBoundingBoxes = smilesList.map(s => this.smilesToSvgXml(s))
+  const boundingBoxes = await Promise.all(svgXmlFilesWithoutBoundingBoxes.map(xml => this.boundingBoxesFromSvgXml(xml)))
+  const svgXmlFilesWithBoundingBoxes = boundingBoxes.map(i => this.addBoundingBoxesToSvg(i)) // TODO aneb: define different styles of labels, then make style configurable
+
+  const fileNames = _.range(smilesList.length)
+
+  const fileNamesWithBoundingBox = fileNames.map((f, i) => `${this.directory}/${filePrefix}-${i}-quality-${this.quality}`)
+  await Promise.all(_.zip(svgXmlFilesWithBoundingBoxes, fileNamesWithBoundingBox).map(([svg, fileName]) => this.saveResizedImage(svg, fileName, this.quality)))
+
+  if (this.quality === 100) {
+    return
+  }
+
+  // aneb: if changing quality, save a high-quality version of the image, too
+  const fileNamesWithOutBoundingBox = fileNames.map((f, i) => `${this.directory}/${filePrefix}-${i}-quality-100`)
+  await Promise.all(_.zip(svgXmlFilesWithoutBoundingBoxes, fileNamesWithOutBoundingBox).map(([svg, fileName]) => this.saveResizedImage(svg, fileName, 100)))
 }
 
 module.exports = Renderer

@@ -13,28 +13,7 @@
   const renderer = new Renderer(conf)
   await renderer.init()
 
-  const batchSize = 20
-  let batch = 0
-  console.log('generating files')
-  while (smilesList.length) {
-    console.log(`left: ${smilesList.length}/${conf.amount}`)
-    const smilesBatch = smilesList.splice(0, batchSize)
-    const xmlFiles = smilesBatch.map(smiles => renderer.smilesToSvgXml(smiles))
-
-    const infos = await Promise.all(xmlFiles.map(xml => renderer.propertiesFromXmlString(xml)))
-    const infosWithBoundingBoxes = infos.map(i => renderer.addBoundingBoxesToSvg(i))
-
-    await Promise.all(
-      infos.map((info, i) => renderer.saveAsPngWithProperSize(info.xml, `${renderer.directory}/${conf.filePrefix}-${batch * batchSize + i}-no-bb`))
-    )
-
-    await Promise.all(
-      infosWithBoundingBoxes.map((info, i) => renderer.saveAsPngWithProperSize(info, `${renderer.directory}/${conf.filePrefix}-${batch * batchSize + i}-bb`, 100))
-    )
-
-    ++batch
-  }
-  console.log(`left: ${smilesList.length}/${conf.amount}`)
+  await renderer.smilesToImage(smilesList)
 
   await renderer.done()
 })()
