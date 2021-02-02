@@ -58,17 +58,21 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
 
   const svgElAfter = await page.$('svg')
 
-  await Promise.all([
-    svgElAfter.screenshot({ path: `${fileName}.jpeg`, omitBackground: false, quality: quality }),
+  const ops = [
+    svgElAfter.screenshot({ path: `${fileName}-quality-${quality}.jpeg`, omitBackground: false, quality: quality }),
     fs.writeFile(`${fileName}.svg`, updatedSvg)
-  ])
+  ]
 
+  // aneb: labels means targets for training
   if (labels.length) {
     labels = labels
       .map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
       .map(({ label, x, y, width, height }) => ({ label, x, y, width, height }))
-    await fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2))
+
+    ops.push(fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2)))
   }
+
+  await Promise.all(ops)
 }
 
 Renderer.prototype.smilesToSvgXml = function(smiles) {
@@ -166,23 +170,33 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePref
   const svgXmlWithBoundingBoxes = this.addBoundingBoxesToSvg({ dom, xml })
 
   const fileName = `${this.directory}/${filePrefix}-${fileIndex}`
-  await this.saveResizedImage(page, svgXmlWithoutBoundingBoxes, `${fileName}-x-quality-${this.quality}`, this.quality)
-  await this.saveResizedImage(page, svgXmlWithBoundingBoxes, `${fileName}-y-quality-${this.quality}`, 100)
+  await this.saveResizedImage(page, svgXmlWithoutBoundingBoxes, `${fileName}-x`, this.quality)
+  await this.saveResizedImage(page, svgXmlWithBoundingBoxes, `${fileName}-y`, 100)
+}
+
+Renderer.prototype.processBatch = async function(page, smilesList, filePrefix, batchIndex, idOffset) {
+  const logEvery = 10
+  const progress = Math.ceil(smilesList.length / logEvery)
+  for (const [i, smiles] of smilesList.entries()) {
+    const fileIndex = idOffset + i
+
+    await this.imageFromSmilesString(page, smiles, filePrefix, fileIndex)
+    if (i % progress === 0) {
+      console.log(`batch #${batchIndex} progress: ${100 * +(i / smilesList.length).toFixed(1)}%`)
+    }
+  }
+
+  console.log(`batch #${batchIndex} progress: 100%`)
 }
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix = 'img') {
-  const n = this.concurrency
+  const batchSize = Math.ceil(smilesList.length / this.concurrency)
+  const batches = _.chunk(smilesList, batchSize)
+  const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
 
-  let i = 0
-
-  while (i < smilesList.length) {
-    console.log(`processing items ${i} to ${i + n}`)
-
-    const current = _.zip(this.pages, smilesList.slice(i, i + n)).filter(([_, smiles]) => !!smiles)
-    await Promise.all(current.map(([page, smiles], fileIndex) => this.imageFromSmilesString(page, smiles, filePrefix, fileIndex + i)))
-
-    i += n
-  }
+  console.time(label)
+  await Promise.all(batches.map((batch, index) => this.processBatch(this.pages[index], batch, filePrefix, index, index * batchSize)))
+  console.timeEnd(label)
 }
 
 module.exports = Renderer
