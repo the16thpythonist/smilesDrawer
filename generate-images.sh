@@ -6,4 +6,5 @@ node generate-images.js \
 --quality "1" \
 --colors "mono" \
 --scale "5" \
---concurrency "16"
+--concurrency "16" \
+-- label "box"

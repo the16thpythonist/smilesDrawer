@@ -7,10 +7,11 @@ const { xml2js, js2xml } = require('xml-js')
 const Parser = require('../drawer/Parser')
 const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
+const { bondLabels, labelTypes } = require('./types')
 
-const { boundingBoxesFromSvg, resizeImage } = require('./browser')
+const { getPositionInfoFromSvg, resizeImage } = require('./browser')
 
-function Renderer({ outputDirectory, quality, scale, colors, concurrency }) {
+function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelType }) {
   this.browser = null
   this.pages = null
   this.document = null
@@ -22,6 +23,7 @@ function Renderer({ outputDirectory, quality, scale, colors, concurrency }) {
   this.quality = quality
   this.scale = scale
   this.concurrency = concurrency
+  this.labelType = labelType
 
   // TODO define options?
   this.drawer = new SvgDrawer({ colors })
@@ -43,11 +45,29 @@ Renderer.prototype.done = async function() {
   this.browser.close()
 }
 
-Renderer.prototype.boundingBoxesFromSvgXml = async function(page, xml) {
+Renderer.prototype.makeEdgeAttributesNumeric = function(edge) {
+  // aneb: one can only read html attributes as strings, postprocessing is done in one place to avoid handling
+  // all types of bonds in browser code which cannot be debugged
+
+  // wedge solid bond is drawn as polygon, all others are drawn from single lines which need to be merged
+  if (edge.label === bondLabels.wedgeSolid) {
+    edge.points = _.chunk(edge.points.split(/,|\s/).map(p => Number(p)), 2)
+    return edge
+  }
+
+  for (const pos of ['x1', 'y1', 'x2', 'y2']) {
+    edge[pos] = Number(edge[pos])
+  }
+
+  return edge
+}
+
+Renderer.prototype.positionInfoFromSvgXml = async function(page, xml) {
   // aneb: need to open browser, getBBox is not available via jsdom as it does not render
   await page.setContent(xml, { waitUntil: 'domcontentloaded' })
 
-  const dom = await page.evaluate(boundingBoxesFromSvg)
+  const dom = await page.evaluate(getPositionInfoFromSvg)
+  dom.edges = dom.edges.map(e => this.makeEdgeAttributesNumeric(e))
 
   return { dom, xml }
 }
@@ -126,6 +146,21 @@ Renderer.prototype.makeBoundingBox = function(id, label, x, y, width, height) {
   })
 }
 
+Renderer.prototype.makeTightBoundingBox = function(id, edge) {
+  const edgeLabel = edge[0].label
+  if (edgeLabel === bondLabels.wedgeSolid) {
+    return
+  }
+
+  if (edgeLabel === bondLabels.wedgeDashed) {
+    return
+  }
+
+  if (edgeLabel === bondLabels.double || edgeLabel === bondLabels.triple) {
+
+  }
+}
+
 Renderer.prototype.mergeBoundingBoxes = function(boxes) {
   const groups = _.groupBy(boxes, 'id')
   return Object.values(groups).map(g => this.getBoxWithMaxArea(g))
@@ -178,7 +213,7 @@ Renderer.prototype.addBoundingBoxesToSvg = function({ dom, xml }) {
     bbContainer.appendChild(bb)
   }
 
-  const correctedEdges = dom.edges.map(({ id, label, x, y, width, height }) => Object.assign({ id, label }, this.correctBoundingBox(x, y, width, height)))
+  const correctedEdges = dom.edges.map(e => Object.assign(e, this.correctBoundingBox(e.x, e.y, e.width, e.height)))
   const merged = this.mergeBoundingBoxes(correctedEdges)
   for (const { id, label, x, y, width, height } of merged) {
     const bb = this.makeBoundingBox(id, label, x, y, width, height)
@@ -190,16 +225,49 @@ Renderer.prototype.addBoundingBoxesToSvg = function({ dom, xml }) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
+Renderer.prototype.addTightBoundingBoxesToSvg = function({ dom, xml }) {
+  // TODO aneb: remove duplicate code fragments after all label types are implemented correctly
+  const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
+  const bbContainer = this.svg.createElement('g')
+
+  for (const { id, label, x, y, width, height } of dom.nodes) {
+    const bb = this.makeBoundingBox(id, label, x, y, width, height)
+    bbContainer.appendChild(bb)
+  }
+
+  const groupedEdges = _.groupBy(dom.edges, 'id')
+  for (const [id, edge] of Object.entries(groupedEdges)) {
+    const bb = this.makeTightBoundingBox(id, edge)
+    bbContainer.appendChild(bb)
+  }
+
+  svg.appendChild(bbContainer)
+}
+
+Renderer.prototype.addLabels = function({ dom, xml }) {
+  if (this.labelType === labelTypes.box) {
+    return this.addBoundingBoxesToSvg({ dom, xml })
+  }
+
+  if (this.labelType === labelTypes.tight) {
+    return this.addTightBoundingBoxesToSvg({ dom, xml })
+  }
+
+  if (this.labelType === labelTypes.points) {
+    throw new Error(`${this.labelType} not implemented yet`)
+  }
+}
+
 Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePrefix, fileIndex) {
   const svgXmlWithoutBoundingBoxes = this.smilesToSvgXml(smiles)
-  const { dom, xml } = await this.boundingBoxesFromSvgXml(page, svgXmlWithoutBoundingBoxes)
+  const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutBoundingBoxes)
 
   // TODO aneb: define different styles of labels, then make style configurable
-  const svgXmlWithBoundingBoxes = this.addBoundingBoxesToSvg({ dom, xml })
+  const svgXmlWithLabels = this.addLabels({ dom, xml })
 
   const fileName = `${this.directory}/${filePrefix}-${fileIndex}`
   await this.saveResizedImage(page, svgXmlWithoutBoundingBoxes, `${fileName}-x`, this.quality)
-  await this.saveResizedImage(page, svgXmlWithBoundingBoxes, `${fileName}-y`, 100)
+  await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-y`, 100)
 }
 
 Renderer.prototype.processBatch = async function(page, smilesList, filePrefix, batchIndex, idOffset) {

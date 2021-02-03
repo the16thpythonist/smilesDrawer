@@ -7,6 +7,7 @@ const Line = require('./Line')
 const SvgWrapper = require('./SvgWrapper')
 const MathHelper = require('./MathHelper')
 const Vector2 = require('./Vector2')
+const { bondLabels } = require('../generator/types')
 
 class SvgDrawer {
   constructor({ colors }) {
@@ -102,14 +103,6 @@ class SvgDrawer {
     if ((!vertexA.value.isDrawn || !vertexB.value.isDrawn) && preprocessor.opts.atomVisualization === 'default') {
       return
     }
-    // aneb: edge.isPartOfAromaticRing is always false when not drawing ring
-    const aromaticBondLabel = 'aromatic-bond'
-    const singleBondLabel = 'single-bond'
-    const doubleBondLabel = 'double-bond'
-    const tripleBondLabel = 'triple-bond'
-
-    const wedgeSolidBondLabel = 'wedge-solid-bond'
-    const wedgeDashedBondLabel = 'wedge-dashed-bond'
 
     const edgeIdLabel = 'edge-id'
     const edgeIdValue = `edge-${edgeId}`
@@ -122,6 +115,7 @@ class SvgDrawer {
     sides[0].multiplyScalar(10).add(a)
     sides[1].multiplyScalar(10).add(a)
 
+    // aneb: edge.isPartOfAromaticRing is always false when not drawing ring
     if (edge.bondType === '=' ||
         preprocessor.getRingbondType(vertexA, vertexB) === '=' ||
             (edge.isPartOfAromaticRing && preprocessor.bridgedRing)) {
@@ -151,8 +145,8 @@ class SvgDrawer {
         line.shorten(opts.bondLength - opts.shortBondLength * opts.bondLength)
 
         // The shortened edge
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, aromaticBondLabel, line, edge.isPartOfAromaticRing)
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, aromaticBondLabel, new Line(a, b, elementA, elementB))
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.aromatic, line, edge.isPartOfAromaticRing)
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.aromatic, new Line(a, b, elementA, elementB))
         return
       }
 
@@ -164,8 +158,8 @@ class SvgDrawer {
         const lineA = new Line(Vector2.add(a, normals[0]), Vector2.add(b, normals[0]), elementA, elementB)
         const lineB = new Line(Vector2.add(a, normals[1]), Vector2.add(b, normals[1]), elementA, elementB)
 
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, lineA)
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, lineB)
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.double, lineA)
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.double, lineB)
         return
       }
 
@@ -177,8 +171,8 @@ class SvgDrawer {
 
         line.shorten(opts.bondLength - opts.shortBondLength * opts.bondLength)
 
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, line)
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, new Line(a, b, elementA, elementB))
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.double, line)
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.double, new Line(a, b, elementA, elementB))
         return
       }
 
@@ -189,8 +183,8 @@ class SvgDrawer {
         const line = new Line(Vector2.add(a, normals[1]), Vector2.add(b, normals[1]), elementA, elementB)
 
         line.shorten(opts.bondLength - opts.shortBondLength * opts.bondLength)
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, line)
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, doubleBondLabel, new Line(a, b, elementA, elementB))
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.double, line)
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.double, new Line(a, b, elementA, elementB))
         return
       }
     }
@@ -202,9 +196,9 @@ class SvgDrawer {
       const lineA = new Line(Vector2.add(a, normals[0]), Vector2.add(b, normals[0]), elementA, elementB)
       const lineB = new Line(Vector2.add(a, normals[1]), Vector2.add(b, normals[1]), elementA, elementB)
 
-      svgWrapper.drawLine(edgeIdLabel, edgeIdValue, tripleBondLabel, lineA)
-      svgWrapper.drawLine(edgeIdLabel, edgeIdValue, tripleBondLabel, lineB)
-      svgWrapper.drawLine(edgeIdLabel, edgeIdValue, tripleBondLabel, new Line(a, b, elementA, elementB))
+      svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.triple, lineA)
+      svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.triple, lineB)
+      svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.triple, new Line(a, b, elementA, elementB))
       return
     }
 
@@ -217,16 +211,16 @@ class SvgDrawer {
     const isChiralCenterB = vertexB.value.isStereoCenter
 
     if (edge.wedge === 'up') {
-      svgWrapper.drawWedge(edgeIdLabel, edgeIdValue, wedgeSolidBondLabel, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
+      svgWrapper.drawWedge(edgeIdLabel, edgeIdValue, bondLabels.wedgeSolid, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
       return
     }
 
     if (edge.wedge === 'down') {
-      svgWrapper.drawDashedWedge(edgeIdLabel, edgeIdValue, wedgeDashedBondLabel, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
+      svgWrapper.drawDashedWedge(edgeIdLabel, edgeIdValue, bondLabels.wedgeDashed, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
       return
     }
 
-    const label = preprocessor.areVerticesInSameRing(vertexA, vertexB) ? aromaticBondLabel : singleBondLabel
+    const label = preprocessor.areVerticesInSameRing(vertexA, vertexB) ? bondLabels.aromatic : bondLabels.single
     svgWrapper.drawLine(edgeIdLabel, edgeIdValue, label, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
   }
 

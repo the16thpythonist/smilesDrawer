@@ -5,6 +5,7 @@ const colors = require('./colors')
 
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
+const { labelTypes } = require('./types')
 
 const readSmilesFromCsv = async(file, smilesCol, n = 100, header = 1) => {
   const stream = fs.createReadStream(file)
@@ -28,7 +29,7 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100, header = 1) => {
 
 const cliParams = () => {
   const {
-    outputDirectory, amount, quality, scale, concurrency,
+    outputDirectory, amount, quality, scale, concurrency, labelType,
     colors: colorMap,
     fromCsvFile: csvFile,
     fromCsvColumn: csvColumn
@@ -42,7 +43,12 @@ const cliParams = () => {
     colors: colors[colorMap] || null,
     quality: Number(quality) || null,
     scale: Number(scale) || null,
-    concurrency: Number(concurrency) || 4
+    concurrency: Number(concurrency) || 4,
+    labelType: labelType || null
+  }
+
+  if (!Object.keys(labelTypes).includes(config.labelType)) {
+    throw new Error(`invalid label type '${config.labelType}'`)
   }
 
   const invalid = Object.entries(config).filter(([key, value]) => value === null)

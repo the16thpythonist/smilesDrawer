@@ -1,4 +1,4 @@
-function boundingBoxesFromSvg() {
+function getPositionInfoFromSvg() {
   const nodes = []
   const edges = []
 
@@ -8,7 +8,7 @@ function boundingBoxesFromSvg() {
     const elements = Array.from(vertex.querySelectorAll('tspan')).map(c => c.textContent).filter(c => !!c)
     const id = vertex.getAttribute('vertex-id')
     const label = vertex.getAttribute('label')
-    nodes.push({ id, elements, x, y, width, height, label })
+    nodes.push({ id, label, elements, x, y, width, height })
   }
 
   const bonds = document.documentElement.querySelectorAll('[edge-id]')
@@ -16,7 +16,13 @@ function boundingBoxesFromSvg() {
     const { x, y, width, height } = bond.getBBox()
     const id = bond.getAttribute('edge-id')
     const label = bond.getAttribute('label')
-    edges.push({ id, x, y, width, height, label })
+    const x1 = bond.getAttribute('x1')
+    const y1 = bond.getAttribute('y1')
+    const x2 = bond.getAttribute('x2')
+    const y2 = bond.getAttribute('y2')
+
+    const points = bond.getAttribute('points')
+    edges.push({ id, label, x, y, width, height, x1, y1, x2, y2, points })
   }
 
   return { nodes, edges }
@@ -41,4 +47,4 @@ function resizeImage(scale) {
   return [updatedSvg, labels]
 }
 
-module.exports = { boundingBoxesFromSvg, resizeImage }
+module.exports = { getPositionInfoFromSvg, resizeImage }
