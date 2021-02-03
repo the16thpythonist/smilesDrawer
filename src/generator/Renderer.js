@@ -2,6 +2,7 @@ const fs = require('fs-extra')
 const puppeteer = require('puppeteer')
 const _ = require('lodash')
 const { JSDOM } = require('jsdom')
+const beautify = require('js-beautify').html
 
 const Parser = require('../drawer/Parser')
 const SvgDrawer = require('../drawer/SvgDrawer')
@@ -56,11 +57,11 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
 
   let [updatedSvg, labels] = await page.evaluate(resizeImage, this.scale)
 
-  const svgElAfter = await page.$('svg')
+  const updatedSvgElement = await page.$('svg')
 
   const ops = [
-    svgElAfter.screenshot({ path: `${fileName}-quality-${quality}.jpeg`, omitBackground: false, quality: quality }),
-    fs.writeFile(`${fileName}.svg`, updatedSvg)
+    updatedSvgElement.screenshot({ path: `${fileName}-quality-${quality}.jpeg`, omitBackground: false, quality: quality }),
+    fs.writeFile(`${fileName}.svg`, beautify(updatedSvg))
   ]
 
   // aneb: labels means targets for training
