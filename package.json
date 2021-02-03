@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "fs-extra": "^9.0.1",
-    "js-beautify": "^1.13.5",
     "jsdom": "^16.4.0",
     "lodash": "^4.17.20",
     "puppeteer": "^5.5.0",
+    "xml-js": "^1.6.11",
     "yargs": "^16.2.0"
   }
 }

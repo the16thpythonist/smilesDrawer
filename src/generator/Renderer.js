@@ -2,7 +2,7 @@ const fs = require('fs-extra')
 const puppeteer = require('puppeteer')
 const _ = require('lodash')
 const { JSDOM } = require('jsdom')
-const beautify = require('js-beautify').html
+const { xml2js, js2xml } = require('xml-js')
 
 const Parser = require('../drawer/Parser')
 const SvgDrawer = require('../drawer/SvgDrawer')
@@ -52,16 +52,43 @@ Renderer.prototype.boundingBoxesFromSvgXml = async function(page, xml) {
   return { dom, xml }
 }
 
+Renderer.prototype.updateXmlAttributes = function(attributes) {
+  const update = ['x', 'y', 'r', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy']
+
+  for (const attr of update) {
+    if (!attributes[attr]) {
+      continue
+    }
+
+    attributes[attr] = Number(attributes[attr]).toFixed(4)
+  }
+
+  return attributes
+}
+
+Renderer.prototype.updateXmlNode = function(node) {
+  if (node.attributes) {
+    node.attributes = this.updateXmlAttributes(node.attributes)
+  }
+
+  if (node.elements && node.elements.length) {
+    node.elements = node.elements.map(c => this.updateXmlNode(c))
+  }
+
+  return node
+}
+
 Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality) {
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
 
   let [updatedSvg, labels] = await page.evaluate(resizeImage, this.scale)
 
   const updatedSvgElement = await page.$('svg')
+  const updatedSvgXml = js2xml(this.updateXmlNode(xml2js(updatedSvg)), { spaces: 2, compact: false })
 
   const ops = [
     updatedSvgElement.screenshot({ path: `${fileName}-quality-${quality}.jpeg`, omitBackground: false, quality: quality }),
-    fs.writeFile(`${fileName}.svg`, beautify(updatedSvg))
+    fs.writeFile(`${fileName}.svg`, updatedSvgXml)
   ]
 
   // aneb: labels means targets for training
