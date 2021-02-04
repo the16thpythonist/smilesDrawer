@@ -151,19 +151,7 @@ Renderer.prototype.makeBoundingBox = function(id, label, x, y, width, height) {
 
 Renderer.prototype.makeBoundingBoxAroundLine = function({ id, label, x1, y1, x2, y2 }) {
   const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
-  const v1 = new Vector2(x1, y1)
-  const v2 = new Vector2(x2, y2)
-  const [n1, n2] = Vector2.units(v1, v2).map(v => v.multiplyScalar(0.5))
-
-  // TODO aneb: find out why there are NaNs and filter
-  const points = [
-    Vector2.add(v1, n1),
-    Vector2.subtract(v1, n1),
-
-    Vector2.add(v2, n2),
-    Vector2.subtract(v2, n2)
-
-  ].map(p => [p.x, p.y])
+  const points = this.svg.getEdgePointsOfBoxAroundLine({ x1, y1, x2, y2 })
 
   return this.svg.createElement('polygon', {
     'label-id': `${id}-label`,

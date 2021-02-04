@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const Vector2 = require('../drawer/Vector2')
 const { JSDOM } = require('jsdom')
 
 function SVG() {
@@ -71,6 +72,22 @@ SVG.prototype.getBoxWithMaxArea = function(boxes) {
 SVG.prototype.mergeBoundingBoxes = function(boxes) {
   const groups = _.groupBy(boxes, 'id')
   return Object.values(groups).map(g => this.getBoxWithMaxArea(g))
+}
+
+SVG.prototype.getEdgePointsOfBoxAroundLine = function({ x1, y1, x2, y2 }) {
+  const v1 = new Vector2(x1, y1)
+  const v2 = new Vector2(x2, y2)
+  const [n1, n2] = Vector2.units(v1, v2).map(v => v.multiplyScalar(0.5))
+
+  // TODO aneb: find out why there are NaNs and filter
+  return [
+    Vector2.add(v1, n1),
+    Vector2.subtract(v1, n1),
+
+    Vector2.add(v2, n2),
+    Vector2.subtract(v2, n2)
+
+  ].map(p => [p.x, p.y])
 }
 
 module.exports = SVG
