@@ -37,7 +37,7 @@ function resizeImage(scale) {
   svg.setAttributeNS(null, 'width', Math.ceil(width * scale))
   svg.setAttributeNS(null, 'viewbox', `${boxX} ${boxY} ${boxWidth * scale} ${boxHeight * scale} `)
 
-  const elements = document.documentElement.querySelectorAll('[bb-id]')
+  const elements = document.documentElement.querySelectorAll('[label-id]')
   // aneb: find better way to do this?
   const labels = Array.from(elements).map(e => Array.from(e.attributes).map(e => ({ [e.name]: e.nodeValue })))
 

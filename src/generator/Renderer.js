@@ -5,6 +5,7 @@ const { JSDOM } = require('jsdom')
 const { xml2js, js2xml } = require('xml-js')
 
 const Parser = require('../drawer/Parser')
+const Vector2 = require('../drawer/Vector2')
 const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
 const { bondLabels, labelTypes } = require('./types')
@@ -83,6 +84,10 @@ Renderer.prototype.updateXmlAttributes = function(attributes) {
     attributes[attr] = Number(attributes[attr]).toFixed(4)
   }
 
+  if (attributes.points) {
+    attributes.points = _.chunk(attributes.points.split(/,|\s/).map(n => Number(n).toFixed(4)), 2).join(' ')
+  }
+
   return attributes
 }
 
@@ -111,11 +116,11 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
     fs.writeFile(`${fileName}.svg`, updatedSvgXml)
   ]
 
-  // aneb: labels means targets for training
+  // aneb: the x image has no labels
   if (labels.length) {
     labels = labels
       .map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
-      .map(({ label, x, y, width, height }) => ({ label, x, y, width, height }))
+      .map(({ label, x, y, width, height, x1, y1, x2, y2, points }) => ({ label, x, y, width, height }))
 
     ops.push(fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2)))
   }
@@ -136,7 +141,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
 Renderer.prototype.makeBoundingBox = function(id, label, x, y, width, height) {
   const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
   return this.svg.createElement('rect', {
-    'bb-id': `${id}-bb`,
+    'label-id': `${id}-label`,
     label: label,
     x: x,
     y: y,
@@ -146,19 +151,46 @@ Renderer.prototype.makeBoundingBox = function(id, label, x, y, width, height) {
   })
 }
 
-Renderer.prototype.makeTightBoundingBox = function(id, edge) {
-  const edgeLabel = edge[0].label
-  if (edgeLabel === bondLabels.wedgeSolid) {
-    return
+Renderer.prototype.makeBoundingBoxAroundLine = function({ id, label, x1, y1, x2, y2 }) {
+  const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
+  const v1 = new Vector2(x1, y1)
+  const v2 = new Vector2(x2, y2)
+  const [n1, n2] = Vector2.units(v1, v2).map(v => v.multiplyScalar(0.5))
+
+  // TODO aneb: find out why there are NaNs and filter
+  const points = [
+    Vector2.add(v1, n1),
+    Vector2.subtract(v1, n1),
+
+    Vector2.add(v2, n2),
+    Vector2.subtract(v2, n2)
+
+  ].map(p => [p.x, p.y])
+
+  return this.svg.createElement('polygon', {
+    'label-id': `${id}-label`,
+    label: label,
+    points: points.join(' '),
+    style: `fill: none; stroke: #a2${randomColor}; stroke-width: 0.5`
+  })
+}
+
+Renderer.prototype.makeTightBoundingBox = function(id, edgeElements) {
+  // TODO make color method and use same color for same bonds
+  const first = edgeElements[0]
+  if (first.label === bondLabels.wedgeSolid) {
+    const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
+    return this.svg.createElement('polygon', {
+      'label-id': `${id}-label`,
+      label: first.label,
+      points: first.points.join(' '),
+      style: `fill: none; stroke: #a2${randomColor}; stroke-width: 0.5`
+    })
   }
 
-  if (edgeLabel === bondLabels.wedgeDashed) {
-    return
-  }
-
-  if (edgeLabel === bondLabels.double || edgeLabel === bondLabels.triple) {
-
-  }
+  // aneb: all others are just arrays of lines
+  const boxes = edgeElements.map(e => this.makeBoundingBoxAroundLine(e))
+  return this.svg.createElement('g', { id: `${id}-container` }, boxes)
 }
 
 Renderer.prototype.mergeBoundingBoxes = function(boxes) {
@@ -242,6 +274,8 @@ Renderer.prototype.addTightBoundingBoxesToSvg = function({ dom, xml }) {
   }
 
   svg.appendChild(bbContainer)
+
+  return this.XMLSerializer.serializeToString(svg)
 }
 
 Renderer.prototype.addLabels = function({ dom, xml }) {
@@ -259,15 +293,14 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
 }
 
 Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePrefix, fileIndex) {
-  const svgXmlWithoutBoundingBoxes = this.smilesToSvgXml(smiles)
-  const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutBoundingBoxes)
+  const svgXmlWithoutLabels = this.smilesToSvgXml(smiles)
+  const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
 
-  // TODO aneb: define different styles of labels, then make style configurable
   const svgXmlWithLabels = this.addLabels({ dom, xml })
 
   const fileName = `${this.directory}/${filePrefix}-${fileIndex}`
-  await this.saveResizedImage(page, svgXmlWithoutBoundingBoxes, `${fileName}-x`, this.quality)
-  await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-y`, 100)
+  await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-${this.labelType}-x`, this.quality)
+  await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-${this.labelType}-y`, 100)
 }
 
 Renderer.prototype.processBatch = async function(page, smilesList, filePrefix, batchIndex, idOffset) {

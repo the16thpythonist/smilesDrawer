@@ -14,10 +14,10 @@ class Vector2 {
      * @param {Number} y The initial y coordinate value.
      */
   constructor(x, y) {
-    if (arguments.length == 0) {
+    if (arguments.length === 0) {
       this.x = 0
       this.y = 0
-    } else if (arguments.length == 1) {
+    } else if (arguments.length === 1) {
       this.x = x.x
       this.y = x.y
     } else {
@@ -354,7 +354,7 @@ class Vector2 {
 
     // Its not always a given, that the polygon is convex (-> sugars)
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      if (((polygon[i].y > this.y) != (polygon[j].y > this.y)) &&
+      if (((polygon[i].y > this.y) !== (polygon[j].y > this.y)) &&
                 (this.x < (polygon[j].x - polygon[i].x) * (this.y - polygon[i].y) /
                 (polygon[j].y - polygon[i].y) + polygon[i].x)) {
         inside = !inside
@@ -425,7 +425,8 @@ class Vector2 {
     const d = this.whichSide(vecA, vecB)
     const dRef = vecC.whichSide(vecA, vecB)
 
-    return d < 0 && dRef < 0 || d == 0 && dRef == 0 || d > 0 && dRef > 0
+    // eslint-disable-next-line no-mixed-operators
+    return d < 0 && dRef < 0 || d === 0 && dRef === 0 || d > 0 && dRef > 0
   }
 
   /**
