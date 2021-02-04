@@ -77,17 +77,25 @@ SVG.prototype.mergeBoundingBoxes = function(boxes) {
 SVG.prototype.getEdgePointsOfBoxAroundLine = function({ x1, y1, x2, y2 }) {
   const v1 = new Vector2(x1, y1)
   const v2 = new Vector2(x2, y2)
+  const { x: dx, y: dy } = Vector2.subtract(v1, v2)
+
+  // aneb: for dashed wedges points may be too close too each other, therefore drawing dummy polygon
+  if (dx === 0 && dy === 0) {
+    return Array(4).fill([x1, y1])
+  }
+
   const [n1, n2] = Vector2.units(v1, v2).map(v => v.multiplyScalar(0.5))
 
-  // TODO aneb: find out why there are NaNs and filter
-  return [
+  const points = [
     Vector2.add(v1, n1),
     Vector2.subtract(v1, n1),
 
     Vector2.add(v2, n2),
     Vector2.subtract(v2, n2)
 
-  ].map(p => [p.x, p.y])
+  ]
+
+  return points.map(p => [p.x, p.y])
 }
 
 SVG.prototype.randomColor = function(seed = 'a2') {

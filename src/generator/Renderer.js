@@ -117,8 +117,12 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
 
   // aneb: the x image has no labels
   if (labels.length) {
-    // TODO aneb: filter properties instead of choosing
     labels = labels.map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
+
+    for (const label of labels) {
+      delete label.style
+    }
+
     ops.push(fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2)))
   }
 
