@@ -194,6 +194,20 @@ Renderer.prototype.makeHullPolygon = function(edge, color) {
   })
 }
 
+Renderer.prototype.makeHullPoints = function(edge, color) {
+  const { id, label, points } = edge[0]
+  return points.map(([x, y]) => {
+    return this.svg.createElement('circle', {
+      'label-id': `${id}-label`,
+      label: label,
+      cx: x,
+      cy: y,
+      r: 0.25,
+      style: this.color(color)
+    })
+  })
+}
+
 Renderer.prototype.addLabels = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
@@ -217,7 +231,10 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
   if (this.labelType === labelTypes.hull) {
     const points = dom.edges.map(e => ({ ...e, points: this.getCornerPoints(e) })).filter(e => !!e.points)
     const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svg.hull(e))
-    const hullBox = hull.map(edge => this.makeHullPolygon(edge, this.svg.randomColor()))
+    const hullBox = this.segment
+      ? hull.map(edge => this.makeHullPolygon(edge, this.svg.randomColor()))
+      : hull.map(edge => this.makeHullPoints(edge, this.svg.randomColor()))
+
     edgeLabels.push(hullBox)
   }
 

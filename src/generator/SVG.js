@@ -3,6 +3,8 @@ const Vector2 = require('../drawer/Vector2')
 const { JSDOM } = require('jsdom')
 const hull = require('hull.js')
 
+const { bondLabels } = require('./types')
+
 function SVG() {
   this.document = new JSDOM('').window.document
 }
@@ -109,9 +111,11 @@ SVG.prototype.randomColor = function(seed = 'a2') {
 }
 
 SVG.prototype.hull = function(edges) {
-  // aneb: procedure below also won't work for solid wedges
-  if (edges.length === 1) {
-    return edges
+  if (edges[0].label === bondLabels.wedgeSolid) {
+    // TODO aneb: find out where this comes from, it breaks point drawing the other way...
+    // it might explain why the code below does not work
+    edges[0].points = edges[0].points[0]
+    // return edges
   }
 
   // TODO aneb: dashed wedge now has polygon property, use it since drawer calculates is correctly
