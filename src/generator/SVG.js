@@ -111,18 +111,15 @@ SVG.prototype.randomColor = function(seed = 'a2') {
 }
 
 SVG.prototype.hull = function(edges) {
+  // aneb: below code does not work for polygon, but points are already in place so no processing is needed
   if (edges[0].label === bondLabels.wedgeSolid) {
-    // TODO aneb: find out where this comes from, it breaks point drawing the other way...
-    // it might explain why the code below does not work
     edges[0].points = edges[0].points[0]
-    // return edges
+    return edges
   }
 
-  // TODO aneb: dashed wedge now has polygon property, use it since drawer calculates is correctly
-  // TODO aneb: try fixing all bonds using polygon setting instead of calulating it
-  // TODO aneb: it works for most multi-bonds but fails for some...
+  // aneb: this solution is super hacky but works ... :(
   const { x1: p11, y1: p12, x2: p21, y2: p22 } = edges[0]
-  const { x1: p31, y1: p32, x2: p41, y2: p42 } = edges.slice(-1)[0]
+  const { x1: p31, y1: p32, x2: p41, y2: p42 } = edges[0].label === bondLabels.triple ? edges.slice(-2)[0] : edges.slice(-1)[0]
   edges[0].points = hull([[p11, p12], [p21, p22], [p31, p32], [p41, p42]])
   return [edges[0]]
 }

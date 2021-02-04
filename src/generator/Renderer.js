@@ -162,7 +162,17 @@ Renderer.prototype.makeBoundingBoxRect = function({ id, label, x, y, width, heig
   })
 }
 
-Renderer.prototype.getCornerPoints = function(edge) {
+Renderer.prototype.getNodeCornerPoints = function(node) {
+  const { x, y, width: dx, height: dy } = node
+  return [
+    [x, y],
+    [x, y + dy],
+    [x + dx, y],
+    [x + dx, y + dy]
+  ]
+}
+
+Renderer.prototype.getEdgeCornerPoints = function(edge) {
   // aneb: wedge is already drawn as polygon, all others are just lines, get polygon around lines and then treat both equally
   if (edge.label === bondLabels.wedgeSolid) {
     return [edge.points]
@@ -173,7 +183,7 @@ Renderer.prototype.getCornerPoints = function(edge) {
 
 Renderer.prototype.makeBoundingBoxPolygon = function(edgeElements, color) {
   const { id, label } = edgeElements[0]
-  const points = edgeElements.map(e => this.getCornerPoints(e)).filter(e => !!e)
+  const points = edgeElements.map(e => this.getEdgeCornerPoints(e)).filter(e => !!e)
   return points.map(point => {
     return this.svg.createElement('polygon', {
       'label-id': `${id}-label`,
@@ -194,15 +204,15 @@ Renderer.prototype.makeHullPolygon = function(edge, color) {
   })
 }
 
-Renderer.prototype.makeHullPoints = function(edge, color) {
-  const { id, label, points } = edge[0]
+Renderer.prototype.makeHullPoints = function(element, color) {
+  const { id, label, points } = element[0]
   return points.map(([x, y]) => {
     return this.svg.createElement('circle', {
       'label-id': `${id}-label`,
       label: label,
       cx: x,
       cy: y,
-      r: 0.25,
+      r: 0.5,
       style: this.color(color)
     })
   })
@@ -211,9 +221,16 @@ Renderer.prototype.makeHullPoints = function(edge, color) {
 Renderer.prototype.addLabels = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
-  const nodeLabels = dom.nodes.map(node => this.makeBoundingBoxRect({ ...node, color: this.svg.randomColor() }))
-
+  const nodeLabels = []
   const edgeLabels = []
+
+  if (this.labelType === labelTypes.hull && !this.segment) {
+    const corners = dom.nodes.map(n => ([{ ...n, points: this.getNodeCornerPoints(n) }])).map(c => this.makeHullPoints(c, this.svg.randomColor()))
+    nodeLabels.push(...corners)
+  } else {
+    const nodeBoxes = dom.nodes.map(node => this.makeBoundingBoxRect({ ...node, color: this.svg.randomColor() }))
+    nodeLabels.push(...nodeBoxes)
+  }
 
   if (this.labelType === labelTypes.box) {
     const correctedEdges = dom.edges.map(e => Object.assign(e, this.svg.correctBoundingBox(e.x, e.y, e.width, e.height)))
@@ -229,7 +246,7 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
   }
 
   if (this.labelType === labelTypes.hull) {
-    const points = dom.edges.map(e => ({ ...e, points: this.getCornerPoints(e) })).filter(e => !!e.points)
+    const points = dom.edges.map(e => ({ ...e, points: this.getEdgeCornerPoints(e) })).filter(e => !!e.points)
     const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svg.hull(e))
     const hullBox = this.segment
       ? hull.map(edge => this.makeHullPolygon(edge, this.svg.randomColor()))
