@@ -114,6 +114,9 @@ SVG.prototype.hull = function(edges) {
     return edges
   }
 
+  // TODO aneb: dashed wedge now has polygon property, use it since drawer calculates is correctly
+  // TODO aneb: try fixing all bonds using polygon setting instead of calulating it
+  // TODO aneb: it works for most multi-bonds but fails for some...
   const { x1: p11, y1: p12, x2: p21, y2: p22 } = edges[0]
   const { x1: p31, y1: p32, x2: p41, y2: p42 } = edges.slice(-1)[0]
   edges[0].points = hull([[p11, p12], [p21, p22], [p31, p32], [p41, p42]])

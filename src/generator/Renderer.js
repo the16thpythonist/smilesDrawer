@@ -11,7 +11,7 @@ const { bondLabels, labelTypes } = require('./types')
 
 const { getPositionInfoFromSvg, resizeImage } = require('./browser')
 
-function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelType, segment }) {
+function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelType, segment, outputSvg, outputLabels }) {
   this.browser = null
   this.pages = null
   this.document = null
@@ -25,6 +25,8 @@ function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelT
   this.concurrency = concurrency
   this.labelType = labelType
   this.segment = segment
+  this.outputSvg = outputSvg
+  this.outputLabels = outputLabels
 
   // TODO define options?
   this.drawer = new SvgDrawer({ colors })
@@ -116,10 +118,7 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
   const updatedSvgElement = await page.$('svg')
   const updatedSvgXml = js2xml(this.updateXmlNode(xml2js(updatedSvg)), { spaces: 2, compact: false })
 
-  const ops = [
-    updatedSvgElement.screenshot({ path: `${fileName}-quality-${quality}.jpeg`, omitBackground: false, quality: quality }),
-    fs.writeFile(`${fileName}.svg`, updatedSvgXml)
-  ]
+  const ops = [updatedSvgElement.screenshot({ path: `${fileName}-quality-${quality}.jpeg`, omitBackground: false, quality: quality })]
 
   // aneb: the x image has no labels
   if (labels.length) {
@@ -128,8 +127,14 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
     for (const label of labels) {
       delete label.style
     }
+  }
 
+  if (this.outputLabels) {
     ops.push(fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2)))
+  }
+
+  if (this.outputSvg) {
+    ops.push(fs.writeFile(`${fileName}.svg`, updatedSvgXml))
   }
 
   await Promise.all(ops)
@@ -229,7 +234,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePref
 
   const fileName = `${this.directory}/${filePrefix}-${fileIndex}-${this.labelType}${this.segment ? '-segment' : ''}`
 
-  await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
+  // await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
   await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-y`, 100)
 }
 
