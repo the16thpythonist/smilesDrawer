@@ -90,4 +90,9 @@ SVG.prototype.getEdgePointsOfBoxAroundLine = function({ x1, y1, x2, y2 }) {
   ].map(p => [p.x, p.y])
 }
 
+SVG.prototype.randomColor = function(seed = 'a2') {
+  const color = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
+  return `#${seed}${color}`
+}
+
 module.exports = SVG

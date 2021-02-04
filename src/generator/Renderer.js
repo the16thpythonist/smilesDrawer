@@ -5,7 +5,6 @@ const { JSDOM } = require('jsdom')
 const { xml2js, js2xml } = require('xml-js')
 
 const Parser = require('../drawer/Parser')
-const Vector2 = require('../drawer/Vector2')
 const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
 const { bondLabels, labelTypes } = require('./types')
@@ -136,8 +135,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.makeBoundingBox = function(id, label, x, y, width, height) {
-  const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
+Renderer.prototype.makeBoundingBox = function({ id, label, x, y, width, height, color }) {
   return this.svg.createElement('rect', {
     'label-id': `${id}-label`,
     label: label,
@@ -145,94 +143,62 @@ Renderer.prototype.makeBoundingBox = function(id, label, x, y, width, height) {
     y: y,
     width: width,
     height: height,
-    style: `fill: none; stroke: #a2${randomColor}; stroke-width: 0.5`
+    style: `fill: none; stroke: ${color || this.svg.randomColor()}; stroke-width: 0.5`
   })
 }
 
-Renderer.prototype.makeBoundingBoxAroundLine = function({ id, label, x1, y1, x2, y2 }) {
-  const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
+Renderer.prototype.makeBoundingBoxAroundLine = function({ id, label, x1, y1, x2, y2, color }) {
   const points = this.svg.getEdgePointsOfBoxAroundLine({ x1, y1, x2, y2 })
 
   return this.svg.createElement('polygon', {
     'label-id': `${id}-label`,
     label: label,
     points: points.join(' '),
-    style: `fill: none; stroke: #a2${randomColor}; stroke-width: 0.5`
+    style: `fill: none; stroke: ${color}; stroke-width: 0.5`
   })
 }
 
-Renderer.prototype.makeTightBoundingBox = function(id, edgeElements) {
-  // TODO make color method and use same color for same bonds
+Renderer.prototype.makeTightBoundingBox = function(id, edgeElements, color) {
   const first = edgeElements[0]
   if (first.label === bondLabels.wedgeSolid) {
-    const randomColor = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
     return this.svg.createElement('polygon', {
       'label-id': `${id}-label`,
       label: first.label,
       points: first.points.join(' '),
-      style: `fill: none; stroke: #a2${randomColor}; stroke-width: 0.5`
+      style: `fill: none; stroke: ${color}; stroke-width: 0.5`
     })
   }
 
   // aneb: all others are just arrays of lines
-  const boxes = edgeElements.map(e => this.makeBoundingBoxAroundLine(e))
+  const boxes = edgeElements.map(e => this.makeBoundingBoxAroundLine(({ ...e, color })))
   return this.svg.createElement('g', { id: `${id}-container` }, boxes)
 }
 
-Renderer.prototype.addBoundingBoxesToSvg = function({ dom, xml }) {
-  const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
-  const bbContainer = this.svg.createElement('g')
-
-  for (const { id, label, x, y, width, height } of dom.nodes) {
-    const bb = this.makeBoundingBox(id, label, x, y, width, height)
-    bbContainer.appendChild(bb)
-  }
-
-  const correctedEdges = dom.edges.map(e => Object.assign(e, this.svg.correctBoundingBox(e.x, e.y, e.width, e.height)))
-  const merged = this.svg.mergeBoundingBoxes(correctedEdges)
-  for (const { id, label, x, y, width, height } of merged) {
-    const bb = this.makeBoundingBox(id, label, x, y, width, height)
-    bbContainer.appendChild(bb)
-  }
-
-  svg.appendChild(bbContainer)
-
-  return this.XMLSerializer.serializeToString(svg)
-}
-
-Renderer.prototype.addTightBoundingBoxesToSvg = function({ dom, xml }) {
-  // TODO aneb: remove duplicate code fragments after all label types are implemented correctly
-  const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
-  const bbContainer = this.svg.createElement('g')
-
-  for (const { id, label, x, y, width, height } of dom.nodes) {
-    const bb = this.makeBoundingBox(id, label, x, y, width, height)
-    bbContainer.appendChild(bb)
-  }
-
-  const groupedEdges = _.groupBy(dom.edges, 'id')
-  for (const [id, edge] of Object.entries(groupedEdges)) {
-    const bb = this.makeTightBoundingBox(id, edge)
-    bbContainer.appendChild(bb)
-  }
-
-  svg.appendChild(bbContainer)
-
-  return this.XMLSerializer.serializeToString(svg)
-}
-
 Renderer.prototype.addLabels = function({ dom, xml }) {
+  const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
+
+  const nodeLabels = dom.nodes.map(node => this.makeBoundingBox({ ...node, color: this.svg.randomColor() }))
+
+  let edgeLabels
+
   if (this.labelType === labelTypes.box) {
-    return this.addBoundingBoxesToSvg({ dom, xml })
+    const correctedEdges = dom.edges.map(e => Object.assign(e, this.svg.correctBoundingBox(e.x, e.y, e.width, e.height)))
+    const merged = this.svg.mergeBoundingBoxes(correctedEdges)
+    edgeLabels = merged.map(edge => this.makeBoundingBox({ ...edge, color: this.svg.randomColor() }))
   }
 
   if (this.labelType === labelTypes.tight) {
-    return this.addTightBoundingBoxesToSvg({ dom, xml })
+    const groupedEdges = _.groupBy(dom.edges, 'id')
+    edgeLabels = Object.entries(groupedEdges).map(([id, edge]) => this.makeTightBoundingBox(id, edge, this.svg.randomColor()))
   }
 
   if (this.labelType === labelTypes.points) {
     throw new Error(`${this.labelType} not implemented yet`)
   }
+  const container = this.svg.createElement('g', null, [...nodeLabels, ...edgeLabels])
+  svg.appendChild(container)
+
+  return this.XMLSerializer.serializeToString(svg)
 }
 
 Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePrefix, fileIndex) {
