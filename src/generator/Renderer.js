@@ -11,7 +11,7 @@ const { bondLabels, labelTypes } = require('./types')
 
 const { getPositionInfoFromSvg, resizeImage } = require('./browser')
 
-function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelType }) {
+function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelType, segment }) {
   this.browser = null
   this.pages = null
   this.document = null
@@ -24,6 +24,7 @@ function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelT
   this.scale = scale
   this.concurrency = concurrency
   this.labelType = labelType
+  this.segment = segment
 
   // TODO define options?
   this.drawer = new SvgDrawer({ colors })
@@ -43,6 +44,11 @@ Renderer.prototype.init = async function() {
 
 Renderer.prototype.done = async function() {
   this.browser.close()
+}
+
+Renderer.prototype.color = function(color) {
+  const fill = this.segment ? color : 'none'
+  return `fill: ${fill}; stroke: ${color}; stroke-width: 0.5`
 }
 
 Renderer.prototype.makeEdgeAttributesNumeric = function(edge) {
@@ -147,7 +153,7 @@ Renderer.prototype.makeBoundingBoxRect = function({ id, label, x, y, width, heig
     y: y,
     width: width,
     height: height,
-    style: `fill: none; stroke: ${color}; stroke-width: 0.5`
+    style: this.color(color)
   })
 }
 
@@ -164,7 +170,7 @@ Renderer.prototype.makeBoundingBoxPolygon = function(id, edgeElements, color) {
       'label-id': `${id}-label`,
       label: label,
       points: point.join(' '),
-      style: `fill: none; stroke: ${color}; stroke-width: 0.5`
+      style: this.color(color)
     })
   })
 
@@ -189,7 +195,7 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
     edgeLabels = Object.entries(groupedEdges).map(([id, edge]) => this.makeBoundingBoxPolygon(id, edge, this.svg.randomColor()))
   }
 
-  if (this.labelType === labelTypes.points) {
+  if (this.labelType === labelTypes.hull) {
     throw new Error(`${this.labelType} not implemented yet`)
   }
 
@@ -205,9 +211,10 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePref
 
   const svgXmlWithLabels = this.addLabels({ dom, xml })
 
-  const fileName = `${this.directory}/${filePrefix}-${fileIndex}`
-  await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-${this.labelType}-x`, this.quality)
-  await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-${this.labelType}-y`, 100)
+  const fileName = `${this.directory}/${filePrefix}-${fileIndex}-${this.labelType}-${this.segment ? 'segment' : ''}`
+
+  await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
+  await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-y`, 100)
 }
 
 Renderer.prototype.processBatch = async function(page, smilesList, filePrefix, batchIndex, idOffset) {

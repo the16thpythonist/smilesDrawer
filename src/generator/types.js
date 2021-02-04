@@ -10,7 +10,7 @@ const bondLabels = {
 const labelTypes = {
   box: 'box',
   tight: 'tight',
-  points: 'points'
+  hull: 'hull'
 }
 
 module.exports = { bondLabels, labelTypes }
