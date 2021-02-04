@@ -118,10 +118,8 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
 
   // aneb: the x image has no labels
   if (labels.length) {
-    labels = labels
-      .map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
-      .map(({ label, x, y, width, height, x1, y1, x2, y2, points }) => ({ label, x, y, width, height }))
-
+    // TODO aneb: filter properties instead of choosing
+    labels = labels.map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
     ops.push(fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2)))
   }
 
@@ -193,49 +191,6 @@ Renderer.prototype.makeTightBoundingBox = function(id, edgeElements) {
   return this.svg.createElement('g', { id: `${id}-container` }, boxes)
 }
 
-Renderer.prototype.mergeBoundingBoxes = function(boxes) {
-  const groups = _.groupBy(boxes, 'id')
-  return Object.values(groups).map(g => this.getBoxWithMaxArea(g))
-}
-
-Renderer.prototype.boundingBoxToRect = function(bb) {
-  const { x, y, width: w, height: h } = bb
-  return { top: y, bottom: y + h, left: x, right: x + w }
-}
-
-Renderer.prototype.getBoxWithMaxArea = function(bonds) {
-  if (bonds.length === 1) {
-    return bonds[0]
-  }
-
-  const rects = bonds.map(bb => this.boundingBoxToRect(bb))
-
-  const minY = Math.min(...rects.map(r => r.top))
-  const maxY = Math.max(...rects.map(r => r.bottom))
-  const minX = Math.min(...rects.map(r => r.left))
-  const maxX = Math.max(...rects.map(r => r.right))
-  const update = { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
-  return Object.assign(bonds[0], update)
-}
-
-Renderer.prototype.correctBoundingBox = function(x, y, width, height) {
-  const minValue = 0.5
-  const newValue = 2
-  let [xCorr, yCorr, widthCorr, heightCorr] = [x, y, width, height]
-
-  if (heightCorr < minValue) {
-    heightCorr = newValue
-    yCorr -= newValue / 2
-  }
-
-  if (widthCorr < minValue) {
-    widthCorr = newValue
-    xCorr -= newValue / 2
-  }
-
-  return { x: xCorr, y: yCorr, width: widthCorr, height: heightCorr }
-}
-
 Renderer.prototype.addBoundingBoxesToSvg = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
   const bbContainer = this.svg.createElement('g')
@@ -245,8 +200,8 @@ Renderer.prototype.addBoundingBoxesToSvg = function({ dom, xml }) {
     bbContainer.appendChild(bb)
   }
 
-  const correctedEdges = dom.edges.map(e => Object.assign(e, this.correctBoundingBox(e.x, e.y, e.width, e.height)))
-  const merged = this.mergeBoundingBoxes(correctedEdges)
+  const correctedEdges = dom.edges.map(e => Object.assign(e, this.svg.correctBoundingBox(e.x, e.y, e.width, e.height)))
+  const merged = this.svg.mergeBoundingBoxes(correctedEdges)
   for (const { id, label, x, y, width, height } of merged) {
     const bb = this.makeBoundingBox(id, label, x, y, width, height)
     bbContainer.appendChild(bb)
