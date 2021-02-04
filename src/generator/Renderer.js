@@ -135,7 +135,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.makeBoundingBox = function({ id, label, x, y, width, height, color }) {
+Renderer.prototype.makeBoundingBoxRect = function({ id, label, x, y, width, height, color }) {
   return this.svg.createElement('rect', {
     'label-id': `${id}-label`,
     label: label,
@@ -143,58 +143,52 @@ Renderer.prototype.makeBoundingBox = function({ id, label, x, y, width, height, 
     y: y,
     width: width,
     height: height,
-    style: `fill: none; stroke: ${color || this.svg.randomColor()}; stroke-width: 0.5`
-  })
-}
-
-Renderer.prototype.makeBoundingBoxAroundLine = function({ id, label, x1, y1, x2, y2, color }) {
-  const points = this.svg.getEdgePointsOfBoxAroundLine({ x1, y1, x2, y2 })
-
-  return this.svg.createElement('polygon', {
-    'label-id': `${id}-label`,
-    label: label,
-    points: points.join(' '),
     style: `fill: none; stroke: ${color}; stroke-width: 0.5`
   })
 }
 
-Renderer.prototype.makeTightBoundingBox = function(id, edgeElements, color) {
-  const first = edgeElements[0]
-  if (first.label === bondLabels.wedgeSolid) {
+Renderer.prototype.makeBoundingBoxPolygon = function(id, edgeElements, color) {
+  const label = edgeElements[0].label
+
+  // aneb: wedge is already drawn as polygon, all others are just lines, get polygon around lines and then treat both equally
+  const points = label === bondLabels.wedgeSolid
+    ? [edgeElements[0].points]
+    : edgeElements.map(({ x1, y1, x2, y2 }) => this.svg.getEdgePointsOfBoxAroundLine({ x1, y1, x2, y2 }))
+
+  const boxes = points.map(point => {
     return this.svg.createElement('polygon', {
       'label-id': `${id}-label`,
-      label: first.label,
-      points: first.points.join(' '),
+      label: label,
+      points: point.join(' '),
       style: `fill: none; stroke: ${color}; stroke-width: 0.5`
     })
-  }
+  })
 
-  // aneb: all others are just arrays of lines
-  const boxes = edgeElements.map(e => this.makeBoundingBoxAroundLine(({ ...e, color })))
   return this.svg.createElement('g', { id: `${id}-container` }, boxes)
 }
 
 Renderer.prototype.addLabels = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
-  const nodeLabels = dom.nodes.map(node => this.makeBoundingBox({ ...node, color: this.svg.randomColor() }))
+  const nodeLabels = dom.nodes.map(node => this.makeBoundingBoxRect({ ...node, color: this.svg.randomColor() }))
 
   let edgeLabels
 
   if (this.labelType === labelTypes.box) {
     const correctedEdges = dom.edges.map(e => Object.assign(e, this.svg.correctBoundingBox(e.x, e.y, e.width, e.height)))
     const merged = this.svg.mergeBoundingBoxes(correctedEdges)
-    edgeLabels = merged.map(edge => this.makeBoundingBox({ ...edge, color: this.svg.randomColor() }))
+    edgeLabels = merged.map(edge => this.makeBoundingBoxRect({ ...edge, color: this.svg.randomColor() }))
   }
 
   if (this.labelType === labelTypes.tight) {
     const groupedEdges = _.groupBy(dom.edges, 'id')
-    edgeLabels = Object.entries(groupedEdges).map(([id, edge]) => this.makeTightBoundingBox(id, edge, this.svg.randomColor()))
+    edgeLabels = Object.entries(groupedEdges).map(([id, edge]) => this.makeBoundingBoxPolygon(id, edge, this.svg.randomColor()))
   }
 
   if (this.labelType === labelTypes.points) {
     throw new Error(`${this.labelType} not implemented yet`)
   }
+
   const container = this.svg.createElement('g', null, [...nodeLabels, ...edgeLabels])
   svg.appendChild(container)
 
