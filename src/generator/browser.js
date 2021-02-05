@@ -30,6 +30,9 @@ function getPositionInfoFromSvg() {
 
 function resizeImage(scale) {
   document.body.style.background = 'url("https://images.unsplash.com/photo-1566041510632-30055e21a9cf?ixid=MXwxMjA3fDB8MHxzZWFyY2h8Nnx8cGFwZXIlMjB0ZXh0dXJlfGVufDB8fDB8&ixlib=rb-1.2.1&w=1000&q=80")'
+  document.body.style.backgroundSize = 'cover'
+  document.body.style.backgroundRepeat = 'np-repeat'
+
   const svg = document.querySelector('svg')
   const [height, width, viewbox] = ['height', 'width', 'viewBox'].map(property => svg.getAttributeNS(null, property))
   const [boxX, boxY, boxWidth, boxHeight] = viewbox.split(' ')
