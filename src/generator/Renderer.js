@@ -113,7 +113,7 @@ Renderer.prototype.updateXmlNode = function(node) {
 Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality) {
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
 
-  let [updatedSvg, labels] = await page.evaluate(resizeImage, this.scale)
+  const [updatedSvg, labels] = await page.evaluate(resizeImage, this.scale)
 
   const updatedSvgElement = await page.$('svg')
   const updatedSvgXml = js2xml(this.updateXmlNode(xml2js(updatedSvg)), { spaces: 2, compact: false })
@@ -122,8 +122,6 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
 
   // aneb: the x image has no labels
   if (labels.length) {
-    labels = labels.map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
-
     for (const label of labels) {
       delete label.style
     }
@@ -134,7 +132,8 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
   }
 
   if (this.outputSvg) {
-    ops.push(fs.writeFile(`${fileName}.svg`, updatedSvgXml))
+    ops.push(fs.writeFile(`${fileName}-before.svg`, js2xml(xml2js(svg), { spaces: 2, compact: false })))
+    ops.push(fs.writeFile(`${fileName}-after.svg`, updatedSvgXml))
   }
 
   await Promise.all(ops)
@@ -266,11 +265,11 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePref
 
   const svgXmlWithLabels = this.addLabels({ dom, xml })
 
-  const fileName = `${this.directory}/${filePrefix}-${fileIndex}-${this.labelType}${this.segment ? '-segment' : ''}`
-
+  const fileName = `${this.directory}/${filePrefix}-${fileIndex}`
+  const suffix = `${this.labelType}${this.segment ? '-segment' : ''}`
   // TODO aneb: find out how background image can be exported even at very low quality
-  await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
-  await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-y`, 100)
+  // await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
+  await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-${suffix}-y`, 100)
 }
 
 Renderer.prototype.processBatch = async function(page, smilesList, filePrefix, batchIndex, idOffset) {

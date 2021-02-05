@@ -43,7 +43,7 @@ function resizeImage(scale) {
 
   const elements = document.documentElement.querySelectorAll('[label-id]')
   // aneb: find better way to do this?
-  const labels = Array.from(elements).map(e => Array.from(e.attributes).map(e => ({ [e.name]: e.nodeValue })))
+  const labels = Array.from(elements).map(e => Array.from(e.attributes).map(e => ({ [e.name]: e.nodeValue }))).map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
 
   // eslint-disable-next-line no-undef
   const updatedSvg = new XMLSerializer().serializeToString(svg)
