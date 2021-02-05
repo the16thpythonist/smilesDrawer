@@ -268,7 +268,8 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePref
 
   const fileName = `${this.directory}/${filePrefix}-${fileIndex}-${this.labelType}${this.segment ? '-segment' : ''}`
 
-  // await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
+  // TODO aneb: find out how background image can be exported even at very low quality
+  await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
   await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-y`, 100)
 }
 
