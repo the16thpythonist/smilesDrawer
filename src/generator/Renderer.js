@@ -149,6 +149,19 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
+Renderer.prototype.getCornersAligned = function({ x, y, width: w, height: h }) {
+  const dx = w
+  const dy = h
+
+  // aneb: they are drawn in the order that is defined, so it is closed at (x,y) again
+  return [
+    [x, y],
+    [x + dx, y],
+    [x + dx, y + dy],
+    [x, y + dy]
+  ]
+}
+
 Renderer.prototype.getCornersOriented = function(edge) {
   // aneb: wedge is already drawn as polygon, all others are just lines, get polygon around lines and then treat both equally
   if (edge.label === bondLabels.wedgeSolid) {
@@ -156,30 +169,6 @@ Renderer.prototype.getCornersOriented = function(edge) {
   }
 
   return this.svg.getEdgePointsOfBoxAroundLine(edge)
-}
-
-Renderer.prototype.makeHullPolygon = function({ id, label, points }) {
-  const color = this.svg.randomColor()
-  return this.svg.createElement('polygon', {
-    'label-id': `${id}-label`,
-    label: label,
-    points: points.join(' '),
-    style: this.color(color)
-  })
-}
-
-Renderer.prototype.makeHullPoints = function({ id, label, points }) {
-  const color = this.svg.randomColor()
-  return points.map(([x, y]) => {
-    return this.svg.createElement('circle', {
-      'label-id': `${id}-label`,
-      label: label,
-      cx: x,
-      cy: y,
-      r: 0.5,
-      style: this.color(color)
-    })
-  })
 }
 
 Renderer.prototype.drawPoints = function({ id, label, points }) {
@@ -220,31 +209,15 @@ Renderer.prototype.drawMultiPolygon = function(edgeElements) {
   })
 }
 
-Renderer.prototype.getCornersAligned = function({ x, y, width: w, height: h }) {
-  const dx = w
-  const dy = h
-  // aneb: they are drawn in the order that is defined, so it is closed at (x,y) again
-  return [
-    [x, y],
-    [x + dx, y],
-    [x + dx, y + dy],
-    [x, y + dy]
-  ]
-}
-
 Renderer.prototype.addLabels = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
-  const nodeLabels = []
+  const nodeEdges = dom.nodes.map(n => ({ ...n, points: this.getCornersAligned(n) }))
+  const nodeLabels = this.labelType === labelTypes.hull && !this.segment
+    ? nodeEdges.map(n => this.drawPoints(n))
+    : nodeEdges.map(n => this.drawSinglePolygon(n))
+
   const edgeLabels = []
-
-  const newNodesEdgePoints = dom.nodes.map(n => ({ ...n, points: this.getCornersAligned(n) }))
-
-  if (this.labelType === labelTypes.hull && !this.segment) {
-    nodeLabels.push(...newNodesEdgePoints.map(n => this.drawPoints(n)))
-  } else {
-    nodeLabels.push(...newNodesEdgePoints.map(n => this.drawSinglePolygon(n)))
-  }
 
   if (this.labelType === labelTypes.box) {
     const correctedEdges = dom.edges.map(e => ({ ...e, ...this.svg.correctBoundingBox(e) }))
@@ -263,8 +236,8 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
     const points = dom.edges.map(e => ({ ...e, points: this.getCornersOriented(e) })).filter(e => !!e.points)
     const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svg.hull(e))
     const hullBox = this.segment
-      ? hull.map(edge => this.makeHullPolygon(edge))
-      : hull.map(edge => this.makeHullPoints(edge))
+      ? hull.map(edge => this.drawSinglePolygon(edge))
+      : hull.map(edge => this.drawPoints(edge))
 
     edgeLabels.push(hullBox)
   }

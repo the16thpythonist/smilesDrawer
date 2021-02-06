@@ -105,9 +105,11 @@ SVG.prototype.getEdgePointsOfBoxAroundLine = function({ x1, y1, x2, y2 }) {
   return points.map(p => [p.x, p.y])
 }
 
-SVG.prototype.randomColor = function(seed = 'a2') {
-  const color = Math.floor(Math.random() * 16777215).toString(16).slice(-4)
-  return `#${seed}${color}`
+SVG.prototype.randomColor = function(seed = 'ff') {
+  const c1 = Math.floor(Math.random() * 16777215).toString(16).slice(-2)
+  const c2 = Math.floor(Math.random() * 16777215).toString(16).slice(-2)
+  const [r, g, b] = _.shuffle([c1, seed, c2])
+  return `#${r}${g}${b}`
 }
 
 SVG.prototype.hull = function(edges) {
