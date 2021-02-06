@@ -240,7 +240,7 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
   const nodeEdges = dom.nodes.map(n => ({ ...n, points: this.getCornersAligned(n) }))
-  const nodeLabels = this.labelType === labelTypes.hull && !this.segment
+  const nodeLabels = this.labelType === labelTypes.points && !this.segment
     ? nodeEdges.map(n => this.drawPoints(n))
     : nodeEdges.map(n => this.drawSinglePolygon(n))
 
@@ -253,13 +253,13 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
     edgeLabels.push(...mergedWithPoints.map(e => this.drawSinglePolygon(e)))
   }
 
-  if (this.labelType === labelTypes.tight) {
+  if (this.labelType === labelTypes.oriented) {
     const groupedEdges = _.groupBy(dom.edges, 'id')
     const tightBoxes = Object.values(groupedEdges).map(edge => this.drawMultiPolygon(edge))
     edgeLabels.push(tightBoxes)
   }
 
-  if (this.labelType === labelTypes.hull) {
+  if (this.labelType === labelTypes.points) {
     const points = dom.edges.map(e => ({ ...e, points: this.getCornersOriented(e) })).filter(e => !!e.points)
     const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svg.hull(e))
     const hullBox = this.segment

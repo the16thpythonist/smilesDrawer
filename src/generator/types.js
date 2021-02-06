@@ -9,8 +9,8 @@ const bondLabels = {
 
 const labelTypes = {
   box: 'box',
-  tight: 'tight',
-  hull: 'hull'
+  oriented: 'oriented',
+  points: 'hull'
 }
 
 module.exports = { bondLabels, labelTypes }
