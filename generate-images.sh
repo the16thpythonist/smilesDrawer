@@ -1,10 +1,10 @@
 node generate-images.js \
---from-csv-file "data/zinc_250k.csv" \
+--from-csv-file "data/drugbank.csv" \
 --from-csv-column "0" \
---amount "10" \
 --output-directory "generated-images" \
 --quality "1" \
 --colors "mono" \
---scale "5" \
+--scale "3" \
 --concurrency "4" \
+--amount "30" \
 --label-type "hull"

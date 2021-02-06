@@ -217,25 +217,61 @@ Renderer.prototype.makeHullPoints = function(element, color) {
   })
 }
 
+Renderer.prototype.drawPoints = function({ id, label, points }) {
+  const color = this.svg.randomColor()
+  return points.map(([x, y]) => {
+    return this.svg.createElement('circle', {
+      'label-id': `${id}-label`,
+      label: label,
+      cx: x,
+      cy: y,
+      r: 0.5,
+      style: this.color(color)
+    })
+  })
+}
+
+Renderer.prototype.drawPolygon = function({ id, label, points }) {
+  const color = this.svg.randomColor()
+  return this.svg.createElement('polygon', {
+    'label-id': `${id}-label`,
+    label: label,
+    points: points.join(' '),
+    style: this.color(color)
+  })
+}
+
+Renderer.prototype.newGetCornersFromXYWH = function({ x, y, width: w, height: h }) {
+  const dx = w
+  const dy = h
+  // aneb: they are drawn in the order that is defined, so it is closed at (x,y) again
+  return [
+    [x, y],
+    [x + dx, y],
+    [x + dx, y + dy],
+    [x, y + dy]
+  ]
+}
+
 Renderer.prototype.addLabels = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
   const nodeLabels = []
   const edgeLabels = []
 
+  const newNodesEdgePoints = dom.nodes.map(n => ({ ...n, points: this.newGetCornersFromXYWH(n) }))
+
   if (this.labelType === labelTypes.hull && !this.segment) {
-    const corners = dom.nodes.map(n => ([{ ...n, points: this.getNodeCornerPoints(n) }])).map(c => this.makeHullPoints(c, this.svg.randomColor()))
-    nodeLabels.push(...corners)
+    nodeLabels.push(...newNodesEdgePoints.map(n => this.drawPoints(n)))
   } else {
-    const nodeBoxes = dom.nodes.map(node => this.makeBoundingBoxRect({ ...node, color: this.svg.randomColor() }))
-    nodeLabels.push(...nodeBoxes)
+    nodeLabels.push(...newNodesEdgePoints.map(n => this.drawPolygon(n)))
   }
 
   if (this.labelType === labelTypes.box) {
-    const correctedEdges = dom.edges.map(e => Object.assign(e, this.svg.correctBoundingBox(e.x, e.y, e.width, e.height)))
+    const correctedEdges = dom.edges.map(e => ({ ...e, ...this.svg.correctBoundingBox(e) }))
     const merged = this.svg.mergeBoundingBoxes(correctedEdges)
-    const boundingBoxes = merged.map(edge => this.makeBoundingBoxRect({ ...edge, color: this.svg.randomColor() }))
-    edgeLabels.push(...boundingBoxes)
+    const mergedWithPoints = merged.map(n => ({ ...n, points: this.newGetCornersFromXYWH(n) }))
+    edgeLabels.push(...mergedWithPoints.map(e => this.drawPolygon(e)))
   }
 
   if (this.labelType === labelTypes.tight) {

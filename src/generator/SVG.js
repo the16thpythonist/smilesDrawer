@@ -39,7 +39,7 @@ SVG.prototype.appendChildren = function(element, children) {
   }
 }
 
-SVG.prototype.correctBoundingBox = function(x, y, width, height) {
+SVG.prototype.correctBoundingBox = function({ x, y, width, height }) {
   const minValue = 0.5
   const newValue = 2
   let [xCorr, yCorr, widthCorr, heightCorr] = [x, y, width, height]
