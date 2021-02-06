@@ -1,6 +1,7 @@
 (async() => {
-  // TODO curate list of interesting test SMILES
-  // TODO add methods to renderer for generation of multiple types of labels, maybe params like atoms="box", bonds="ends"
+  // TODO aneb: make configuration for explicit drawings, it does not work with the current drawer config
+  // need to update the Atom.drawExplicit property
+
   const fs = require('fs-extra')
 
   const Renderer = require('./src/generator/Renderer')
@@ -17,7 +18,7 @@
     : Object.values(labelTypes).filter(t => t !== labelTypes.all)
 
   if (conf.clean) {
-    await fs.remove(conf.outputDirectory)
+    await fs.emptyDir(conf.outputDirectory)
   }
 
   await fs.ensureDir(conf.outputDirectory)

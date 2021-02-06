@@ -11,7 +11,6 @@ const { bondLabels } = require('../generator/types')
 
 class SvgDrawer {
   constructor({ colors }) {
-    // TODO aneb: if this gets too annoying, change the whole parameter passing, it's too much ...
     this.colors = colors
     this.preprocessor = new Drawer({ })
     this.opts = this.preprocessor.opts
