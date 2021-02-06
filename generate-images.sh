@@ -7,4 +7,5 @@ node generate-images.js \
 --scale "3" \
 --concurrency "4" \
 --amount "30" \
---label-type "hull"
+--label-type "tight" \
+--output-labels

@@ -31,24 +31,31 @@ function getPositionInfoFromSvg() {
 function resizeImage(scale) {
   // document.body.style.background = 'url("https://images.unsplash.com/photo-1566041510632-30055e21a9cf?ixid=MXwxMjA3fDB8MHxzZWFyY2h8Nnx8cGFwZXIlMjB0ZXh0dXJlfGVufDB8fDB8&ixlib=rb-1.2.1&w=1000&q=80")'
   // document.body.style.backgroundSize = 'cover'
-  // document.body.style.backgroundRepeat = 'np-repeat'
+  // document.body.style.backgroundRepeat = 'no-repeat'
 
   const svg = document.querySelector('svg')
-  const [height, width, viewbox] = ['height', 'width', 'viewBox'].map(property => svg.getAttributeNS(null, property))
-  const [boxX, boxY, boxWidth, boxHeight] = viewbox.split(' ')
 
+  const [height, width] = ['height', 'width'].map(property => svg.getAttributeNS(null, property))
+
+  // aneb: original viewbox must be preserved, inner coordinates are relative to it
+  // changing width and height is the proper way to do it, rendering it will recognize the new proportions
   svg.setAttributeNS(null, 'height', Math.ceil(height * scale))
   svg.setAttributeNS(null, 'width', Math.ceil(width * scale))
-  svg.setAttributeNS(null, 'viewbox', `${boxX} ${boxY} ${boxWidth * scale} ${boxHeight * scale} `)
 
   const elements = document.documentElement.querySelectorAll('[label-id]')
   // aneb: find better way to do this?
-  const labels = Array.from(elements).map(e => Array.from(e.attributes).map(e => ({ [e.name]: e.nodeValue }))).map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
+  const labels = Array.from(elements)
+    .map(e => Array.from(e.attributes).map(e => ({ [e.name]: e.nodeValue })))
+    .map(pair => pair.reduce((p, c) => Object.assign(p, c), {}))
 
   // eslint-disable-next-line no-undef
   const updatedSvg = new XMLSerializer().serializeToString(svg)
 
-  return [updatedSvg, labels]
+  // aneb: easiest way to make object out of it
+  const { a, b, c, d, e, f } = svg.getScreenCTM()
+  const matrix = { a, b, c, d, e, f }
+
+  return [updatedSvg, labels, matrix]
 }
 
 module.exports = { getPositionInfoFromSvg, resizeImage }

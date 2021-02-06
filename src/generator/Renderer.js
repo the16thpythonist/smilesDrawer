@@ -48,8 +48,8 @@ Renderer.prototype.done = async function() {
   this.browser.close()
 }
 
-Renderer.prototype.color = function(color) {
-  const fill = this.segment ? color : 'none'
+Renderer.prototype.color = function(color, circle = false) {
+  const fill = this.segment || circle ? color : 'none'
   return `fill: ${fill}; stroke: ${color}; stroke-width: 0.5`
 }
 
@@ -110,29 +110,53 @@ Renderer.prototype.updateXmlNode = function(node) {
   return node
 }
 
-Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality) {
-  await page.setContent(svg, { waitUntil: 'domcontentloaded' })
+Renderer.prototype.cleanupLabel = function(label) {
+  delete label.style
 
-  const [updatedSvg, labels] = await page.evaluate(resizeImage, this.scale)
-
-  const updatedSvgElement = await page.$('svg')
-  const updatedSvgXml = js2xml(this.updateXmlNode(xml2js(updatedSvg)), { spaces: 2, compact: false })
-
-  const ops = [updatedSvgElement.screenshot({ path: `${fileName}-quality-${quality}.jpeg`, omitBackground: false, quality: quality })]
-
-  // aneb: the x image has no labels
-  if (labels.length) {
-    for (const label of labels) {
-      delete label.style
-    }
+  if (label.points) {
+    label.points = _.chunk(label.points.split(/,|\s/).map(p => Number(p)), 2)
+    return label
   }
 
+  if (label.cx && label.cy) {
+    label.points = [[label.cx, label.cy]]
+    delete label.cx && delete label.cy && delete label.r
+    return label
+  }
+
+  throw new Error('the label is neither a polygon nor a point!')
+}
+
+Renderer.prototype.groupLabels = function(labels) {
+  const groups = _.groupBy(labels, 'label-id')
+  const result = []
+  for (const [id, points] of Object.entries(groups)) {
+    const label = points[0].label
+    const xy = _.zip(...points.map(p => p.y))
+    result.push({ id, label, xy })
+  }
+
+  return _.sortBy(result, 'id')
+}
+
+Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality) {
+  await page.setContent(svg, { waitUntil: 'domcontentloaded' })
+  const [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, this.scale)
+  const updatedSvgElement = await page.$('svg')
+  const ops = [updatedSvgElement.screenshot({ path: `${fileName}-quality-${quality}.jpeg`, omitBackground: false, quality: quality })]
+
   if (this.outputLabels) {
-    ops.push(fs.writeFile(`${fileName}.labels.json`, JSON.stringify(labels, null, 2)))
+    const cleanLabels = labels
+      .map(l => this.cleanupLabel(l))
+      .map(l => ({ ...l, y: this.svg.transformPoints(l, matrix) }))
+
+    const finalLabels = this.groupLabels(cleanLabels)
+
+    ops.push(fs.writeFile(`${fileName}.labels.json`, JSON.stringify(finalLabels, null, 2)))
   }
 
   if (this.outputSvg) {
-    ops.push(fs.writeFile(`${fileName}-before.svg`, js2xml(xml2js(svg), { spaces: 2, compact: false })))
+    const updatedSvgXml = js2xml(this.updateXmlNode(xml2js(updatedSvg)), { spaces: 2, compact: false })
     ops.push(fs.writeFile(`${fileName}-after.svg`, updatedSvgXml))
   }
 
@@ -173,14 +197,17 @@ Renderer.prototype.getCornersOriented = function(edge) {
 
 Renderer.prototype.drawPoints = function({ id, label, points }) {
   const color = this.svg.randomColor()
+
+  // aneb: try to avoid overlapping points by using different sizes
+  const size = _.floor(_.random(true) * 10 + 2) / 10
   return points.map(([x, y]) => {
     return this.svg.createElement('circle', {
       'label-id': `${id}-label`,
       label: label,
       cx: x,
       cy: y,
-      r: 0.5,
-      style: this.color(color)
+      r: size,
+      style: this.color(color, true)
     })
   })
 }
@@ -251,6 +278,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePref
   const svgXmlWithoutLabels = this.smilesToSvgXml(smiles)
   const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
 
+  // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
 
   const fileName = `${this.directory}/${filePrefix}-${fileIndex}`

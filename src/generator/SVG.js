@@ -126,4 +126,21 @@ SVG.prototype.hull = function(edges) {
   return edges[0]
 }
 
+SVG.prototype.transformPoint = function([x, y], { a, b, c, d }) {
+  //  https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
+  // newX = a * oldX + c * oldY
+  // newY = b * oldX + d * oldY
+  return [
+    a * x + c * y,
+    b * x + d * y
+  ]
+}
+
+SVG.prototype.transformPoints = function(label, matrix) {
+  return label.points
+    .map(([x, y]) => ([Number(x), Number(y)]))
+    .map(p => this.transformPoint(p, matrix))
+    .map(([x, y]) => ([_.round(x, 2), _.round(y, 2)]))
+}
+
 module.exports = SVG
