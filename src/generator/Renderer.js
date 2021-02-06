@@ -40,8 +40,6 @@ Renderer.prototype.init = async function() {
 
   this.browser = await puppeteer.launch({ headless: true, devtools: false })
   this.pages = await Promise.all(Array(this.concurrency).fill(null).map(() => this.browser.newPage()))
-
-  await fs.ensureDir(this.directory)
 }
 
 Renderer.prototype.done = async function() {
@@ -132,7 +130,7 @@ Renderer.prototype.groupLabels = function(labels) {
   const result = []
   for (const [id, points] of Object.entries(groups)) {
     const label = points[0].label
-    const xy = _.zip(...points.map(p => p.y))
+    const xy = _.zip(...points.map(p => p.xy)).map(p => p.toString()).join(' ')
     result.push({ id, label, xy })
   }
 
@@ -148,7 +146,7 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
   if (this.outputLabels) {
     const cleanLabels = labels
       .map(l => this.cleanupLabel(l))
-      .map(l => ({ ...l, y: this.svg.transformPoints(l, matrix) }))
+      .map(l => ({ ...l, xy: this.svg.transformPoints(l, matrix) }))
 
     const finalLabels = this.groupLabels(cleanLabels)
 
@@ -199,7 +197,7 @@ Renderer.prototype.drawPoints = function({ id, label, points }) {
   const color = this.svg.randomColor()
 
   // aneb: try to avoid overlapping points by using different sizes
-  const size = _.floor(_.random(true) * 10 + 2) / 10
+  const size = _.floor(_.random(true) * 5 + 2) / 10
   return points.map(([x, y]) => {
     return this.svg.createElement('circle', {
       'label-id': `${id}-label`,
@@ -296,11 +294,11 @@ Renderer.prototype.processBatch = async function(page, smilesList, filePrefix, b
 
     await this.imageFromSmilesString(page, smiles, filePrefix, fileIndex)
     if (i % progress === 0) {
-      console.log(`batch #${batchIndex} progress: ${100 * +(i / smilesList.length).toFixed(1)}%`)
+      console.log(`${this.labelType} - batch #${batchIndex} progress: ${100 * +(i / smilesList.length).toFixed(1)}%`)
     }
   }
 
-  console.log(`batch #${batchIndex} progress: 100%`)
+  console.log(`${this.labelType} - batch #${batchIndex} progress: 100%`)
 }
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix = 'img') {

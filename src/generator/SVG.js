@@ -1,7 +1,6 @@
 const _ = require('lodash')
 const Vector2 = require('../drawer/Vector2')
 const { JSDOM } = require('jsdom')
-const hull = require('hull.js')
 
 const { bondLabels } = require('./types')
 
@@ -119,28 +118,29 @@ SVG.prototype.hull = function(edges) {
     return edges[0]
   }
 
-  // aneb: this solution is super hacky but works ... :(
   const { x1: p11, y1: p12, x2: p21, y2: p22 } = edges[0]
   const { x1: p31, y1: p32, x2: p41, y2: p42 } = edges[0].label === bondLabels.triple ? edges.slice(-2)[0] : edges.slice(-1)[0]
-  edges[0].points = hull([[p11, p12], [p21, p22], [p31, p32], [p41, p42]])
+  const points = [[p11, p12], [p21, p22], [p31, p32], [p41, p42]]
+
+  // aneb: no matter the orientation, this orders the points such that the polygon can be drawn
+  // clockwise or counterclockwise, therefore not having crossing paths
+  edges[0].points = _.sortBy(points, [1, 0])
   return edges[0]
 }
 
-SVG.prototype.transformPoint = function([x, y], { a, b, c, d }) {
+SVG.prototype.transformPoints = function(label, matrix) {
   //  https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
   // newX = a * oldX + c * oldY
   // newY = b * oldX + d * oldY
-  return [
-    a * x + c * y,
-    b * x + d * y
-  ]
-}
+  const { a, b, c, d } = matrix
 
-SVG.prototype.transformPoints = function(label, matrix) {
-  return label.points
-    .map(([x, y]) => ([Number(x), Number(y)]))
-    .map(p => this.transformPoint(p, matrix))
-    .map(([x, y]) => ([_.round(x, 2), _.round(y, 2)]))
+  return label.points.map(p => {
+    const [x, y] = [Number(p[0]), Number(p[1])]
+    return [
+      _.round(a * x + c * y, 4),
+      _.round(b * x + d * y, 4)
+    ]
+  })
 }
 
 module.exports = SVG

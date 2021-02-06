@@ -4,8 +4,9 @@ node generate-images.js \
 --output-directory "generated-images" \
 --quality "1" \
 --colors "mono" \
---scale "3" \
---concurrency "4" \
---amount "30" \
---label-type "tight" \
---output-labels
+--scale "5" \
+--concurrency "8" \
+--amount "50" \
+--label-type "all" \
+--output-labels \
+--clean

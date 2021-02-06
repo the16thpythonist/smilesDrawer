@@ -29,7 +29,7 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100, header = 1) => {
 
 const cliParams = () => {
   const {
-    outputDirectory, amount, quality, scale, concurrency, labelType, segment, outputSvg, outputLabels,
+    outputDirectory, amount, quality, scale, concurrency, labelType, segment, outputSvg, outputLabels, clean,
     colors: colorMap,
     fromCsvFile: csvFile,
     fromCsvColumn: csvColumn
@@ -47,7 +47,8 @@ const cliParams = () => {
     labelType: labelType || null,
     segment: !!segment,
     outputSvg: !!outputSvg,
-    outputLabels: !!outputLabels
+    outputLabels: !!outputLabels,
+    clean: !!clean
   }
 
   if (!Object.keys(labelTypes).includes(config.labelType)) {
