@@ -329,8 +329,8 @@ class Vertex {
 
     for (let i = 0; i < neighbours.length; i++) {
       if (ArrayHelper.contains(vertices[neighbours[i]].value.rings, {
-        value: ringId
-      }) &&
+          value: ringId
+        }) &&
         neighbours[i] != previousVertexId) {
         return neighbours[i]
       }

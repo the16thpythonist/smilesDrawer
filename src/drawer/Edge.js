@@ -14,12 +14,12 @@
  */
 class Edge {
   /**
-     * The constructor for the class Edge.
-     *
-     * @param {Number} sourceId A vertex id.
-     * @param {Number} targetId A vertex id.
-     * @param {Number} [weight=1] The weight of the edge.
-     */
+   * The constructor for the class Edge.
+   *
+   * @param {Number} sourceId A vertex id.
+   * @param {Number} targetId A vertex id.
+   * @param {Number} [weight=1] The weight of the edge.
+   */
   constructor(sourceId, targetId, weight = 1) {
     this.id = null
     this.sourceId = sourceId
@@ -32,19 +32,10 @@ class Edge {
   }
 
   /**
-     * Set the bond type of this edge. This also sets the edge weight.
-     * @param {String} bondType
-     */
-  setBondType(bondType) {
-    this.bondType = bondType
-    this.weight = Edge.bonds[bondType]
-  }
-
-  /**
-     * An object mapping the bond type to the number of bonds.
-     *
-     * @returns {Object} The object containing the map.
-     */
+   * An object mapping the bond type to the number of bonds.
+   *
+   * @returns {Object} The object containing the map.
+   */
   static get bonds() {
     return {
       '-': 1,
@@ -54,6 +45,15 @@ class Edge {
       '#': 3,
       $: 4
     }
+  }
+
+  /**
+   * Set the bond type of this edge. This also sets the edge weight.
+   * @param {String} bondType
+   */
+  setBondType(bondType) {
+    this.bondType = bondType
+    this.weight = Edge.bonds[bondType]
   }
 }
 

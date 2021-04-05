@@ -86,9 +86,9 @@ class SvgWrapper {
   }
 
   /**
-     * Create a linear gradient to apply to a line
-     * @param {Line} line the line to apply the gradiation to.
-     */
+   * Create a linear gradient to apply to a line
+   * @param {Line} line the line to apply the gradiation to.
+   */
   createGradient(line) {
     const gradientUrl = `line-${this.gradientId++}`
     const l = line.getLeftVector()
@@ -99,12 +99,25 @@ class SvgWrapper {
     const toY = r.y + this.offsetY
 
     const firstStopColor = this.getColor(line.getLeftElement()) || this.getColor('C')
-    const firstStop = this.svgHelper.createElement('stop', { 'stop-color': firstStopColor, offset: '20%' })
+    const firstStop = this.svgHelper.createElement('stop', {
+      'stop-color': firstStopColor,
+      offset: '20%'
+    })
 
     const secondStopColor = this.getColor(line.getRightElement() || this.getColor('C'))
-    const secondStop = this.svgHelper.createElement('stop', { 'stop-color': secondStopColor, offset: '100%' })
+    const secondStop = this.svgHelper.createElement('stop', {
+      'stop-color': secondStopColor,
+      offset: '100%'
+    })
 
-    const gradientAttributes = { id: gradientUrl, gradientUnits: 'userSpaceOnUse', x1: fromX, y1: fromY, x2: toX, y2: toY }
+    const gradientAttributes = {
+      id: gradientUrl,
+      gradientUnits: 'userSpaceOnUse',
+      x1: fromX,
+      y1: fromY,
+      x2: toX,
+      y2: toY
+    }
     const gradient = this.svgHelper.createElement('linearGradient', gradientAttributes, [firstStop, secondStop])
 
     this.gradients.push(gradient)
@@ -113,21 +126,24 @@ class SvgWrapper {
   }
 
   /**
-     * Create a tspan element for sub or super scripts that styles the text
-     * appropriately as one of those text types.
-     * @param {String} text the actual text
-     * @param {String} shift the type of text, either 'sub', or 'super'
-     */
+   * Create a tspan element for sub or super scripts that styles the text
+   * appropriately as one of those text types.
+   * @param {String} text the actual text
+   * @param {String} shift the type of text, either 'sub', or 'super'
+   */
   createSubSuperScripts(text, shift) {
-    const attributes = { 'baseline-shift': shift, class: 'sub' }
+    const attributes = {
+      'baseline-shift': shift,
+      class: 'sub'
+    }
     const textNode = document.createTextNode(text)
     return this.svgHelper.createElement('tspan', attributes, [textNode])
   }
 
   /**
-     * Determine drawing dimensiosn based on vertex positions.
-     * @param {Vertex[]} vertices An array of vertices containing the vertices associated with the current molecule.
-     */
+   * Determine drawing dimensiosn based on vertex positions.
+   * @param {Vertex[]} vertices An array of vertices containing the vertices associated with the current molecule.
+   */
   determineDimensions(vertices) {
     // Figure out the final size of the image
     let maxX = -Number.MAX_VALUE
@@ -189,11 +205,11 @@ class SvgWrapper {
   }
 
   /**
-     * Draw an svg ring.
-     * @param {Number} x The x position of the text.
-     * @param {Number} y The y position of the text.
-     * @param {Number} r Radius of ring
-     */
+   * Draw an svg ring.
+   * @param {Number} x The x position of the text.
+   * @param {Number} y The y position of the text.
+   * @param {Number} r Radius of ring
+   */
   drawRing(x, y, r) {
     const ring = this.svgHelper.createElement('circle', {
       cx: x + this.offsetX,
@@ -215,7 +231,7 @@ class SvgWrapper {
    */
   drawDashedWedge(idLabel, idValue, bondLabel, line) {
     if (isNaN(line.from.x) || isNaN(line.from.y) ||
-            isNaN(line.to.x) || isNaN(line.to.y)) {
+      isNaN(line.to.x) || isNaN(line.to.y)) {
       return
     }
 
@@ -338,7 +354,10 @@ class SvgWrapper {
    */
   drawText(vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
     // TODO aneb: clean up this mess ...
-    const pos = { x: x + this.offsetX, y: y + this.offsetY }
+    const pos = {
+      x: x + this.offsetX,
+      y: y + this.offsetY
+    }
 
     let writingMode = 'horizontal-tb'
     let letterSpacing = 'normal'
@@ -413,7 +432,7 @@ class SvgWrapper {
     // TODO: Better handle exceptions
     // Exception for nitro (draw nitro as NO2 instead of N+O-O)
     if (charge === 1 && elementName === 'N' && attachedPseudoElement.hasOwnProperty('0O') &&
-            attachedPseudoElement.hasOwnProperty('0O-1')) {
+      attachedPseudoElement.hasOwnProperty('0O-1')) {
       attachedPseudoElement = {
         '0O': {
           element: 'O',

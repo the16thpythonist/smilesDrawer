@@ -24,10 +24,10 @@ const RingConnection = require('./RingConnection')
  */
 class Ring {
   /**
-     * The constructor for the class Ring.
-     *
-     * @param {Number[]} members An array containing the vertex ids of the members of the ring to be created.
-     */
+   * The constructor for the class Ring.
+   *
+   * @param {Number[]} members An array containing the vertex ids of the members of the ring to be created.
+   */
   constructor(members) {
     this.id = null
     this.members = members
@@ -46,10 +46,10 @@ class Ring {
   }
 
   /**
-     * Clones this ring and returns the clone.
-     *
-     * @returns {Ring} A clone of this ring.
-     */
+   * Clones this ring and returns the clone.
+   *
+   * @returns {Ring} A clone of this ring.
+   */
   clone() {
     const clone = new Ring(this.members)
 
@@ -70,20 +70,20 @@ class Ring {
   }
 
   /**
-     * Returns the size (number of members) of this ring.
-     *
-     * @returns {Number} The size (number of members) of this ring.
-     */
+   * Returns the size (number of members) of this ring.
+   *
+   * @returns {Number} The size (number of members) of this ring.
+   */
   getSize() {
     return this.members.length
   }
 
   /**
-     * Gets the polygon representation (an array of the ring-members positional vectors) of this ring.
-     *
-     * @param {Vertex[]} vertices An array of vertices representing the current molecule.
-     * @returns {Vector2[]} An array of the positional vectors of the ring members.
-     */
+   * Gets the polygon representation (an array of the ring-members positional vectors) of this ring.
+   *
+   * @param {Vertex[]} vertices An array of vertices representing the current molecule.
+   * @returns {Vector2[]} An array of the positional vectors of the ring members.
+   */
   getPolygon(vertices) {
     const polygon = []
 
@@ -95,22 +95,22 @@ class Ring {
   }
 
   /**
-     * Returns the angle of this ring in relation to the coordinate system.
-     *
-     * @returns {Number} The angle in radians.
-     */
+   * Returns the angle of this ring in relation to the coordinate system.
+   *
+   * @returns {Number} The angle in radians.
+   */
   getAngle() {
     return Math.PI - this.centralAngle
   }
 
   /**
-     * Loops over the members of this ring from a given start position in a direction opposite to the vertex id passed as the previousId.
-     *
-     * @param {Vertex[]} vertices The vertices associated with the current molecule.
-     * @param {Function} callback A callback with the current vertex id as a parameter.
-     * @param {Number} startVertexId The vertex id of the start vertex.
-     * @param {Number} previousVertexId The vertex id of the previous vertex (the loop calling the callback function will run in the opposite direction of this vertex).
-     */
+   * Loops over the members of this ring from a given start position in a direction opposite to the vertex id passed as the previousId.
+   *
+   * @param {Vertex[]} vertices The vertices associated with the current molecule.
+   * @param {Function} callback A callback with the current vertex id as a parameter.
+   * @param {Number} startVertexId The vertex id of the start vertex.
+   * @param {Number} previousVertexId The vertex id of the previous vertex (the loop calling the callback function will run in the opposite direction of this vertex).
+   */
   eachMember(vertices, callback, startVertexId, previousVertexId) {
     startVertexId = startVertexId || startVertexId === 0 ? startVertexId : this.members[0]
     let current = startVertexId
@@ -133,11 +133,11 @@ class Ring {
   }
 
   /**
-     * Returns an array containing the neighbouring rings of this ring ordered by ring size.
-     *
-     * @param {RingConnection[]} ringConnections An array of ring connections associated with the current molecule.
-     * @returns {Object[]} An array of neighbouring rings sorted by ring size. Example: { n: 5, neighbour: 1 }.
-     */
+   * Returns an array containing the neighbouring rings of this ring ordered by ring size.
+   *
+   * @param {RingConnection[]} ringConnections An array of ring connections associated with the current molecule.
+   * @returns {Object[]} An array of neighbouring rings sorted by ring size. Example: { n: 5, neighbour: 1 }.
+   */
   getOrderedNeighbours(ringConnections) {
     const orderedNeighbours = Array(this.neighbours.length)
 
@@ -159,25 +159,25 @@ class Ring {
   }
 
   /**
-     * Check whether this ring is an implicitly defined benzene-like (e.g. C1=CC=CC=C1) with 6 members and 3 double bonds.
-     *
-     * @param {Vertex[]} vertices An array of vertices associated with the current molecule.
-     * @returns {Boolean} A boolean indicating whether or not this ring is an implicitly defined benzene-like.
-     */
+   * Check whether this ring is an implicitly defined benzene-like (e.g. C1=CC=CC=C1) with 6 members and 3 double bonds.
+   *
+   * @param {Vertex[]} vertices An array of vertices associated with the current molecule.
+   * @returns {Boolean} A boolean indicating whether or not this ring is an implicitly defined benzene-like.
+   */
   isBenzeneLike(vertices) {
     const db = this.getDoubleBondCount(vertices)
     const length = this.members.length
 
     return db === 3 && length === 6 ||
-               db === 2 && length === 5
+      db === 2 && length === 5
   }
 
   /**
-     * Get the number of double bonds inside this ring.
-     *
-     * @param {Vertex[]} vertices An array of vertices associated with the current molecule.
-     * @returns {Number} The number of double bonds inside this ring.
-     */
+   * Get the number of double bonds inside this ring.
+   *
+   * @param {Vertex[]} vertices An array of vertices associated with the current molecule.
+   * @returns {Number} The number of double bonds inside this ring.
+   */
   getDoubleBondCount(vertices) {
     let doubleBondCount = 0
 
@@ -193,11 +193,11 @@ class Ring {
   }
 
   /**
-     * Checks whether or not this ring contains a member with a given vertex id.
-     *
-     * @param {Number} vertexId A vertex id.
-     * @returns {Boolean} A boolean indicating whether or not this ring contains a member with the given vertex id.
-     */
+   * Checks whether or not this ring contains a member with a given vertex id.
+   *
+   * @param {Number} vertexId A vertex id.
+   * @returns {Boolean} A boolean indicating whether or not this ring contains a member with the given vertex id.
+   */
   contains(vertexId) {
     for (let i = 0; i < this.members.length; i++) {
       if (this.members[i] == vertexId) {

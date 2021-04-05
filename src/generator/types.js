@@ -14,4 +14,7 @@ const labelTypes = {
   all: 'all'
 }
 
-module.exports = { bondLabels, labelTypes }
+module.exports = {
+  bondLabels,
+  labelTypes
+}

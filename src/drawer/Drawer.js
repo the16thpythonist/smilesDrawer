@@ -21,10 +21,10 @@ const SSSR = require('./SSSR')
  */
 class Drawer {
   /**
-     * The constructor for the class SmilesDrawer.
-     *
-     * @param {Object} options An object containing custom values for different options. It is merged with the default options.
-     */
+   * The constructor for the class SmilesDrawer.
+   *
+   * @param {Object} options An object containing custom values for different options. It is merged with the default options.
+   */
   constructor(options) {
     this.graph = null
     this.doubleBondConfigCount = 0
@@ -192,19 +192,19 @@ class Drawer {
   }
 
   /**
-     * Returns the total overlap score of the current molecule.
-     *
-     * @returns {Number} The overlap score.
-     */
+   * Returns the total overlap score of the current molecule.
+   *
+   * @returns {Number} The overlap score.
+   */
   getTotalOverlapScore() {
     return this.totalOverlapScore
   }
 
   /**
-     * Returns the molecular formula of the loaded molecule as a string.
-     *
-     * @returns {String} The molecular formula.
-     */
+   * Returns the molecular formula of the loaded molecule as a string.
+   *
+   * @returns {String} The molecular formula.
+   */
   getMolecularFormula() {
     let molecularFormula = ''
     const counts = new Map()
@@ -272,12 +272,12 @@ class Drawer {
   }
 
   /**
-     * Returns the aromatic or largest ring shared by the two vertices.
-     *
-     * @param {Vertex} vertexA A vertex.
-     * @param {Vertex} vertexB A vertex.
-     * @returns {(Ring|null)} If an aromatic common ring exists, that ring, else the largest (non-aromatic) ring, else null.
-     */
+   * Returns the aromatic or largest ring shared by the two vertices.
+   *
+   * @param {Vertex} vertexA A vertex.
+   * @param {Vertex} vertexB A vertex.
+   * @returns {(Ring|null)} If an aromatic common ring exists, that ring, else the largest (non-aromatic) ring, else null.
+   */
   getLargestOrAromaticCommonRing(vertexA, vertexB) {
     const commonRings = this.getCommonRings(vertexA, vertexB)
     let maxSize = 0
@@ -299,12 +299,12 @@ class Drawer {
   }
 
   /**
-     * When drawing a double bond, choose the side to place the double bond. E.g. a double bond should always been drawn inside a ring.
-     *
-     * @param {Vertex} vertexA A vertex.
-     * @param {Vertex} vertexB A vertex.
-     * @param {Vector2[]} sides An array containing the two normals of the line spanned by the two provided vertices.
-     * @returns {Object} Returns an object containing the following information: {
+   * When drawing a double bond, choose the side to place the double bond. E.g. a double bond should always been drawn inside a ring.
+   *
+   * @param {Vertex} vertexA A vertex.
+   * @param {Vertex} vertexB A vertex.
+   * @param {Vector2[]} sides An array containing the two normals of the line spanned by the two provided vertices.
+   * @returns {Object} Returns an object containing the following information: {
           totalSideCount: Counts the sides of each vertex in the molecule, is an array [ a, b ],
           totalPosition: Same as position, but based on entire molecule,
           sideCount: Counts the sides of each neighbour, is an array [ a, b ],
@@ -312,7 +312,7 @@ class Drawer {
           anCount: the number of neighbours of vertexA,
           bnCount: the number of neighbours of vertexB
       }
-     */
+   */
   chooseSide(vertexA, vertexB, sides) {
     // Check which side has more vertices
     // Get all the vertices connected to the both ends
@@ -362,12 +362,12 @@ class Drawer {
   }
 
   /**
-     * Checks whether or not two vertices are in the same ring.
-     *
-     * @param {Vertex} vertexA A vertex.
-     * @param {Vertex} vertexB A vertex.
-     * @returns {Boolean} A boolean indicating whether or not the two vertices are in the same ring.
-     */
+   * Checks whether or not two vertices are in the same ring.
+   *
+   * @param {Vertex} vertexA A vertex.
+   * @param {Vertex} vertexB A vertex.
+   * @returns {Boolean} A boolean indicating whether or not the two vertices are in the same ring.
+   */
   areVerticesInSameRing(vertexA, vertexB) {
     // This is a little bit lighter (without the array and push) than
     // getCommonRings().length > 0
@@ -383,11 +383,11 @@ class Drawer {
   }
 
   /**
-     * Check whether or not a ring is an implicitly defined aromatic ring (lower case smiles).
-     *
-     * @param {Ring} ring A ring.
-     * @returns {Boolean} A boolean indicating whether or not a ring is implicitly defined as aromatic.
-     */
+   * Check whether or not a ring is an implicitly defined aromatic ring (lower case smiles).
+   *
+   * @param {Ring} ring A ring.
+   * @returns {Boolean} A boolean indicating whether or not a ring is implicitly defined as aromatic.
+   */
   isRingAromatic(ring) {
     for (let i = 0; i < ring.members.length; i++) {
       const vertex = this.graph.vertices[ring.members[i]]
@@ -401,11 +401,11 @@ class Drawer {
   }
 
   /**
-     * Get the normals of an edge.
-     *
-     * @param {Edge} edge An edge.
-     * @returns {Vector2[]} An array containing two vectors, representing the normals.
-     */
+   * Get the normals of an edge.
+   *
+   * @param {Edge} edge An edge.
+   * @returns {Vector2[]} An array containing two vectors, representing the normals.
+   */
   getEdgeNormals(edge) {
     const v1 = this.graph.vertices[edge.sourceId].position
     const v2 = this.graph.vertices[edge.targetId].position
@@ -415,12 +415,12 @@ class Drawer {
   }
 
   /**
-     * Returns the type of the ringbond (e.g. '=' for a double bond). The ringbond represents the break in a ring introduced when creating the MST. If the two vertices supplied as arguments are not part of a common ringbond, the method returns null.
-     *
-     * @param {Vertex} vertexA A vertex.
-     * @param {Vertex} vertexB A vertex.
-     * @returns {(String|null)} Returns the ringbond type or null, if the two supplied vertices are not connected by a ringbond.
-     */
+   * Returns the type of the ringbond (e.g. '=' for a double bond). The ringbond represents the break in a ring introduced when creating the MST. If the two vertices supplied as arguments are not part of a common ringbond, the method returns null.
+   *
+   * @param {Vertex} vertexA A vertex.
+   * @param {Vertex} vertexB A vertex.
+   * @returns {(String|null)} Returns the ringbond type or null, if the two supplied vertices are not connected by a ringbond.
+   */
   getRingbondType(vertexA, vertexB) {
     // Checks whether the two vertices are the ones connecting the ring
     // and what the bond type should be.
@@ -447,8 +447,8 @@ class Drawer {
   }
 
   /**
-     * A helper method to extend the default options with user supplied ones.
-     */
+   * A helper method to extend the default options with user supplied ones.
+   */
   extend() {
     const that = this
     const extended = {}
@@ -482,11 +482,11 @@ class Drawer {
   };
 
   /**
-     * Returns the number of rings this edge is a part of.
-     *
-     * @param {Number} edgeId The id of an edge.
-     * @returns {Number} The number of rings the provided edge is part of.
-     */
+   * Returns the number of rings this edge is a part of.
+   *
+   * @param {Number} edgeId The id of an edge.
+   * @returns {Number} The number of rings the provided edge is part of.
+   */
   edgeRingCount(edgeId) {
     const edge = this.graph.edges[edgeId]
     const a = this.graph.vertices[edge.sourceId]
@@ -496,10 +496,10 @@ class Drawer {
   }
 
   /**
-     * Returns an array containing the bridged rings associated with this  molecule.
-     *
-     * @returns {Ring[]} An array containing all bridged rings associated with this molecule.
-     */
+   * Returns an array containing the bridged rings associated with this  molecule.
+   *
+   * @returns {Ring[]} An array containing all bridged rings associated with this molecule.
+   */
   getBridgedRings() {
     const bridgedRings = Array()
 
@@ -513,8 +513,8 @@ class Drawer {
   }
 
   /**
-     * Rotates the drawing to make the widest dimension horizontal.
-     */
+   * Rotates the drawing to make the widest dimension horizontal.
+   */
   rotateDrawing() {
     // Rotate the vertices to make the molecule align horizontally
     // Find the longest distance
@@ -574,8 +574,8 @@ class Drawer {
   }
 
   /**
-     * Initializes rings and ringbonds for the current molecule.
-     */
+   * Initializes rings and ringbonds for the current molecule.
+   */
   initRings() {
     const openBonds = new Map()
 
@@ -715,7 +715,7 @@ class Drawer {
         neighbour.value.hasHydrogen = true
 
         if (!neighbour.value.isStereoCenter || neighbour.value.rings.length < 2 && !neighbour.value.bridgedRing ||
-                    neighbour.value.bridgedRing && neighbour.value.originalRings.length < 2) {
+          neighbour.value.bridgedRing && neighbour.value.originalRings.length < 2) {
           vertex.value.isDrawn = false
         }
       }
@@ -723,11 +723,11 @@ class Drawer {
   }
 
   /**
-     * Returns all rings connected by bridged bonds starting from the ring with the supplied ring id.
-     *
-     * @param {Number} ringId A ring id.
-     * @returns {Number[]} An array containing all ring ids of rings part of a bridged ring system.
-     */
+   * Returns all rings connected by bridged bonds starting from the ring with the supplied ring id.
+   *
+   * @param {Number} ringId A ring id.
+   * @returns {Number[]} An array containing all ring ids of rings part of a bridged ring system.
+   */
   getBridgedRingRings(ringId) {
     const involvedRings = Array()
     const that = this
@@ -741,8 +741,8 @@ class Drawer {
         const n = ring.neighbours[i]
 
         if (involvedRings.indexOf(n) === -1 &&
-                    n !== r &&
-                    RingConnection.isBridge(that.ringConnections, that.graph.vertices, r, n)) {
+          n !== r &&
+          RingConnection.isBridge(that.ringConnections, that.graph.vertices, r, n)) {
           recurse(n)
         }
       }
@@ -754,15 +754,15 @@ class Drawer {
   }
 
   /**
-     * Checks whether or not a ring is part of a bridged ring.
-     *
-     * @param {Number} ringId A ring id.
-     * @returns {Boolean} A boolean indicating whether or not the supplied ring (by id) is part of a bridged ring system.
-     */
+   * Checks whether or not a ring is part of a bridged ring.
+   *
+   * @param {Number} ringId A ring id.
+   * @returns {Boolean} A boolean indicating whether or not the supplied ring (by id) is part of a bridged ring system.
+   */
   isPartOfBridgedRing(ringId) {
     for (let i = 0; i < this.ringConnections.length; i++) {
       if (this.ringConnections[i].containsRing(ringId) &&
-                this.ringConnections[i].isBridge(this.graph.vertices)) {
+        this.ringConnections[i].isBridge(this.graph.vertices)) {
         return true
       }
     }
@@ -771,12 +771,12 @@ class Drawer {
   }
 
   /**
-     * Creates a bridged ring.
-     *
-     * @param {Number[]} ringIds An array of ids of rings involved in the bridged ring.
-     * @param {Number} sourceVertexId The vertex id to start the bridged ring discovery from.
-     * @returns {Ring} The bridged ring.
-     */
+   * Creates a bridged ring.
+   *
+   * @param {Number[]} ringIds An array of ids of rings involved in the bridged ring.
+   * @param {Number} sourceVertexId The vertex id to start the bridged ring discovery from.
+   * @returns {Ring} The bridged ring.
+   */
   createBridgedRing(ringIds, sourceVertexId) {
     const ringMembers = new Set()
     const vertices = new Set()
@@ -890,12 +890,12 @@ class Drawer {
   }
 
   /**
-     * Returns an array of ring ids shared by both vertices.
-     *
-     * @param {Vertex} vertexA A vertex.
-     * @param {Vertex} vertexB A vertex.
-     * @returns {Number[]} An array of ids of rings shared by the two vertices.
-     */
+   * Returns an array of ring ids shared by both vertices.
+   *
+   * @param {Vertex} vertexA A vertex.
+   * @param {Vertex} vertexB A vertex.
+   * @returns {Number[]} An array of ids of rings shared by the two vertices.
+   */
   getCommonRings(vertexA, vertexB) {
     const commonRings = Array()
 
@@ -911,11 +911,11 @@ class Drawer {
   }
 
   /**
-     * Returns the closest vertex (connected as well as unconnected).
-     *
-     * @param {Vertex} vertex The vertex of which to find the closest other vertex.
-     * @returns {Vertex} The closest vertex.
-     */
+   * Returns the closest vertex (connected as well as unconnected).
+   *
+   * @param {Vertex} vertex The vertex of which to find the closest other vertex.
+   * @returns {Vertex} The closest vertex.
+   */
   getClosestVertex(vertex) {
     let minDist = 99999
     let minVertex = null
@@ -939,11 +939,11 @@ class Drawer {
   }
 
   /**
-     * Add a ring to this representation of a molecule.
-     *
-     * @param {Ring} ring A new ring.
-     * @returns {Number} The ring id of the new ring.
-     */
+   * Add a ring to this representation of a molecule.
+   *
+   * @param {Ring} ring A new ring.
+   * @returns {Number} The ring id of the new ring.
+   */
   addRing(ring) {
     ring.id = this.ringIdCounter++
     this.rings.push(ring)
@@ -952,10 +952,10 @@ class Drawer {
   }
 
   /**
-     * Removes a ring from the array of rings associated with the current molecule.
-     *
-     * @param {Number} ringId A ring id.
-     */
+   * Removes a ring from the array of rings associated with the current molecule.
+   *
+   * @param {Number} ringId A ring id.
+   */
   removeRing(ringId) {
     this.rings = this.rings.filter(function(item) {
       return item.id !== ringId
@@ -976,11 +976,11 @@ class Drawer {
   }
 
   /**
-     * Gets a ring object from the array of rings associated with the current molecule by its id. The ring id is not equal to the index, since rings can be added and removed when processing bridged rings.
-     *
-     * @param {Number} ringId A ring id.
-     * @returns {Ring} A ring associated with the current molecule.
-     */
+   * Gets a ring object from the array of rings associated with the current molecule by its id. The ring id is not equal to the index, since rings can be added and removed when processing bridged rings.
+   *
+   * @param {Number} ringId A ring id.
+   * @returns {Ring} A ring associated with the current molecule.
+   */
   getRing(ringId) {
     for (let i = 0; i < this.rings.length; i++) {
       if (this.rings[i].id === ringId) {
@@ -990,11 +990,11 @@ class Drawer {
   }
 
   /**
-     * Add a ring connection to this representation of a molecule.
-     *
-     * @param {RingConnection} ringConnection A new ringConnection.
-     * @returns {Number} The ring connection id of the new ring connection.
-     */
+   * Add a ring connection to this representation of a molecule.
+   *
+   * @param {RingConnection} ringConnection A new ringConnection.
+   * @returns {Number} The ring connection id of the new ring connection.
+   */
   addRingConnection(ringConnection) {
     ringConnection.id = this.ringConnectionIdCounter++
     this.ringConnections.push(ringConnection)
@@ -1003,10 +1003,10 @@ class Drawer {
   }
 
   /**
-     * Removes a ring connection from the array of rings connections associated with the current molecule.
-     *
-     * @param {Number} ringConnectionId A ring connection id.
-     */
+   * Removes a ring connection from the array of rings connections associated with the current molecule.
+   *
+   * @param {Number} ringConnectionId A ring connection id.
+   */
   removeRingConnection(ringConnectionId) {
     this.ringConnections = this.ringConnections.filter(function(item) {
       return item.id !== ringConnectionId
@@ -1014,18 +1014,18 @@ class Drawer {
   }
 
   /**
-     * Removes all ring connections between two vertices.
-     *
-     * @param {Number} vertexIdA A vertex id.
-     * @param {Number} vertexIdB A vertex id.
-     */
+   * Removes all ring connections between two vertices.
+   *
+   * @param {Number} vertexIdA A vertex id.
+   * @param {Number} vertexIdB A vertex id.
+   */
   removeRingConnectionsBetween(vertexIdA, vertexIdB) {
     const toRemove = Array()
     for (let i = 0; i < this.ringConnections.length; i++) {
       const ringConnection = this.ringConnections[i]
 
       if (ringConnection.firstRingId === vertexIdA && ringConnection.secondRingId === vertexIdB ||
-                ringConnection.firstRingId === vertexIdB && ringConnection.secondRingId === vertexIdA) {
+        ringConnection.firstRingId === vertexIdB && ringConnection.secondRingId === vertexIdA) {
         toRemove.push(ringConnection.id)
       }
     }
@@ -1036,11 +1036,11 @@ class Drawer {
   }
 
   /**
-     * Get a ring connection with a given id.
-     *
-     * @param {Number} id
-     * @returns {RingConnection} The ring connection with the specified id.
-     */
+   * Get a ring connection with a given id.
+   *
+   * @param {Number} id
+   * @returns {RingConnection} The ring connection with the specified id.
+   */
   getRingConnection(id) {
     for (let i = 0; i < this.ringConnections.length; i++) {
       if (this.ringConnections[i].id === id) {
@@ -1050,12 +1050,12 @@ class Drawer {
   }
 
   /**
-     * Get the ring connections between a ring and a set of rings.
-     *
-     * @param {Number} ringId A ring id.
-     * @param {Number[]} ringIds An array of ring ids.
-     * @returns {Number[]} An array of ring connection ids.
-     */
+   * Get the ring connections between a ring and a set of rings.
+   *
+   * @param {Number} ringId A ring id.
+   * @param {Number[]} ringIds An array of ring ids.
+   * @returns {Number[]} An array of ring connection ids.
+   */
   getRingConnections(ringId, ringIds) {
     const ringConnections = Array()
 
@@ -1066,7 +1066,7 @@ class Drawer {
         const id = ringIds[j]
 
         if (rc.firstRingId === ringId && rc.secondRingId === id ||
-                    rc.firstRingId === id && rc.secondRingId === ringId) {
+          rc.firstRingId === id && rc.secondRingId === ringId) {
           ringConnections.push(rc.id)
         }
       }
@@ -1076,10 +1076,10 @@ class Drawer {
   }
 
   /**
-     * Returns the overlap score of the current molecule based on its positioned vertices. The higher the score, the more overlaps occur in the structure drawing.
-     *
-     * @returns {Object} Returns the total overlap score and the overlap score of each vertex sorted by score (higher to lower). Example: { total: 99, scores: [ { id: 0, score: 22 }, ... ]  }
-     */
+   * Returns the overlap score of the current molecule based on its positioned vertices. The higher the score, the more overlaps occur in the structure drawing.
+   *
+   * @returns {Object} Returns the total overlap score and the overlap score of each vertex sorted by score (higher to lower). Example: { total: 99, scores: [ { id: 0, score: 22 }, ... ]  }
+   */
   getOverlapScore() {
     let total = 0.0
     const overlapScores = new Float32Array(this.graph.vertices.length)
@@ -1130,10 +1130,10 @@ class Drawer {
   }
 
   /**
-     * Sets the center for a ring.
-     *
-     * @param {Ring} ring A ring.
-     */
+   * Sets the center for a ring.
+   *
+   * @param {Ring} ring A ring.
+   */
   setRingCenter(ring) {
     const ringSize = ring.getSize()
     const total = new Vector2(0, 0)
@@ -1146,8 +1146,8 @@ class Drawer {
   }
 
   /**
-     * Position the vertices according to their bonds and properties.
-     */
+   * Position the vertices according to their bonds and properties.
+   */
   position() {
     let startVertex = null
 
@@ -1179,8 +1179,8 @@ class Drawer {
   }
 
   /**
-     * Stores the current information associated with rings.
-     */
+   * Stores the current information associated with rings.
+   */
   backupRingInformation() {
     this.originalRings = Array()
     this.originalRingConnections = Array()
@@ -1199,8 +1199,8 @@ class Drawer {
   }
 
   /**
-     * Restores the most recently backed up information associated with rings.
-     */
+   * Restores the most recently backed up information associated with rings.
+   */
   restoreRingInformation() {
     // Get the subring centers from the bridged rings
     const bridgedRings = this.getBridgedRings()
@@ -1231,14 +1231,14 @@ class Drawer {
   }
 
   /**
-     * Creates a new ring, that is, positiones all the vertices inside a ring.
-     *
-     * @param {Ring} ring The ring to position.
-     * @param {(Vector2|null)} [center=null] The center of the ring to be created.
-     * @param {(Vertex|null)} [startVertex=null] The first vertex to be positioned inside the ring.
-     * @param {(Vertex|null)} [previousVertex=null] The last vertex that was positioned.
-     * @param {Boolean} [previousVertex=false] A boolean indicating whether or not this ring was force positioned already - this is needed after force layouting a ring, in order to draw rings connected to it.
-     */
+   * Creates a new ring, that is, positiones all the vertices inside a ring.
+   *
+   * @param {Ring} ring The ring to position.
+   * @param {(Vector2|null)} [center=null] The center of the ring to be created.
+   * @param {(Vertex|null)} [startVertex=null] The first vertex to be positioned inside the ring.
+   * @param {(Vertex|null)} [previousVertex=null] The last vertex that was positioned.
+   * @param {Boolean} [previousVertex=false] A boolean indicating whether or not this ring was force positioned already - this is needed after force layouting a ring, in order to draw rings connected to it.
+   */
   createRing(ring, center = null, startVertex = null, previousVertex = null) {
     if (ring.positioned) {
       return
@@ -1402,13 +1402,13 @@ class Drawer {
   }
 
   /**
-     * Rotate an entire subtree by an angle around a center.
-     *
-     * @param {Number} vertexId A vertex id (the root of the sub-tree).
-     * @param {Number} parentVertexId A vertex id in the previous direction of the subtree that is to rotate.
-     * @param {Number} angle An angle in randians.
-     * @param {Vector2} center The rotational center.
-     */
+   * Rotate an entire subtree by an angle around a center.
+   *
+   * @param {Number} vertexId A vertex id (the root of the sub-tree).
+   * @param {Number} parentVertexId A vertex id in the previous direction of the subtree that is to rotate.
+   * @param {Number} angle An angle in randians.
+   * @param {Vector2} center The rotational center.
+   */
   rotateSubtree(vertexId, parentVertexId, angle, center) {
     const that = this
 
@@ -1426,13 +1426,13 @@ class Drawer {
   }
 
   /**
-     * Gets the overlap score of a subtree.
-     *
-     * @param {Number} vertexId A vertex id (the root of the sub-tree).
-     * @param {Number} parentVertexId A vertex id in the previous direction of the subtree.
-     * @param {Number[]} vertexOverlapScores An array containing the vertex overlap scores indexed by vertex id.
-     * @returns {Object} An object containing the total overlap score and the center of mass of the subtree weighted by overlap score { value: 0.2, center: new Vector2() }.
-     */
+   * Gets the overlap score of a subtree.
+   *
+   * @param {Number} vertexId A vertex id (the root of the sub-tree).
+   * @param {Number} parentVertexId A vertex id in the previous direction of the subtree.
+   * @param {Number[]} vertexOverlapScores An array containing the vertex overlap scores indexed by vertex id.
+   * @returns {Object} An object containing the total overlap score and the center of mass of the subtree weighted by overlap score { value: 0.2, center: new Vector2() }.
+   */
   getSubtreeOverlapScore(vertexId, parentVertexId, vertexOverlapScores) {
     const that = this
     let score = 0
@@ -1464,10 +1464,10 @@ class Drawer {
   }
 
   /**
-     * Returns the current (positioned vertices so far) center of mass.
-     *
-     * @returns {Vector2} The current center of mass.
-     */
+   * Returns the current (positioned vertices so far) center of mass.
+   *
+   * @returns {Vector2} The current center of mass.
+   */
   getCurrentCenterOfMass() {
     const total = new Vector2(0, 0)
     let count = 0
@@ -1485,8 +1485,8 @@ class Drawer {
   }
 
   /**
-     * Resolve primary (exact) overlaps, such as two vertices that are connected to the same ring vertex.
-     */
+   * Resolve primary (exact) overlaps, such as two vertices that are connected to the same ring vertex.
+   */
   resolvePrimaryOverlaps() {
     const overlaps = Array()
     const done = Array(this.graph.vertices.length)
@@ -1581,12 +1581,12 @@ class Drawer {
   }
 
   /**
-     * Resolve secondary overlaps. Those overlaps are due to the structure turning back on itself.
-     *
-     * @param {Object[]} scores An array of objects sorted descending by score.
-     * @param {Number} scores[].id A vertex id.
-     * @param {Number} scores[].score The overlap score associated with the vertex id.
-     */
+   * Resolve secondary overlaps. Those overlaps are due to the structure turning back on itself.
+   *
+   * @param {Object[]} scores An array of objects sorted descending by score.
+   * @param {Number} scores[].id A vertex id.
+   * @param {Number} scores[].score The overlap score associated with the vertex id.
+   */
   resolveSecondaryOverlaps(scores) {
     for (let i = 0; i < scores.length; i++) {
       if (scores[i].score > this.opts.overlapSensitivity) {
@@ -1616,10 +1616,10 @@ class Drawer {
   }
 
   /**
-     * Get the last non-null or 0 angle vertex.
-     * @param {Number} vertexId A vertex id.
-     * @returns {Vertex} The last vertex with an angle that was not 0 or null.
-     */
+   * Get the last non-null or 0 angle vertex.
+   * @param {Number} vertexId A vertex id.
+   * @returns {Vertex} The last vertex with an angle that was not 0 or null.
+   */
   getLastVertexWithAngle(vertexId) {
     let angle = 0
     let vertex = null
@@ -1634,14 +1634,14 @@ class Drawer {
   }
 
   /**
-     * Positiones the next vertex thus creating a bond.
-     *
-     * @param {Vertex} vertex A vertex.
-     * @param {Vertex} [previousVertex=null] The previous vertex which has been positioned.
-     * @param {Number} [angle=0.0] The (global) angle of the vertex.
-     * @param {Boolean} [originShortest=false] Whether the origin is the shortest subtree in the branch.
-     * @param {Boolean} [skipPositioning=false] Whether or not to skip positioning and just check the neighbours.
-     */
+   * Positiones the next vertex thus creating a bond.
+   *
+   * @param {Vertex} vertex A vertex.
+   * @param {Vertex} [previousVertex=null] The previous vertex which has been positioned.
+   * @param {Number} [angle=0.0] The (global) angle of the vertex.
+   * @param {Boolean} [originShortest=false] Whether the origin is the shortest subtree in the branch.
+   * @param {Boolean} [skipPositioning=false] Whether or not to skip positioning and just check the neighbours.
+   */
   createNextBond(vertex, previousVertex = null, angle = 0.0, originShortest = false, skipPositioning = false) {
     if (vertex.positioned && !skipPositioning) {
       return
@@ -1796,8 +1796,8 @@ class Drawer {
         // Make a single chain always cis except when there's a tribble (yes, this is a Star Trek reference) bond
         // or if there are successive double bonds. Added a ring check because if there is an aromatic ring the ring bond inside the ring counts as a double bond and leads to =-= being straight.
         if ((vertex.value.bondType === '#' || (previousVertex && previousVertex.value.bondType === '#')) ||
-                    vertex.value.bondType === '=' && previousVertex && previousVertex.value.rings.length === 0 &&
-                    previousVertex.value.bondType === '=' && vertex.value.branchBond !== '-') {
+          vertex.value.bondType === '=' && previousVertex && previousVertex.value.rings.length === 0 &&
+          previousVertex.value.bondType === '=' && vertex.value.branchBond !== '-') {
           vertex.value.drawExplicit = false
 
           if (previousVertex) {
@@ -1978,13 +1978,13 @@ class Drawer {
         // Create a cross if more than one subtree is of length > 1
         // or the vertex is connected to a ring
         if (previousVertex &&
-                    previousVertex.value.rings.length < 1 &&
-                    s.value.rings.length < 1 &&
-                    l.value.rings.length < 1 &&
-                    r.value.rings.length < 1 &&
-                    this.graph.getTreeDepth(l.id, vertex.id) === 1 &&
-                    this.graph.getTreeDepth(r.id, vertex.id) === 1 &&
-                    this.graph.getTreeDepth(s.id, vertex.id) > 1) {
+          previousVertex.value.rings.length < 1 &&
+          s.value.rings.length < 1 &&
+          l.value.rings.length < 1 &&
+          r.value.rings.length < 1 &&
+          this.graph.getTreeDepth(l.id, vertex.id) === 1 &&
+          this.graph.getTreeDepth(r.id, vertex.id) === 1 &&
+          this.graph.getTreeDepth(s.id, vertex.id) > 1) {
           s.angle = -vertex.angle
           if (vertex.angle >= 0) {
             l.angle = MathHelper.toRad(30)
@@ -2054,11 +2054,11 @@ class Drawer {
   }
 
   /**
-     * Check whether or not an edge is rotatable.
-     *
-     * @param {Edge} edge An edge.
-     * @returns {Boolean} A boolean indicating whether or not the edge is rotatable.
-     */
+   * Check whether or not an edge is rotatable.
+   *
+   * @param {Edge} edge An edge.
+   * @returns {Boolean} A boolean indicating whether or not the edge is rotatable.
+   */
   isEdgeRotatable(edge) {
     const vertexA = this.graph.vertices[edge.sourceId]
     const vertexB = this.graph.vertices[edge.targetId]
@@ -2081,7 +2081,7 @@ class Drawer {
     // Ringbonds are not rotatable
     // noinspection RedundantIfStatementJS
     if (vertexA.value.rings.length > 0 && vertexB.value.rings.length > 0 &&
-            this.areVerticesInSameRing(vertexA, vertexB)) {
+      this.areVerticesInSameRing(vertexA, vertexB)) {
       return false
     }
 
@@ -2089,11 +2089,11 @@ class Drawer {
   }
 
   /**
-     * Returns an array of vertices that are neighbouring a vertix but are not members of a ring (including bridges).
-     *
-     * @param {Number} vertexId A vertex id.
-     * @returns {Vertex[]} An array of vertices.
-     */
+   * Returns an array of vertices that are neighbouring a vertix but are not members of a ring (including bridges).
+   *
+   * @param {Number} vertexId A vertex id.
+   * @returns {Vertex[]} An array of vertices.
+   */
   getNonRingNeighbours(vertexId) {
     const nrneighbours = Array()
     const vertex = this.graph.vertices[vertexId]
@@ -2112,8 +2112,8 @@ class Drawer {
   }
 
   /**
-     * Annotaed stereochemistry information for visualization.
-     */
+   * Annotaed stereochemistry information for visualization.
+   */
   annotateStereochemistry() {
     const maxDepth = 10
 
@@ -2291,16 +2291,16 @@ class Drawer {
   }
 
   /**
-     *
-     *
-     * @param {Number} vertexId The id of a vertex.
-     * @param {(Number|null)} previousVertexId The id of the parent vertex of the vertex.
-     * @param {Uint8Array} visited An array containing the visited flag for all vertices in the graph.
-     * @param {Array} priority An array of arrays storing the atomic numbers for each level.
-     * @param {Number} maxDepth The maximum depth.
-     * @param {Number} depth The current depth.
-     * @param parentAtomicNumber
-     */
+   *
+   *
+   * @param {Number} vertexId The id of a vertex.
+   * @param {(Number|null)} previousVertexId The id of the parent vertex of the vertex.
+   * @param {Uint8Array} visited An array containing the visited flag for all vertices in the graph.
+   * @param {Array} priority An array of arrays storing the atomic numbers for each level.
+   * @param {Number} maxDepth The maximum depth.
+   * @param {Number} depth The current depth.
+   * @param parentAtomicNumber
+   */
   visitStereochemistry(vertexId, previousVertexId, visited, priority, maxDepth, depth, parentAtomicNumber = 0) {
     visited[vertexId] = 1
     const vertex = this.graph.vertices[vertexId]
@@ -2341,9 +2341,9 @@ class Drawer {
   }
 
   /**
-     * Creates pseudo-elements (such as Et, Me, Ac, Bz, ...) at the position of the carbon sets
-     * the involved atoms not to be displayed.
-     */
+   * Creates pseudo-elements (such as Et, Me, Ac, Bz, ...) at the position of the carbon sets
+   * the involved atoms not to be displayed.
+   */
   initPseudoElements() {
     for (let i = 0; i < this.graph.vertices.length; i++) {
       const vertex = this.graph.vertices[i]
@@ -2369,7 +2369,7 @@ class Drawer {
 
       // Ignore also guanidine
       if (vertex.value.element === 'C' && neighbours.length === 3 &&
-                neighbours[0].value.element === 'N' && neighbours[1].value.element === 'N' && neighbours[2].value.element === 'N') {
+        neighbours[0].value.element === 'N' && neighbours[1].value.element === 'N' && neighbours[2].value.element === 'N') {
         continue
       }
 
@@ -2384,7 +2384,7 @@ class Drawer {
         const neighbourCount = neighbour.getNeighbourCount()
 
         if (neighbouringElement !== 'C' && neighbouringElement !== 'H' &&
-                    neighbourCount === 1) {
+          neighbourCount === 1) {
           heteroAtomCount++
         }
 

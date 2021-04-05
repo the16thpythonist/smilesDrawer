@@ -12,18 +12,18 @@ const { bondLabels } = require('../generator/types')
 class SvgDrawer {
   constructor({ colors }) {
     this.colors = colors
-    this.preprocessor = new Drawer({ })
+    this.preprocessor = new Drawer({})
     this.opts = this.preprocessor.opts
   }
 
   /**
-     * Draws the parsed smiles data to an svg element.
-     *
-     * @param {Object} data The tree returned by the smiles parser.
-     * @param {(String|HTMLElement)} target The id of the HTML svg element the structure is drawn to - or the element itself.
+   * Draws the parsed smiles data to an svg element.
+   *
+   * @param {Object} data The tree returned by the smiles parser.
+   * @param {(String|HTMLElement)} target The id of the HTML svg element the structure is drawn to - or the element itself.
 
-     * @returns {Object} The dimensions of the drawing in { width, height }
-     */
+   * @returns {Object} The dimensions of the drawing in { width, height }
+   */
   draw(data, target) {
     const preprocessor = this.preprocessor
 
@@ -44,17 +44,17 @@ class SvgDrawer {
   }
 
   /**
-     * Draws a ring inside a provided ring, indicating aromaticity.
-     * @param {Ring} ring A ring.
-     */
+   * Draws a ring inside a provided ring, indicating aromaticity.
+   * @param {Ring} ring A ring.
+   */
   drawAromaticityRing(ring) {
     const r = MathHelper.apothemFromSideLength(this.opts.bondLength, ring.getSize())
     this.svgWrapper.drawRing(ring.center.x, ring.center.y, r * 0.8)
   }
 
   /**
-     * Draw the actual edges as bonds.
-     */
+   * Draw the actual edges as bonds.
+   */
   drawEdges() {
     const preprocessor = this.preprocessor
     const graph = preprocessor.graph
@@ -116,8 +116,8 @@ class SvgDrawer {
 
     // aneb: edge.isPartOfAromaticRing is always false when not drawing ring
     if (edge.bondType === '=' ||
-        preprocessor.getRingbondType(vertexA, vertexB) === '=' ||
-            (edge.isPartOfAromaticRing && preprocessor.bridgedRing)) {
+      preprocessor.getRingbondType(vertexA, vertexB) === '=' ||
+      (edge.isPartOfAromaticRing && preprocessor.bridgedRing)) {
       // Always draw double bonds inside the ring
       const inRing = preprocessor.areVerticesInSameRing(vertexA, vertexB)
       const s = preprocessor.chooseSide(vertexA, vertexB, sides)
@@ -150,8 +150,8 @@ class SvgDrawer {
       }
 
       if ((edge.center ||
-          (vertexA.isTerminal() && vertexB.isTerminal())) ||
-          ((s.anCount === 0 && s.bnCount > 1) || (s.bnCount === 0 && s.anCount > 1))) {
+        (vertexA.isTerminal() && vertexB.isTerminal())) ||
+        ((s.anCount === 0 && s.bnCount > 1) || (s.bnCount === 0 && s.anCount > 1))) {
         this.multiplyNormals(normals, opts.halfBondSpacing)
 
         const lineA = new Line(Vector2.add(a, normals[0]), Vector2.add(b, normals[0]), elementA, elementB)
@@ -163,7 +163,7 @@ class SvgDrawer {
       }
 
       if ((s.sideCount[0] > s.sideCount[1]) ||
-                (s.totalSideCount[0] > s.totalSideCount[1])) {
+        (s.totalSideCount[0] > s.totalSideCount[1])) {
         this.multiplyNormals(normals, opts.bondSpacing)
 
         const line = new Line(Vector2.add(a, normals[0]), Vector2.add(b, normals[0]), elementA, elementB)
@@ -176,7 +176,7 @@ class SvgDrawer {
       }
 
       if ((s.sideCount[0] < s.sideCount[1]) ||
-                (s.totalSideCount[0] <= s.totalSideCount[1])) {
+        (s.totalSideCount[0] <= s.totalSideCount[1])) {
         this.multiplyNormals(normals, opts.bondSpacing)
 
         const line = new Line(Vector2.add(a, normals[1]), Vector2.add(b, normals[1]), elementA, elementB)
@@ -224,9 +224,9 @@ class SvgDrawer {
   }
 
   /**
-     * Draws the vertices representing atoms to the canvas.
-     *
-     */
+   * Draws the vertices representing atoms to the canvas.
+   *
+   */
   drawVertices() {
     const preprocessor = this.preprocessor
     const opts = preprocessor.opts
@@ -265,7 +265,7 @@ class SvgDrawer {
       if (opts.atomVisualization === 'allballs') {
         svgWrapper.drawBall(vertexIdLabel, vertexIdValue, vertexLabel, vertex.position.x, vertex.position.y, element)
       } else if ((atom.isDrawn &&
-          (!isCarbon || atom.drawExplicit || isTerminal || atom.hasAttachedPseudoElements)) || graph.vertices.length === 1) {
+        (!isCarbon || atom.drawExplicit || isTerminal || atom.hasAttachedPseudoElements)) || graph.vertices.length === 1) {
         if (opts.atomVisualization === 'default') {
           svgWrapper.drawText(vertexIdLabel, vertexIdValue, vertexLabel, vertex.position.x, vertex.position.y,
             element, hydrogens, dir, isTerminal, charge, isotope, atom.getAttachedPseudoElements())
@@ -286,25 +286,25 @@ class SvgDrawer {
   }
 
   /**
-     * Returns the total overlap score of the current molecule.
-     * @returns {Number} The overlap score.
-     */
+   * Returns the total overlap score of the current molecule.
+   * @returns {Number} The overlap score.
+   */
   getTotalOverlapScore() {
     return this.preprocessor.getTotalOverlapScore()
   }
 
   /**
-     * Returns the molecular formula of the loaded molecule as a string.
-     * @returns {String} The molecular formula.
-     */
+   * Returns the molecular formula of the loaded molecule as a string.
+   * @returns {String} The molecular formula.
+   */
   getMolecularFormula() {
     return this.preprocessor.getMolecularFormula()
   }
 
   /**
-     * @param {Array} normals list of normals to multiply
-     * @param {Number} spacing value to multiply normals by
-     */
+   * @param {Array} normals list of normals to multiply
+   * @param {Number} spacing value to multiply normals by
+   */
   multiplyNormals(normals, spacing) {
     normals[0].multiplyScalar(spacing)
     normals[1].multiplyScalar(spacing)

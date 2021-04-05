@@ -33,6 +33,93 @@ class Graph {
   }
 
   /**
+   * Returns the connected components of the graph.
+   *
+   * @param {Array[]} adjacencyMatrix An adjacency matrix.
+   * @returns {Set[]} Connected components as sets.
+   */
+  static getConnectedComponents(adjacencyMatrix) {
+    const length = adjacencyMatrix.length
+    const visited = new Array(length)
+    const components = new Array()
+    let count = 0
+
+    visited.fill(false)
+
+    for (let u = 0; u < length; u++) {
+      if (!visited[u]) {
+        const component = Array()
+        visited[u] = true
+        component.push(u)
+        count++
+        Graph._ccGetDfs(u, visited, adjacencyMatrix, component)
+        if (component.length > 1) {
+          components.push(component)
+        }
+      }
+    }
+
+    return components
+  }
+
+  /**
+   * Returns the number of connected components for the graph.
+   *
+   * @param {Array[]} adjacencyMatrix An adjacency matrix.
+   * @returns {Number} The number of connected components of the supplied graph.
+   */
+  static getConnectedComponentCount(adjacencyMatrix) {
+    const length = adjacencyMatrix.length
+    const visited = new Array(length)
+    let count = 0
+
+    visited.fill(false)
+
+    for (let u = 0; u < length; u++) {
+      if (!visited[u]) {
+        visited[u] = true
+        count++
+        Graph._ccCountDfs(u, visited, adjacencyMatrix)
+      }
+    }
+
+    return count
+  }
+
+  /**
+   * PRIVATE FUNCTION used by getConnectedComponentCount().
+   */
+  static _ccCountDfs(u, visited, adjacencyMatrix) {
+    for (let v = 0; v < adjacencyMatrix[u].length; v++) {
+      const c = adjacencyMatrix[u][v]
+
+      if (!c || visited[v] || u === v) {
+        continue
+      }
+
+      visited[v] = true
+      Graph._ccCountDfs(v, visited, adjacencyMatrix)
+    }
+  }
+
+  /**
+   * PRIVATE FUNCTION used by getConnectedComponents().
+   */
+  static _ccGetDfs(u, visited, adjacencyMatrix, component) {
+    for (let v = 0; v < adjacencyMatrix[u].length; v++) {
+      const c = adjacencyMatrix[u][v]
+
+      if (!c || visited[v] || u === v) {
+        continue
+      }
+
+      visited[v] = true
+      component.push(v)
+      Graph._ccGetDfs(v, visited, adjacencyMatrix, component)
+    }
+  }
+
+  /**
    * PRIVATE FUNCTION. Initializing the graph from the parse tree.
    *
    * @param {Object} node The current node in the parse tree.
@@ -827,93 +914,6 @@ class Graph {
       } else if (v !== parent[u]) {
         low[u] = Math.min(low[u], disc[v])
       }
-    }
-  }
-
-  /**
-   * Returns the connected components of the graph.
-   *
-   * @param {Array[]} adjacencyMatrix An adjacency matrix.
-   * @returns {Set[]} Connected components as sets.
-   */
-  static getConnectedComponents(adjacencyMatrix) {
-    const length = adjacencyMatrix.length
-    const visited = new Array(length)
-    const components = new Array()
-    let count = 0
-
-    visited.fill(false)
-
-    for (let u = 0; u < length; u++) {
-      if (!visited[u]) {
-        const component = Array()
-        visited[u] = true
-        component.push(u)
-        count++
-        Graph._ccGetDfs(u, visited, adjacencyMatrix, component)
-        if (component.length > 1) {
-          components.push(component)
-        }
-      }
-    }
-
-    return components
-  }
-
-  /**
-   * Returns the number of connected components for the graph.
-   *
-   * @param {Array[]} adjacencyMatrix An adjacency matrix.
-   * @returns {Number} The number of connected components of the supplied graph.
-   */
-  static getConnectedComponentCount(adjacencyMatrix) {
-    const length = adjacencyMatrix.length
-    const visited = new Array(length)
-    let count = 0
-
-    visited.fill(false)
-
-    for (let u = 0; u < length; u++) {
-      if (!visited[u]) {
-        visited[u] = true
-        count++
-        Graph._ccCountDfs(u, visited, adjacencyMatrix)
-      }
-    }
-
-    return count
-  }
-
-  /**
-   * PRIVATE FUNCTION used by getConnectedComponentCount().
-   */
-  static _ccCountDfs(u, visited, adjacencyMatrix) {
-    for (let v = 0; v < adjacencyMatrix[u].length; v++) {
-      const c = adjacencyMatrix[u][v]
-
-      if (!c || visited[v] || u === v) {
-        continue
-      }
-
-      visited[v] = true
-      Graph._ccCountDfs(v, visited, adjacencyMatrix)
-    }
-  }
-
-  /**
-   * PRIVATE FUNCTION used by getConnectedComponents().
-   */
-  static _ccGetDfs(u, visited, adjacencyMatrix, component) {
-    for (let v = 0; v < adjacencyMatrix[u].length; v++) {
-      const c = adjacencyMatrix[u][v]
-
-      if (!c || visited[v] || u === v) {
-        continue
-      }
-
-      visited[v] = true
-      component.push(v)
-      Graph._ccGetDfs(v, visited, adjacencyMatrix, component)
     }
   }
 }

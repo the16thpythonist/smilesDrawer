@@ -13,15 +13,15 @@ const Vector2 = require('./Vector2')
  */
 class Line {
   /**
-     * The constructor for the class Line.
-     *
-     * @param {Vector2} [from=new Vector2(0, 0)] A vector marking the beginning of the line.
-     * @param {Vector2} [to=new Vector2(0, 0)] A vector marking the end of the line.
-     * @param {string} [elementFrom=null] A one-letter representation of the element associated with the vector marking the beginning of the line.
-     * @param {string} [elementTo=null] A one-letter representation of the element associated with the vector marking the end of the line.
-     * @param {Boolean} [chiralFrom=false] Whether or not the from atom is a chiral center.
-     * @param {Boolean} [chiralTo=false] Whether or not the to atom is a chiral center.
-     */
+   * The constructor for the class Line.
+   *
+   * @param {Vector2} [from=new Vector2(0, 0)] A vector marking the beginning of the line.
+   * @param {Vector2} [to=new Vector2(0, 0)] A vector marking the end of the line.
+   * @param {string} [elementFrom=null] A one-letter representation of the element associated with the vector marking the beginning of the line.
+   * @param {string} [elementTo=null] A one-letter representation of the element associated with the vector marking the end of the line.
+   * @param {Boolean} [chiralFrom=false] Whether or not the from atom is a chiral center.
+   * @param {Boolean} [chiralTo=false] Whether or not the to atom is a chiral center.
+   */
   constructor(from = new Vector2(0, 0), to = new Vector2(0, 0), elementFrom = null, elementTo = null, chiralFrom = false, chiralTo = false) {
     this.from = from
     this.to = to
@@ -32,29 +32,29 @@ class Line {
   }
 
   /**
-     * Clones this line and returns the clone.
-     *
-     * @returns {Line} A clone of this line.
-     */
+   * Clones this line and returns the clone.
+   *
+   * @returns {Line} A clone of this line.
+   */
   clone() {
     return new Line(this.from.clone(), this.to.clone(), this.elementFrom, this.elementTo)
   }
 
   /**
-     * Returns the length of this line.
-     *
-     * @returns {Number} The length of this line.
-     */
+   * Returns the length of this line.
+   *
+   * @returns {Number} The length of this line.
+   */
   getLength() {
     return Math.sqrt(Math.pow(this.to.x - this.from.x, 2) +
-                         Math.pow(this.to.y - this.from.y, 2))
+      Math.pow(this.to.y - this.from.y, 2))
   }
 
   /**
-     * Returns the angle of the line in relation to the coordinate system (the x-axis).
-     *
-     * @returns {Number} The angle in radians.
-     */
+   * Returns the angle of the line in relation to the coordinate system (the x-axis).
+   *
+   * @returns {Number} The angle in radians.
+   */
   getAngle() {
     // Get the angle between the line and the x-axis
     const diff = Vector2.subtract(this.getRightVector(), this.getLeftVector())
@@ -62,10 +62,10 @@ class Line {
   }
 
   /**
-     * Returns the right vector (the vector with the larger x value).
-     *
-     * @returns {Vector2} The right vector.
-     */
+   * Returns the right vector (the vector with the larger x value).
+   *
+   * @returns {Vector2} The right vector.
+   */
   getRightVector() {
     // Return the vector with the larger x value (the right one)
     if (this.from.x < this.to.x) {
@@ -76,10 +76,10 @@ class Line {
   }
 
   /**
-     * Returns the left vector (the vector with the smaller x value).
-     *
-     * @returns {Vector2} The left vector.
-     */
+   * Returns the left vector (the vector with the smaller x value).
+   *
+   * @returns {Vector2} The left vector.
+   */
   getLeftVector() {
     // Return the vector with the smaller x value (the left one)
     if (this.from.x < this.to.x) {
@@ -90,10 +90,10 @@ class Line {
   }
 
   /**
-     * Returns the element associated with the right vector (the vector with the larger x value).
-     *
-     * @returns {String} The element associated with the right vector.
-     */
+   * Returns the element associated with the right vector (the vector with the larger x value).
+   *
+   * @returns {String} The element associated with the right vector.
+   */
   getRightElement() {
     if (this.from.x < this.to.x) {
       return this.elementTo
@@ -103,10 +103,10 @@ class Line {
   }
 
   /**
-     * Returns the element associated with the left vector (the vector with the smaller x value).
-     *
-     * @returns {String} The element associated with the left vector.
-     */
+   * Returns the element associated with the left vector (the vector with the smaller x value).
+   *
+   * @returns {String} The element associated with the left vector.
+   */
   getLeftElement() {
     if (this.from.x < this.to.x) {
       return this.elementFrom
@@ -116,10 +116,10 @@ class Line {
   }
 
   /**
-     * Returns whether or not the atom associated with the right vector (the vector with the larger x value) is a chiral center.
-     *
-     * @returns {Boolean} Whether or not the atom associated with the right vector is a chiral center.
-     */
+   * Returns whether or not the atom associated with the right vector (the vector with the larger x value) is a chiral center.
+   *
+   * @returns {Boolean} Whether or not the atom associated with the right vector is a chiral center.
+   */
   getRightChiral() {
     if (this.from.x < this.to.x) {
       return this.chiralTo
@@ -129,10 +129,10 @@ class Line {
   }
 
   /**
-     * Returns whether or not the atom associated with the left vector (the vector with the smaller x value) is a chiral center.
-     *
-     * @returns {Boolean} Whether or not the atom  associated with the left vector is a chiral center.
-     */
+   * Returns whether or not the atom associated with the left vector (the vector with the smaller x value) is a chiral center.
+   *
+   * @returns {Boolean} Whether or not the atom  associated with the left vector is a chiral center.
+   */
   getLeftChiral() {
     if (this.from.x < this.to.x) {
       return this.chiralFrom
@@ -142,12 +142,12 @@ class Line {
   }
 
   /**
-     * Set the value of the right vector.
-     *
-     * @param {Number} x The x value.
-     * @param {Number} y The y value.
-     * @returns {Line} This line.
-     */
+   * Set the value of the right vector.
+   *
+   * @param {Number} x The x value.
+   * @param {Number} y The y value.
+   * @returns {Line} This line.
+   */
   setRightVector(x, y) {
     if (this.from.x < this.to.x) {
       this.to.x = x
@@ -161,12 +161,12 @@ class Line {
   }
 
   /**
-     * Set the value of the left vector.
-     *
-     * @param {Number} x The x value.
-     * @param {Number} y The y value.
-     * @returns {Line} This line.
-     */
+   * Set the value of the left vector.
+   *
+   * @param {Number} x The x value.
+   * @param {Number} y The y value.
+   * @returns {Line} This line.
+   */
   setLeftVector(x, y) {
     if (this.from.x < this.to.x) {
       this.from.x = x
@@ -180,10 +180,10 @@ class Line {
   }
 
   /**
-     * Rotates this line to be aligned with the x-axis. The center of rotation is the left vector.
-     *
-     * @returns {Line} This line.
-     */
+   * Rotates this line to be aligned with the x-axis. The center of rotation is the left vector.
+   *
+   * @returns {Line} This line.
+   */
   rotateToXAxis() {
     const left = this.getLeftVector()
 
@@ -193,11 +193,11 @@ class Line {
   }
 
   /**
-     * Rotate the line by a given value (in radians). The center of rotation is the left vector.
-     *
-     * @param {Number} theta The angle (in radians) to rotate the line.
-     * @returns {Line} This line.
-     */
+   * Rotate the line by a given value (in radians). The center of rotation is the left vector.
+   *
+   * @param {Number} theta The angle (in radians) to rotate the line.
+   * @returns {Line} This line.
+   */
   rotate(theta) {
     const l = this.getLeftVector()
     const r = this.getRightVector()
@@ -213,11 +213,11 @@ class Line {
   }
 
   /**
-     * Shortens this line from the "from" direction by a given value (in pixels).
-     *
-     * @param {Number} by The length in pixels to shorten the vector by.
-     * @returns {Line} This line.
-     */
+   * Shortens this line from the "from" direction by a given value (in pixels).
+   *
+   * @param {Number} by The length in pixels to shorten the vector by.
+   * @returns {Line} This line.
+   */
   shortenFrom(by) {
     const f = Vector2.subtract(this.to, this.from)
 
@@ -230,11 +230,11 @@ class Line {
   }
 
   /**
-     * Shortens this line from the "to" direction by a given value (in pixels).
-     *
-     * @param {Number} by The length in pixels to shorten the vector by.
-     * @returns {Line} This line.
-     */
+   * Shortens this line from the "to" direction by a given value (in pixels).
+   *
+   * @param {Number} by The length in pixels to shorten the vector by.
+   * @returns {Line} This line.
+   */
   shortenTo(by) {
     const f = Vector2.subtract(this.from, this.to)
 
@@ -247,11 +247,11 @@ class Line {
   }
 
   /**
-     * Shorten the right side.
-     *
-     * @param {Number} by The length in pixels to shorten the vector by.
-     * @returns {Line} Returns itself.
-     */
+   * Shorten the right side.
+   *
+   * @param {Number} by The length in pixels to shorten the vector by.
+   * @returns {Line} Returns itself.
+   */
   shortenRight(by) {
     if (this.from.x < this.to.x) {
       this.shortenTo(by)
@@ -263,11 +263,11 @@ class Line {
   }
 
   /**
-     * Shorten the left side.
-     *
-     * @param {Number} by The length in pixels to shorten the vector by.
-     * @returns {Line} Returns itself.
-     */
+   * Shorten the left side.
+   *
+   * @param {Number} by The length in pixels to shorten the vector by.
+   * @returns {Line} Returns itself.
+   */
   shortenLeft(by) {
     if (this.from.x < this.to.x) {
       this.shortenFrom(by)
@@ -279,11 +279,11 @@ class Line {
   }
 
   /**
-     * Shortens this line from both directions by a given value (in pixels).
-     *
-     * @param {Number} by The length in pixels to shorten the vector by.
-     * @returns {Line} This line.
-     */
+   * Shortens this line from both directions by a given value (in pixels).
+   *
+   * @param {Number} by The length in pixels to shorten the vector by.
+   * @returns {Line} This line.
+   */
   shorten(by) {
     const f = Vector2.subtract(this.from, this.to)
 

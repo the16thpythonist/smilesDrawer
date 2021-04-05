@@ -75,186 +75,6 @@ class Atom {
   }
 
   /**
-   * Adds a neighbouring element to this atom.
-   *
-   * @param {String} element A string representing an element.
-   */
-  addNeighbouringElement(element) {
-    this.neighbouringElements.push(element)
-  }
-
-  /**
-   * Attaches a pseudo element (e.g. Ac) to the atom.
-   * @param {String} element The element identifier (e.g. Br, C, ...).
-   * @param {String} previousElement The element that is part of the main chain (not the terminals that are converted to the pseudo element or concatinated).
-   * @param {Number} [hydrogenCount=0] The number of hydrogens for the element.
-   * @param {Number} [charge=0] The charge for the element.
-   */
-  attachPseudoElement(element, previousElement, hydrogenCount = 0, charge = 0) {
-    if (hydrogenCount === null) {
-      hydrogenCount = 0
-    }
-
-    if (charge === null) {
-      charge = 0
-    }
-
-    const key = hydrogenCount + element + charge
-
-    if (this.attachedPseudoElements[key]) {
-      this.attachedPseudoElements[key].count += 1
-    } else {
-      this.attachedPseudoElements[key] = {
-        element: element,
-        count: 1,
-        hydrogenCount: hydrogenCount,
-        previousElement: previousElement,
-        charge: charge
-      }
-    }
-
-    this.hasAttachedPseudoElements = true
-  }
-
-  /**
-   * Returns the attached pseudo elements sorted by hydrogen count (ascending).
-   *
-   * @returns {Object} The sorted attached pseudo elements.
-   */
-  getAttachedPseudoElements() {
-    const ordered = {}
-    const that = this
-
-    Object.keys(this.attachedPseudoElements).sort().forEach(function(key) {
-      ordered[key] = that.attachedPseudoElements[key]
-    })
-
-    return ordered
-  }
-
-  /**
-   * Returns the number of attached pseudo elements.
-   *
-   * @returns {Number} The number of attached pseudo elements.
-   */
-  getAttachedPseudoElementsCount() {
-    return Object.keys(this.attachedPseudoElements).length
-  }
-
-  /**
-   * Returns whether this atom is a heteroatom (not C and not H).
-   *
-   * @returns {Boolean} A boolean indicating whether this atom is a heteroatom.
-   */
-  isHeteroAtom() {
-    return this.element !== 'C' && this.element !== 'H'
-  }
-
-  /**
-   * Defines this atom as the anchor for a ring. When doing repositionings of the vertices and the vertex associated with this atom is moved, the center of this ring is moved as well.
-   *
-   * @param {Number} ringId A ring id.
-   */
-  addAnchoredRing(ringId) {
-    if (!ArrayHelper.contains(this.anchoredRings, {
-      value: ringId
-    })) {
-      this.anchoredRings.push(ringId)
-    }
-  }
-
-  /**
-   * Returns the number of ringbonds (breaks in rings to generate the MST of the smiles) within this atom is connected to.
-   *
-   * @returns {Number} The number of ringbonds this atom is connected to.
-   */
-  getRingbondCount() {
-    return this.ringbonds.length
-  }
-
-  /**
-   * Backs up the current rings.
-   */
-  backupRings() {
-    this.originalRings = Array(this.rings.length)
-
-    for (let i = 0; i < this.rings.length; i++) {
-      this.originalRings[i] = this.rings[i]
-    }
-  }
-
-  /**
-   * Restores the most recent backed up rings.
-   */
-  restoreRings() {
-    this.rings = Array(this.originalRings.length)
-
-    for (let i = 0; i < this.originalRings.length; i++) {
-      this.rings[i] = this.originalRings[i]
-    }
-  }
-
-  /**
-   * Checks whether or not two atoms share a common ringbond id. A ringbond is a break in a ring created when generating the spanning tree of a structure.
-   *
-   * @param {Atom} atomA An atom.
-   * @param {Atom} atomB An atom.
-   * @returns {Boolean} A boolean indicating whether or not two atoms share a common ringbond.
-   */
-  haveCommonRingbond(atomA, atomB) {
-    for (let i = 0; i < atomA.ringbonds.length; i++) {
-      for (let j = 0; j < atomB.ringbonds.length; j++) {
-        if (atomA.ringbonds[i].id == atomB.ringbonds[j].id) {
-          return true
-        }
-      }
-    }
-
-    return false
-  }
-
-  /**
-   * Check whether or not the neighbouring elements of this atom equal the supplied array.
-   *
-   * @param {String[]} arr An array containing all the elements that are neighbouring this atom. E.g. ['C', 'O', 'O', 'N']
-   * @returns {Boolean} A boolean indicating whether or not the neighbours match the supplied array of elements.
-   */
-  neighbouringElementsEqual(arr) {
-    if (arr.length !== this.neighbouringElements.length) {
-      return false
-    }
-
-    arr.sort()
-    this.neighbouringElements.sort()
-
-    for (let i = 0; i < this.neighbouringElements.length; i++) {
-      if (arr[i] !== this.neighbouringElements[i]) {
-        return false
-      }
-    }
-
-    return true
-  }
-
-  /**
-   * Get the atomic number of this atom.
-   *
-   * @returns {Number} The atomic number of this atom.
-   */
-  getAtomicNumber() {
-    return Atom.atomicNumbers[this.element]
-  }
-
-  /**
-   * Get the maximum number of bonds for this atom.
-   *
-   * @returns {Number} The maximum number of bonds of this atom.
-   */
-  getMaxBonds() {
-    return Atom.maxBonds[this.element]
-  }
-
-  /**
    * A map mapping element symbols to their maximum bonds.
    */
   static get maxBonds() {
@@ -535,6 +355,186 @@ class Atom {
       Uus: 117,
       Uuo: 118
     }
+  }
+
+  /**
+   * Adds a neighbouring element to this atom.
+   *
+   * @param {String} element A string representing an element.
+   */
+  addNeighbouringElement(element) {
+    this.neighbouringElements.push(element)
+  }
+
+  /**
+   * Attaches a pseudo element (e.g. Ac) to the atom.
+   * @param {String} element The element identifier (e.g. Br, C, ...).
+   * @param {String} previousElement The element that is part of the main chain (not the terminals that are converted to the pseudo element or concatinated).
+   * @param {Number} [hydrogenCount=0] The number of hydrogens for the element.
+   * @param {Number} [charge=0] The charge for the element.
+   */
+  attachPseudoElement(element, previousElement, hydrogenCount = 0, charge = 0) {
+    if (hydrogenCount === null) {
+      hydrogenCount = 0
+    }
+
+    if (charge === null) {
+      charge = 0
+    }
+
+    const key = hydrogenCount + element + charge
+
+    if (this.attachedPseudoElements[key]) {
+      this.attachedPseudoElements[key].count += 1
+    } else {
+      this.attachedPseudoElements[key] = {
+        element: element,
+        count: 1,
+        hydrogenCount: hydrogenCount,
+        previousElement: previousElement,
+        charge: charge
+      }
+    }
+
+    this.hasAttachedPseudoElements = true
+  }
+
+  /**
+   * Returns the attached pseudo elements sorted by hydrogen count (ascending).
+   *
+   * @returns {Object} The sorted attached pseudo elements.
+   */
+  getAttachedPseudoElements() {
+    const ordered = {}
+    const that = this
+
+    Object.keys(this.attachedPseudoElements).sort().forEach(function(key) {
+      ordered[key] = that.attachedPseudoElements[key]
+    })
+
+    return ordered
+  }
+
+  /**
+   * Returns the number of attached pseudo elements.
+   *
+   * @returns {Number} The number of attached pseudo elements.
+   */
+  getAttachedPseudoElementsCount() {
+    return Object.keys(this.attachedPseudoElements).length
+  }
+
+  /**
+   * Returns whether this atom is a heteroatom (not C and not H).
+   *
+   * @returns {Boolean} A boolean indicating whether this atom is a heteroatom.
+   */
+  isHeteroAtom() {
+    return this.element !== 'C' && this.element !== 'H'
+  }
+
+  /**
+   * Defines this atom as the anchor for a ring. When doing repositionings of the vertices and the vertex associated with this atom is moved, the center of this ring is moved as well.
+   *
+   * @param {Number} ringId A ring id.
+   */
+  addAnchoredRing(ringId) {
+    if (!ArrayHelper.contains(this.anchoredRings, {
+      value: ringId
+    })) {
+      this.anchoredRings.push(ringId)
+    }
+  }
+
+  /**
+   * Returns the number of ringbonds (breaks in rings to generate the MST of the smiles) within this atom is connected to.
+   *
+   * @returns {Number} The number of ringbonds this atom is connected to.
+   */
+  getRingbondCount() {
+    return this.ringbonds.length
+  }
+
+  /**
+   * Backs up the current rings.
+   */
+  backupRings() {
+    this.originalRings = Array(this.rings.length)
+
+    for (let i = 0; i < this.rings.length; i++) {
+      this.originalRings[i] = this.rings[i]
+    }
+  }
+
+  /**
+   * Restores the most recent backed up rings.
+   */
+  restoreRings() {
+    this.rings = Array(this.originalRings.length)
+
+    for (let i = 0; i < this.originalRings.length; i++) {
+      this.rings[i] = this.originalRings[i]
+    }
+  }
+
+  /**
+   * Checks whether or not two atoms share a common ringbond id. A ringbond is a break in a ring created when generating the spanning tree of a structure.
+   *
+   * @param {Atom} atomA An atom.
+   * @param {Atom} atomB An atom.
+   * @returns {Boolean} A boolean indicating whether or not two atoms share a common ringbond.
+   */
+  haveCommonRingbond(atomA, atomB) {
+    for (let i = 0; i < atomA.ringbonds.length; i++) {
+      for (let j = 0; j < atomB.ringbonds.length; j++) {
+        if (atomA.ringbonds[i].id == atomB.ringbonds[j].id) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * Check whether or not the neighbouring elements of this atom equal the supplied array.
+   *
+   * @param {String[]} arr An array containing all the elements that are neighbouring this atom. E.g. ['C', 'O', 'O', 'N']
+   * @returns {Boolean} A boolean indicating whether or not the neighbours match the supplied array of elements.
+   */
+  neighbouringElementsEqual(arr) {
+    if (arr.length !== this.neighbouringElements.length) {
+      return false
+    }
+
+    arr.sort()
+    this.neighbouringElements.sort()
+
+    for (let i = 0; i < this.neighbouringElements.length; i++) {
+      if (arr[i] !== this.neighbouringElements[i]) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  /**
+   * Get the atomic number of this atom.
+   *
+   * @returns {Number} The atomic number of this atom.
+   */
+  getAtomicNumber() {
+    return Atom.atomicNumbers[this.element]
+  }
+
+  /**
+   * Get the maximum number of bonds for this atom.
+   *
+   * @returns {Number} The maximum number of bonds of this atom.
+   */
+  getMaxBonds() {
+    return Atom.maxBonds[this.element]
   }
 }
 

@@ -14,6 +14,7 @@ module.exports = (function() {
     function ctor() {
       this.constructor = child
     }
+
     ctor.prototype = parent.prototype
     child.prototype = new ctor()
   }
@@ -108,7 +109,8 @@ module.exports = (function() {
 
     function describeExpected(expected) {
       const descriptions = new Array(expected.length)
-      let i; let j
+      let i
+      let j
 
       for (i = 0; i < expected.length; i++) {
         descriptions[i] = describeExpectation(expected[i])
@@ -357,7 +359,7 @@ module.exports = (function() {
 
     if ('startRule' in options) {
       if (!(options.startRule in peg$startRuleFunctions)) {
-        throw new Error("Can't start parsing from rule \"" + options.startRule + '".')
+        throw new Error('Can\'t start parsing from rule "' + options.startRule + '".')
       }
 
       peg$startRuleFunction = peg$startRuleFunctions[options.startRule]

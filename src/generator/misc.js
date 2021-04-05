@@ -29,7 +29,16 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100, header = 1) => {
 
 const cliParams = () => {
   const {
-    outputDirectory, amount, quality, scale, concurrency, labelType, segment, outputSvg, outputLabels, clean,
+    outputDirectory,
+    amount,
+    quality,
+    scale,
+    concurrency,
+    labelType,
+    segment,
+    outputSvg,
+    outputLabels,
+    clean,
     colors: colorMap,
     fromCsvFile: csvFile,
     fromCsvColumn: csvColumn
@@ -64,4 +73,7 @@ const cliParams = () => {
   return config
 }
 
-module.exports = { readSmilesFromCsv, cliParams }
+module.exports = {
+  readSmilesFromCsv,
+  cliParams
+}
