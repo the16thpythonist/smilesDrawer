@@ -2,11 +2,11 @@ node generate-images.js \
 --from-csv-file "data/drugbank.csv" \
 --from-csv-column "0" \
 --output-directory "generated-images" \
---quality "1" \
+--quality "100" \
 --colors "mono" \
 --scale "1" \
 --concurrency "8" \
---amount "50" \
+--amount "500" \
 --label-type "points" \
 --output-labels \
 --clean

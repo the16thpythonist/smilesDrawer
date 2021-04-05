@@ -1,17 +1,37 @@
+const crypto = require('crypto')
 const fs = require('fs-extra')
 const puppeteer = require('puppeteer')
 const _ = require('lodash')
 const { JSDOM } = require('jsdom')
-const { xml2js, js2xml } = require('xml-js')
+const {
+  xml2js,
+  js2xml
+} = require('xml-js')
 
 const Parser = require('../drawer/Parser')
 const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
-const { bondLabels, labelTypes } = require('./types')
+const {
+  bondLabels,
+  labelTypes
+} = require('./types')
 
-const { getPositionInfoFromSvg, resizeImage } = require('./browser')
+const {
+  getPositionInfoFromSvg,
+  resizeImage
+} = require('./browser')
 
-function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelType, segment, outputSvg, outputLabels }) {
+function Renderer({
+  outputDirectory,
+  quality,
+  scale,
+  colors,
+  concurrency,
+  labelType,
+  segment,
+  outputSvg,
+  outputLabels
+}) {
   this.browser = null
   this.pages = null
   this.document = null
@@ -34,16 +54,26 @@ function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelT
 }
 
 Renderer.prototype.init = async function() {
-  const { document, XMLSerializer } = (new JSDOM('')).window
+  const {
+    document,
+    XMLSerializer
+  } = (new JSDOM('')).window
   this.document = document
   this.XMLSerializer = new XMLSerializer()
 
-  this.browser = await puppeteer.launch({ headless: true, devtools: false })
+  this.browser = await puppeteer.launch({
+    headless: true,
+    devtools: false
+  })
   this.pages = await Promise.all(Array(this.concurrency).fill(null).map(() => this.browser.newPage()))
 }
 
 Renderer.prototype.done = async function() {
   this.browser.close()
+}
+
+Renderer.prototype.uuid = function() {
+  return crypto.randomBytes(16).toString('hex')
 }
 
 Renderer.prototype.color = function(color, circle = false) {
@@ -75,7 +105,10 @@ Renderer.prototype.positionInfoFromSvgXml = async function(page, xml) {
   const dom = await page.evaluate(getPositionInfoFromSvg)
   dom.edges = dom.edges.map(e => this.makeEdgeAttributesNumeric(e))
 
-  return { dom, xml }
+  return {
+    dom,
+    xml
+  }
 }
 
 Renderer.prototype.updateXmlAttributes = function(attributes) {
@@ -131,7 +164,11 @@ Renderer.prototype.groupLabels = function(labels) {
   for (const [id, points] of Object.entries(groups)) {
     const label = points[0].label
     const xy = points.map(p => p.xy.toString()).join(' ')
-    result.push({ id, label, xy })
+    result.push({
+      id,
+      label,
+      xy
+    })
   }
 
   return _.sortBy(result, 'id')
@@ -141,12 +178,19 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
   const [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, this.scale)
   const updatedSvgElement = await page.$('svg')
-  const ops = [updatedSvgElement.screenshot({ path: `${fileName}-quality-${quality}.jpg`, omitBackground: false, quality: quality })]
+  const ops = [updatedSvgElement.screenshot({
+    path: `${fileName}-quality-${quality}.jpg`,
+    omitBackground: false,
+    quality: quality
+  })]
 
-  if (this.outputLabels) {
+  if (this.outputLabels && labels.length) {
     const cleanLabels = labels
       .map(l => this.cleanupLabel(l))
-      .map(l => ({ ...l, xy: this.svg.transformPoints(l, matrix) }))
+      .map(l => ({
+        ...l,
+        xy: this.svg.transformPoints(l, matrix)
+      }))
 
     const finalLabels = this.groupLabels(cleanLabels)
 
@@ -154,7 +198,10 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
   }
 
   if (this.outputSvg) {
-    const updatedSvgXml = js2xml(this.updateXmlNode(xml2js(updatedSvg)), { spaces: 2, compact: false })
+    const updatedSvgXml = js2xml(this.updateXmlNode(xml2js(updatedSvg)), {
+      spaces: 2,
+      compact: false
+    })
     ops.push(fs.writeFile(`${fileName}-after.svg`, updatedSvgXml))
   }
 
@@ -171,7 +218,12 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.getCornersAligned = function({ x, y, width: w, height: h }) {
+Renderer.prototype.getCornersAligned = function({
+  x,
+  y,
+  width: w,
+  height: h
+}) {
   const dx = w
   const dy = h
 
@@ -193,7 +245,11 @@ Renderer.prototype.getCornersOriented = function(edge) {
   return this.svg.getEdgePointsOfBoxAroundLine(edge)
 }
 
-Renderer.prototype.drawPoints = function({ id, label, points }) {
+Renderer.prototype.drawPoints = function({
+  id,
+  label,
+  points
+}) {
   const color = this.svg.randomColor()
 
   // aneb: try to avoid overlapping points by using different sizes
@@ -210,7 +266,11 @@ Renderer.prototype.drawPoints = function({ id, label, points }) {
   })
 }
 
-Renderer.prototype.drawSinglePolygon = function({ id, label, points }) {
+Renderer.prototype.drawSinglePolygon = function({
+  id,
+  label,
+  points
+}) {
   const color = this.svg.randomColor()
   return this.svg.createElement('polygon', {
     'label-id': `${id}-label`,
@@ -222,7 +282,10 @@ Renderer.prototype.drawSinglePolygon = function({ id, label, points }) {
 
 Renderer.prototype.drawMultiPolygon = function(edgeElements) {
   const color = this.svg.randomColor()
-  const { id, label } = edgeElements[0]
+  const {
+    id,
+    label
+  } = edgeElements[0]
   const points = edgeElements.map(e => this.getCornersOriented(e)).filter(e => !!e)
   return points.map(point => {
     return this.svg.createElement('polygon', {
@@ -234,10 +297,16 @@ Renderer.prototype.drawMultiPolygon = function(edgeElements) {
   })
 }
 
-Renderer.prototype.addLabels = function({ dom, xml }) {
+Renderer.prototype.addLabels = function({
+  dom,
+  xml
+}) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
-  const nodeEdges = dom.nodes.map(n => ({ ...n, points: this.getCornersAligned(n) }))
+  const nodeEdges = dom.nodes.map(n => ({
+    ...n,
+    points: this.getCornersAligned(n)
+  }))
   const nodeLabels = this.labelType === labelTypes.points && !this.segment
     ? nodeEdges.map(n => this.drawPoints(n))
     : nodeEdges.map(n => this.drawSinglePolygon(n))
@@ -247,7 +316,10 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
   if (this.labelType === labelTypes.box) {
     const correctedEdges = dom.edges.map(e => ({ ...e, ...this.svg.correctBoundingBox(e) }))
     const merged = this.svg.mergeBoundingBoxes(correctedEdges)
-    const mergedWithPoints = merged.map(n => ({ ...n, points: this.getCornersAligned(n) }))
+    const mergedWithPoints = merged.map(n => ({
+      ...n,
+      points: this.getCornersAligned(n)
+    }))
     edgeLabels.push(...mergedWithPoints.map(e => this.drawSinglePolygon(e)))
   }
 
@@ -258,7 +330,10 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
   }
 
   if (this.labelType === labelTypes.points) {
-    const points = dom.edges.map(e => ({ ...e, points: this.getCornersOriented(e) })).filter(e => !!e.points)
+    const points = dom.edges.map(e => ({
+      ...e,
+      points: this.getCornersOriented(e)
+    })).filter(e => !!e.points)
     const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svg.hull(e))
     const hullBox = this.segment
       ? hull.map(edge => this.drawSinglePolygon(edge))
@@ -274,15 +349,22 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
 
 Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePrefix, fileIndex) {
   const svgXmlWithoutLabels = this.smilesToSvgXml(smiles)
-  const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
+  const {
+    dom,
+    xml
+  } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
 
   // aneb: these are only at the original size, the final labels are computed after image has been resized
-  const svgXmlWithLabels = this.addLabels({ dom, xml })
+  const svgXmlWithLabels = this.addLabels({
+    dom,
+    xml
+  })
 
   const fileName = `${this.directory}/${filePrefix}-${fileIndex}`
   const suffix = `${this.labelType}${this.segment ? '-segment' : ''}`
+
   // TODO aneb: find out how background image can be exported even at very low quality
-  // await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
+  await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
   await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-${suffix}-y`, 100)
 }
 
@@ -290,11 +372,15 @@ Renderer.prototype.processBatch = async function(page, smilesList, filePrefix, b
   const logEvery = 10
   const progress = Math.ceil(smilesList.length / logEvery)
   for (const [i, smiles] of smilesList.entries()) {
-    const fileIndex = idOffset + i
+    try {
+      const fileIndex = this.uuid()
 
-    await this.imageFromSmilesString(page, smiles, filePrefix, fileIndex)
-    if (i % progress === 0) {
-      console.log(`${this.labelType} - batch #${batchIndex} progress: ${100 * +(i / smilesList.length).toFixed(1)}%`)
+      await this.imageFromSmilesString(page, smiles, filePrefix, fileIndex)
+      if (i % progress === 0) {
+        console.log(`${this.labelType} - batch #${batchIndex} progress: ${100 * +(i / smilesList.length).toFixed(1)}%`)
+      }
+    } catch (e) {
+      console.error(`failed to process SMILES string '${smiles}'`, e.message)
     }
   }
 
