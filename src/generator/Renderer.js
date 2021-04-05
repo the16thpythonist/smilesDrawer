@@ -130,7 +130,7 @@ Renderer.prototype.groupLabels = function(labels) {
   const result = []
   for (const [id, points] of Object.entries(groups)) {
     const label = points[0].label
-    const xy = _.zip(...points.map(p => p.xy)).map(p => p.toString()).join(' ')
+    const xy = points.map(p => p.xy.toString()).join(' ')
     result.push({ id, label, xy })
   }
 
@@ -141,7 +141,7 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
   const [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, this.scale)
   const updatedSvgElement = await page.$('svg')
-  const ops = [updatedSvgElement.screenshot({ path: `${fileName}-quality-${quality}.jpeg`, omitBackground: false, quality: quality })]
+  const ops = [updatedSvgElement.screenshot({ path: `${fileName}-quality-${quality}.jpg`, omitBackground: false, quality: quality })]
 
   if (this.outputLabels) {
     const cleanLabels = labels
