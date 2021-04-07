@@ -275,7 +275,9 @@ class SvgWrapper {
    * @param {String} gradient gradient url. Defaults to null.
    */
   drawLine(idLabel, idValue, bondLabel, line, dashed = false, gradient = null) {
+    // aneb: this actually has no parameter, if needed, add parameter for stroke-width
     const styles = [
+      ['stroke-width', '1.75'],
       ['stroke-linecap', 'round'],
       ['stroke-dasharray', dashed ? '5, 5' : 'none']
     ].map(sub => sub.join(':')).join(';')
