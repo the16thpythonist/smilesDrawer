@@ -8,6 +8,7 @@ node generate-images.js \
 --concurrency "8" \
 --amount "10000" \
 --label-type "points" \
---max-smiles-length "100" \
+--min-smiles-length "10" \
+--max-smiles-length "50" \
 --output-labels \
 --clean

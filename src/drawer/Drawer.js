@@ -40,7 +40,7 @@ class Drawer {
       bondThickness: 0.6,
       bondLength: 25,
       shortBondLength: 0.85,
-      bondSpacing: 0.18 * 15,
+      bondSpacing: 0.18 * 20,
       atomVisualization: 'default',
       isomeric: true,
       terminalCarbons: false,

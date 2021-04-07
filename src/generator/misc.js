@@ -7,7 +7,7 @@ const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 const { labelTypes } = require('./types')
 
-const readSmilesFromCsv = async(file, smilesCol, n = 100, header = 1) => {
+const readSmilesFromCsv = async(file, smilesCol, n = 100) => {
   const stream = fs.createReadStream(file)
   const rl = readline.createInterface({
     input: stream,
@@ -18,13 +18,13 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100, header = 1) => {
   for await (const line of rl) {
     const smiles = line.split(',')[smilesCol]
     result.push(smiles)
-    if (result.length >= n + header) {
+    if (result.length >= 2 * n) {
       break
     }
   }
 
   stream.destroy()
-  return result.slice(header)
+  return result
 }
 
 const cliParams = () => {
@@ -39,6 +39,7 @@ const cliParams = () => {
     outputSvg,
     outputLabels,
     clean,
+    minSmilesLength,
     maxSmilesLength,
     colors: colorMap,
     fromCsvFile: csvFile,
@@ -59,7 +60,8 @@ const cliParams = () => {
     outputSvg: !!outputSvg,
     outputLabels: !!outputLabels,
     clean: !!clean,
-    maxSmilesLength: Number(maxSmilesLength) || 1000
+    maxSmilesLength: Number(maxSmilesLength) || 1000,
+    minSmilesLength: Number(minSmilesLength) || 0
   }
 
   if (!Object.keys(labelTypes).includes(config.labelType)) {
