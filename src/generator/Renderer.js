@@ -49,9 +49,7 @@ function Renderer({
   // TODO define options?
   this.drawer = new SvgDrawer({ colors })
   this.svg = new SVG()
-}
 
-Renderer.prototype.init = async function() {
   const {
     document,
     XMLSerializer
@@ -361,8 +359,8 @@ Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
     headless: true,
     devtools: false
   }
-  let browser = await puppeteer.launch(browserOptions)
-  let page = await browser.newPage()
+  const browser = await puppeteer.launch(browserOptions)
+  const page = await browser.newPage()
 
   for (const smiles of smilesList) {
     try {
@@ -370,13 +368,6 @@ Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
       await this.imageFromSmilesString(page, smiles, filePrefix, fileIndex)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
-      //  TODO improve this after memory leak has been found
-      const pages = await browser.pages()
-      await Promise.all(pages.map(p => p.close()))
-      await browser.close()
-
-      browser = await puppeteer.launch(browserOptions)
-      page = await browser.newPage()
     }
   }
 
@@ -388,7 +379,7 @@ Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
 Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix = 'img') {
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   const totalItems = smilesList.length
-  const clearInterval = Math.min(smilesList.length, 100)
+  const clearInterval = Math.min(smilesList.length, 1000)
   let iteration = 0
   console.time(label)
 

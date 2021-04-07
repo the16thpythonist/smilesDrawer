@@ -39,6 +39,7 @@ const cliParams = () => {
     outputSvg,
     outputLabels,
     clean,
+    maxSmilesLength,
     colors: colorMap,
     fromCsvFile: csvFile,
     fromCsvColumn: csvColumn
@@ -57,7 +58,8 @@ const cliParams = () => {
     segment: !!segment,
     outputSvg: !!outputSvg,
     outputLabels: !!outputLabels,
-    clean: !!clean
+    clean: !!clean,
+    maxSmilesLength: Number(maxSmilesLength) || 1000
   }
 
   if (!Object.keys(labelTypes).includes(config.labelType)) {

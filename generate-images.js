@@ -26,10 +26,11 @@
 
   await fs.ensureDir(conf.outputDirectory)
 
+  const valid = smilesList.filter(s => s.length < conf.maxSmilesLength)
+  console.log(`removed ${smilesList.length - valid.length}/${smilesList.length} SMILES strings longer than ${conf.maxSmilesLength} characters`)
   for (const type of types) {
     conf.labelType = type
     const renderer = new Renderer(conf)
-    await renderer.init()
-    await renderer.imagesFromSmilesList(smilesList)
+    await renderer.imagesFromSmilesList(valid)
   }
 })()

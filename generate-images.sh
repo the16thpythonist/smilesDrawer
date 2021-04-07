@@ -4,9 +4,10 @@ node generate-images.js \
 --output-directory "generated-images" \
 --quality "100" \
 --colors "mono" \
---scale "1" \
+--scale "2" \
 --concurrency "8" \
---amount "500" \
+--amount "10000" \
 --label-type "points" \
+--max-smiles-length "100" \
 --output-labels \
 --clean
