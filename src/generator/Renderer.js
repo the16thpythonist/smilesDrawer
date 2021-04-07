@@ -357,11 +357,11 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePref
 }
 
 Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
-  const browser = await puppeteer.launch({
+  const browserOptions = {
     headless: true,
     devtools: false
-  })
-
+  }
+  let browser = await puppeteer.launch(browserOptions)
   let page = await browser.newPage()
 
   for (const smiles of smilesList) {
@@ -370,17 +370,25 @@ Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
       await this.imageFromSmilesString(page, smiles, filePrefix, fileIndex)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
+      //  TODO improve this after memory leak has been found
+      const pages = await browser.pages()
+      await Promise.all(pages.map(p => p.close()))
+      await browser.close()
+
+      browser = await puppeteer.launch(browserOptions)
       page = await browser.newPage()
     }
   }
 
+  const pages = await browser.pages()
+  await Promise.all(pages.map(p => p.close()))
   await browser.close()
 }
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix = 'img') {
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   const totalItems = smilesList.length
-  const clearInterval = Math.min(smilesList.length, 250)
+  const clearInterval = Math.min(smilesList.length, 100)
   let iteration = 0
   console.time(label)
 

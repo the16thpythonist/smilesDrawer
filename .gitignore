@@ -4,3 +4,4 @@ yarn-error.log
 *.png
 *.svg
 generated-images/**/*
+*.log
