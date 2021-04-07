@@ -32,8 +32,6 @@ function Renderer({
   outputSvg,
   outputLabels
 }) {
-  this.browser = null
-  this.pages = null
   this.document = null
   this.XMLSerializer = null
 
@@ -60,16 +58,6 @@ Renderer.prototype.init = async function() {
   } = (new JSDOM('')).window
   this.document = document
   this.XMLSerializer = new XMLSerializer()
-
-  this.browser = await puppeteer.launch({
-    headless: true,
-    devtools: false
-  })
-  this.pages = await Promise.all(Array(this.concurrency).fill(null).map(() => this.browser.newPage()))
-}
-
-Renderer.prototype.done = async function() {
-  this.browser.close()
 }
 
 Renderer.prototype.uuid = function() {
@@ -368,32 +356,44 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePref
   await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-${suffix}-y`, 100)
 }
 
-Renderer.prototype.processBatch = async function(page, smilesList, filePrefix, batchIndex, idOffset) {
-  const logEvery = 10
-  const progress = Math.ceil(smilesList.length / logEvery)
-  for (const [i, smiles] of smilesList.entries()) {
+Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
+  const browser = await puppeteer.launch({
+    headless: true,
+    devtools: false
+  })
+
+  let page = await browser.newPage()
+
+  for (const smiles of smilesList) {
     try {
       const fileIndex = this.uuid()
-
       await this.imageFromSmilesString(page, smiles, filePrefix, fileIndex)
-      if (i % progress === 0) {
-        console.log(`${this.labelType} - batch #${batchIndex} progress: ${100 * +(i / smilesList.length).toFixed(1)}%`)
-      }
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
+      page = await browser.newPage()
     }
   }
 
-  console.log(`${this.labelType} - batch #${batchIndex} progress: 100%`)
+  await browser.close()
 }
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix = 'img') {
-  const batchSize = Math.ceil(smilesList.length / this.concurrency)
-  const batches = _.chunk(smilesList, batchSize)
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
-
+  const clearInterval = Math.min(smilesList.length, 250)
+  let iteration = 0
   console.time(label)
-  await Promise.all(batches.map((batch, index) => this.processBatch(this.pages[index], batch, filePrefix, index, index * batchSize)))
+
+  while (smilesList.length) {
+    console.log(`${new Date().toUTCString()} processing items ${iteration * clearInterval}-${iteration * clearInterval + clearInterval}/${smilesList.length}`)
+    const currentBatch = smilesList.splice(0, clearInterval)
+    const batchSize = Math.ceil(currentBatch.length / this.concurrency)
+    const batches = _.chunk(currentBatch, batchSize)
+
+    await Promise.all(batches.map((batch, index) => this.processBatch(batch, filePrefix)))
+
+    ++iteration
+  }
+
   console.timeEnd(label)
 }
 

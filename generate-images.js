@@ -31,6 +31,5 @@
     const renderer = new Renderer(conf)
     await renderer.init()
     await renderer.imagesFromSmilesList(smilesList)
-    await renderer.done()
   }
 })()
