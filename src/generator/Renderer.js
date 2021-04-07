@@ -379,12 +379,13 @@ Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix = 'img') {
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
+  const totalItems = smilesList.length
   const clearInterval = Math.min(smilesList.length, 250)
   let iteration = 0
   console.time(label)
 
   while (smilesList.length) {
-    console.log(`${new Date().toUTCString()} processing items ${iteration * clearInterval}-${iteration * clearInterval + clearInterval}/${smilesList.length}`)
+    console.log(`${new Date().toUTCString()} processing items ${iteration * clearInterval}-${iteration * clearInterval + clearInterval}/${totalItems}`)
     const currentBatch = smilesList.splice(0, clearInterval)
     const batchSize = Math.ceil(currentBatch.length / this.concurrency)
     const batches = _.chunk(currentBatch, batchSize)
