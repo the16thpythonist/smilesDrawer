@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-operators,array-callback-return */
 // @ts-check
 const MathHelper = require('./MathHelper')
 const ArrayHelper = require('./ArrayHelper')
@@ -71,11 +72,11 @@ class Drawer {
     this.ringConnectionIdCounter = 0
 
     this.graph = new Graph(data, this.opts.isomeric)
-    this.rings = Array()
-    this.ringConnections = Array()
+    this.rings = []
+    this.ringConnections = []
 
-    this.originalRings = Array()
-    this.originalRingConnections = Array()
+    this.originalRings = []
+    this.originalRingConnections = []
 
     this.bridgedRing = false
 
@@ -501,7 +502,7 @@ class Drawer {
    * @returns {Ring[]} An array containing all bridged rings associated with this molecule.
    */
   getBridgedRings() {
-    const bridgedRings = Array()
+    const bridgedRings = []
 
     for (let i = 0; i < this.rings.length; i++) {
       if (this.rings[i].isBridged) {
@@ -729,7 +730,7 @@ class Drawer {
    * @returns {Number[]} An array containing all ring ids of rings part of a bridged ring system.
    */
   getBridgedRingRings(ringId) {
-    const involvedRings = Array()
+    const involvedRings = []
     const that = this
 
     const recurse = function(r) {
@@ -818,7 +819,7 @@ class Drawer {
     // Vertices can also be part of multiple rings and lay on the bridged ring,
     // however, they have to have at least two neighbours that are not part of
     // two rings
-    const insideRing = Array()
+    const insideRing = []
 
     for (const id of leftovers) {
       const vertex = this.graph.vertices[id]
@@ -858,7 +859,7 @@ class Drawer {
     // associated with the bridged ring
     for (let i = 0; i < insideRing.length; i++) {
       const vertex = this.graph.vertices[insideRing[i]]
-      vertex.value.rings = Array()
+      vertex.value.rings = []
     }
 
     // Remove former rings from members of the bridged ring and add the bridged ring
@@ -897,7 +898,7 @@ class Drawer {
    * @returns {Number[]} An array of ids of rings shared by the two vertices.
    */
   getCommonRings(vertexA, vertexB) {
-    const commonRings = Array()
+    const commonRings = []
 
     for (let i = 0; i < vertexA.value.rings.length; i++) {
       for (let j = 0; j < vertexB.value.rings.length; j++) {
@@ -1020,7 +1021,7 @@ class Drawer {
    * @param {Number} vertexIdB A vertex id.
    */
   removeRingConnectionsBetween(vertexIdA, vertexIdB) {
-    const toRemove = Array()
+    const toRemove = []
     for (let i = 0; i < this.ringConnections.length; i++) {
       const ringConnection = this.ringConnections[i]
 
@@ -1057,7 +1058,7 @@ class Drawer {
    * @returns {Number[]} An array of ring connection ids.
    */
   getRingConnections(ringId, ringIds) {
-    const ringConnections = Array()
+    const ringConnections = []
 
     for (let i = 0; i < this.ringConnections.length; i++) {
       const rc = this.ringConnections[i]
@@ -1109,7 +1110,7 @@ class Drawer {
       }
     }
 
-    const sortable = Array()
+    const sortable = []
 
     for (let i = 0; i < this.graph.vertices.length; i++) {
       sortable.push({
@@ -1182,8 +1183,8 @@ class Drawer {
    * Stores the current information associated with rings.
    */
   backupRingInformation() {
-    this.originalRings = Array()
-    this.originalRingConnections = Array()
+    this.originalRings = []
+    this.originalRingConnections = []
 
     for (let i = 0; i < this.rings.length; i++) {
       this.originalRings.push(this.rings[i])
@@ -1205,8 +1206,8 @@ class Drawer {
     // Get the subring centers from the bridged rings
     const bridgedRings = this.getBridgedRings()
 
-    this.rings = Array()
-    this.ringConnections = Array()
+    this.rings = []
+    this.ringConnections = []
 
     for (let i = 0; i < bridgedRings.length; i++) {
       const bridgedRing = bridgedRings[i]
@@ -1488,7 +1489,7 @@ class Drawer {
    * Resolve primary (exact) overlaps, such as two vertices that are connected to the same ring vertex.
    */
   resolvePrimaryOverlaps() {
-    const overlaps = Array()
+    const overlaps = []
     const done = Array(this.graph.vertices.length)
 
     // Looking for overlaps created by two bonds coming out of a ring atom, which both point straight
@@ -1509,7 +1510,7 @@ class Drawer {
 
         if (nonRingNeighbours.length > 1) {
           // Look for rings where there are atoms with two bonds outside the ring (overlaps)
-          const rings = Array()
+          const rings = []
 
           for (let k = 0; k < vertex.value.rings.length; k++) {
             rings.push(vertex.value.rings[k])
@@ -1523,7 +1524,7 @@ class Drawer {
         } else if (nonRingNeighbours.length === 1 && vertex.value.rings.length === 2) {
           // Look for bonds coming out of joined rings to adjust the angle, an example is: C1=CC(=CC=C1)[C@]12SCCN1CC1=CC=CC=C21
           // where the angle has to be adjusted to account for fused ring
-          const rings = Array()
+          const rings = []
 
           for (let k = 0; k < vertex.value.rings.length; k++) {
             rings.push(vertex.value.rings[k])
@@ -1774,7 +1775,7 @@ class Drawer {
     } else {
       // Draw the non-ring vertices connected to this one
       const tmpNeighbours = vertex.getNeighbours()
-      let neighbours = Array()
+      let neighbours = []
 
       // Remove neighbours that are not drawn
       for (let i = 0; i < tmpNeighbours.length; i++) {
@@ -2095,7 +2096,7 @@ class Drawer {
    * @returns {Vertex[]} An array of vertices.
    */
   getNonRingNeighbours(vertexId) {
-    const nrneighbours = Array()
+    const nrneighbours = []
     const vertex = this.graph.vertices[vertexId]
     const neighbours = vertex.neighbours
 
@@ -2131,7 +2132,7 @@ class Drawer {
 
       for (let j = 0; j < nNeighbours; j++) {
         const visited = new Uint8Array(this.graph.vertices.length)
-        const priority = Array(Array())
+        const priority = Array([])
         visited[vertex.id] = 1
 
         this.visitStereochemistry(neighbours[j], vertex.id, visited, priority, maxDepth, 0)
@@ -2307,7 +2308,7 @@ class Drawer {
     const atomicNumber = vertex.value.getAtomicNumber()
 
     if (priority.length <= depth) {
-      priority.push(Array())
+      priority.push([])
     }
 
     for (let i = 0; i < this.graph.getEdge(vertexId, previousVertexId).weight; i++) {
@@ -2332,7 +2333,7 @@ class Drawer {
 
       for (let i = 0; i < vertex.value.getMaxBonds() - bonds; i++) {
         if (priority.length <= depth + 1) {
-          priority.push(Array())
+          priority.push([])
         }
 
         priority[depth + 1].push(atomicNumber * 1000 + 1)
@@ -2455,6 +2456,7 @@ class Drawer {
 
         const pseudoElements = neighbour.getAttachedPseudoElements()
 
+        // eslint-disable-next-line no-prototype-builtins
         if (pseudoElements.hasOwnProperty('0O') && pseudoElements.hasOwnProperty('3C')) {
           neighbour.isDrawn = false
           vertex.value.attachPseudoElement('Ac', '', 0)
