@@ -35,22 +35,20 @@ class Drawer {
     this.totalOverlapScore = 0
 
     this.defaultOptions = {
-      // width: 500,
-      // height: 500,
       bondThickness: 0.6,
       bondLength: 25,
       shortBondLength: 0.85,
       bondSpacing: 0.18 * 20,
+      fontSizeLarge: 7,
+      fontSizeSmall: 4,
+      padding: 25,
       atomVisualization: 'default',
       isomeric: true,
       terminalCarbons: false,
       explicitHydrogens: true,
-      overlapSensitivity: 0.1,
-      overlapResolutionIterations: 5,
+      overlapSensitivity: 0.01,
+      overlapResolutionIterations: 10,
       compactDrawing: true,
-      fontSizeLarge: 5,
-      fontSizeSmall: 3,
-      padding: 25,
       experimentalSSSR: false,
       kkThreshold: 0.1,
       kkInnerThreshold: 0.1,
@@ -62,9 +60,9 @@ class Drawer {
     this.opts = this.extend(true, this.defaultOptions, options)
     this.opts.halfBondSpacing = this.opts.bondSpacing / 2.0
     this.opts.bondLengthSq = this.opts.bondLength * this.opts.bondLength
-    this.opts.halfFontSizeLarge = this.opts.fontSizeLarge / 2.0
-    this.opts.quarterFontSizeLarge = this.opts.fontSizeLarge / 4.0
-    this.opts.fifthFontSizeSmall = this.opts.fontSizeSmall / 5.0
+    // this.opts.halfFontSizeLarge = this.opts.fontSizeLarge / 2.0
+    // this.opts.quarterFontSizeLarge = this.opts.fontSizeLarge / 4.0
+    // this.opts.fifthFontSizeSmall = this.opts.fontSizeSmall / 5.0
   }
 
   initDraw(data) {
