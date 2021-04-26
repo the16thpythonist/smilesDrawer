@@ -11,6 +11,7 @@ const {
 const Parser = require('../drawer/Parser')
 const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
+const uuid = require('uuid')
 const {
   bondLabels,
   labelTypes
@@ -165,7 +166,7 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
   const [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, this.scale)
   const updatedSvgElement = await page.$('svg')
   const ops = [updatedSvgElement.screenshot({
-    path: `${fileName}-quality-${quality}.jpg`,
+    path: `${fileName}.jpg`,
     omitBackground: false,
     quality: quality
   })]
@@ -180,7 +181,7 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
 
     const finalLabels = this.groupLabels(cleanLabels)
 
-    ops.push(fs.writeFile(`${fileName}.labels.json`, JSON.stringify(finalLabels, null, 2)))
+    ops.push(fs.writeFile(`${fileName}.json`, JSON.stringify(finalLabels, null, 2)))
   }
 
   if (this.outputSvg) {
@@ -333,7 +334,7 @@ Renderer.prototype.addLabels = function({
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePrefix, fileIndex) {
+Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   const svgXmlWithoutLabels = this.smilesToSvgXml(smiles)
   const {
     dom,
@@ -346,15 +347,13 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, filePref
     xml
   })
 
-  const fileName = `${this.directory}/${filePrefix}-${fileIndex}`
-  const suffix = `${this.labelType}${this.segment ? '-segment' : ''}`
-
-  // TODO aneb: find out how background image can be exported even at very low quality
-  await this.saveResizedImage(page, svgXmlWithoutLabels, `${fileName}-x`, this.quality)
-  await this.saveResizedImage(page, svgXmlWithLabels, `${fileName}-${suffix}-y`, 100)
+  const target = `${this.directory}/${uuid()}`
+  await fs.ensureDir(target)
+  await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, this.quality)
+  await this.saveResizedImage(page, svgXmlWithLabels, `${target}/y`, 100)
 }
 
-Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
+Renderer.prototype.processBatch = async function(smilesList) {
   const browserOptions = {
     headless: true,
     devtools: false
@@ -364,8 +363,7 @@ Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
 
   for (const smiles of smilesList) {
     try {
-      const fileIndex = this.uuid()
-      await this.imageFromSmilesString(page, smiles, filePrefix, fileIndex)
+      await this.imageFromSmilesString(page, smiles)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
     }
@@ -376,7 +374,7 @@ Renderer.prototype.processBatch = async function(smilesList, filePrefix) {
   await browser.close()
 }
 
-Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix = 'img') {
+Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   const totalItems = smilesList.length
   const clearInterval = Math.min(smilesList.length, 1000)
@@ -389,7 +387,7 @@ Renderer.prototype.imagesFromSmilesList = async function(smilesList, filePrefix 
     const batchSize = Math.ceil(currentBatch.length / this.concurrency)
     const batches = _.chunk(currentBatch, batchSize)
 
-    await Promise.all(batches.map((batch, index) => this.processBatch(batch, filePrefix)))
+    await Promise.all(batches.map((batch, index) => this.processBatch(batch)))
 
     ++iteration
   }
