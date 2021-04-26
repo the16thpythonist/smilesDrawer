@@ -11,7 +11,6 @@ const {
 const Parser = require('../drawer/Parser')
 const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
-const uuid = require('uuid')
 const {
   bondLabels,
   labelTypes
@@ -347,7 +346,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
     xml
   })
 
-  const target = `${this.directory}/${uuid()}`
+  const target = `${this.directory}/${this.uuid()}`
   await fs.ensureDir(target)
   await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, this.quality)
   await this.saveResizedImage(page, svgXmlWithLabels, `${target}/y`, 100)
