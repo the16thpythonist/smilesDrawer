@@ -1,14 +1,14 @@
 node generate-images.js \
---from-csv-file "data/drugbank.csv" \
+--from-csv-file "data/pubchem.csv" \
 --from-csv-column "0" \
 --output-directory "generated-images" \
 --quality "100" \
 --colors "mono" \
 --scale "4" \
 --concurrency "8" \
---amount "2000" \
+--amount "10000" \
 --label-type "points" \
---min-smiles-length "10" \
---max-smiles-length "100" \
+--min-smiles-length "0" \
+--max-smiles-length "1000" \
 --output-labels \
 --clean
