@@ -367,14 +367,19 @@ class SvgWrapper {
     let letterSpacing = 'normal'
     let textOrientation = 'mixed'
     let textDirection = 'direction: ltr;'
-    let xShift = -2
-    let yShift = 2.5
+    let xShift = -3.5
+    let yShift = 3.0
 
-    const mask = this.svgHelper.createElement('circle', {
+    const roundCorners = 0
+    const maskSize = 7.5
+    const mask = this.svgHelper.createElement('rect', {
       [`text-mask-${vertexIdLabel}`]: vertexIdValue,
-      cx: pos.x,
-      cy: pos.y,
-      r: '3.5',
+      x: pos.x - maskSize / 2,
+      y: pos.y - maskSize / 2,
+      rx: roundCorners,
+      ry: roundCorners,
+      width: maskSize,
+      height: maskSize,
       fill: 'black'
     })
 
@@ -390,13 +395,23 @@ class SvgWrapper {
 
     if (direction === 'down' && !isTerminal) {
       xShift = 0
-      yShift = -2
+      yShift = -4
     }
+
+    // aneb: added by myself
+    if (direction === 'down' && isTerminal) {
+      xShift = -3.5
+      yShift = 5.0
+    }
+
     if (direction === 'up' && !isTerminal) {
-      xShift = 0.5
+      xShift = -2.5
+      yShift = 5
     }
+
     if (direction === 'left') {
-      xShift = 2
+      xShift = 3
+      yShift = 4
     }
 
     if (direction === 'left' || (direction === 'up' && !isTerminal)) {
