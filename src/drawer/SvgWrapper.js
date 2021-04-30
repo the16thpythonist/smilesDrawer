@@ -391,9 +391,11 @@ class SvgWrapper {
     if (direction === 'down' && !isTerminal) {
       xShift = 0
       yShift = -2
-    } else if (direction === 'up' && !isTerminal) {
+    }
+    if (direction === 'up' && !isTerminal) {
       xShift = 0.5
-    } else if (direction === 'left') {
+    }
+    if (direction === 'left') {
       xShift = 2
     }
 
