@@ -279,7 +279,7 @@ class SvgWrapper {
   drawLine(idLabel, idValue, bondLabel, line, dashed = false, gradient = null) {
     // aneb: this actually has no parameter, if needed, add parameter for stroke-width
     const styles = [
-      ['stroke-width', '1.75'],
+      ['stroke-width', '1'],
       ['stroke-linecap', 'round'],
       ['stroke-dasharray', dashed ? '5, 5' : 'none']
     ].map(sub => sub.join(':')).join(';')
@@ -390,8 +390,8 @@ class SvgWrapper {
       yShift = 2
     }
     if (direction === 'right' && !isTerminal) {
-      xShift = -3.5
-      yShift = 3.5
+      xShift = -3.0
+      yShift = 3.0
     }
 
     if (direction === 'left' && isTerminal) {
@@ -406,13 +406,13 @@ class SvgWrapper {
     }
 
     if (direction === 'up' && isTerminal) {
-      xShift = 3.5
+      xShift = 4.0
       yShift = 3.5
       textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
     }
     if (direction === 'up' && !isTerminal) {
-      xShift = 0.5
-      yShift = 5
+      xShift = 2
+      yShift = 6
       textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
     }
 

@@ -10,5 +10,4 @@ node generate-images.js \
 --label-type "points" \
 --min-smiles-length "0" \
 --max-smiles-length "1000" \
---output-labels \
 --clean

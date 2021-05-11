@@ -70,7 +70,6 @@ function resizeImage(size) {
   // changing width and height is the proper way to do it, rendering it will recognize the new proportions
   svg.setAttributeNS(null, 'height', size)
   svg.setAttributeNS(null, 'width', size)
-  svg.setAttributeNS(null, 'preserveAspectRatio', 'none')
 
   const elements = document.documentElement.querySelectorAll('[label-id]')
   // aneb: find better way to do this?

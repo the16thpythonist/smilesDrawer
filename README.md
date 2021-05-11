@@ -17,7 +17,7 @@ Parameter | Description
 `--size` | Value specifying by how much the generated image should be resized.
 `--amount` | How many SMILES to read.
 `--concurrency` | How many headless browsers to start.
-`--label-type` | One of ```box```, ```oriented``` of ```points```.
+`--label-type` | One of ```box```, ```oriented```, ```points``` or ```all```.
 `--min-smiles-length` | Lower bound for SMILES strings.
 `--max-smiles-length` | Upper bound for SMILES strings.
 `--output-labels` | Debug option. Whether to output labels.
