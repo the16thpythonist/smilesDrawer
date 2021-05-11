@@ -6,10 +6,7 @@
   const fs = require('fs-extra')
 
   const Renderer = require('./src/generator/Renderer')
-  const {
-    readSmilesFromCsv,
-    cliParams
-  } = require('./src/generator/misc')
+  const { readSmilesFromCsv, cliParams } = require('./src/generator/misc')
   const { labelTypes } = require('./src/generator/types')
 
   const conf = cliParams()

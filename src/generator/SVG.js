@@ -38,12 +38,7 @@ SVG.prototype.appendChildren = function(element, children) {
   }
 }
 
-SVG.prototype.correctBoundingBox = function({
-  x,
-  y,
-  width,
-  height
-}) {
+SVG.prototype.correctBoundingBox = function({ x, y, width, height }) {
   const minValue = 0.5
   const newValue = 2
   let [xCorr, yCorr, widthCorr, heightCorr] = [x, y, width, height]
@@ -67,12 +62,7 @@ SVG.prototype.correctBoundingBox = function({
 }
 
 SVG.prototype.boundingBoxToRect = function(box) {
-  const {
-    x,
-    y,
-    width: w,
-    height: h
-  } = box
+  const { x, y, width: w, height: h } = box
   return {
     top: y,
     bottom: y + h,
@@ -114,10 +104,7 @@ SVG.prototype.getEdgePointsOfBoxAroundLine = function({
 }) {
   const v1 = new Vector2(x1, y1)
   const v2 = new Vector2(x2, y2)
-  const {
-    x: dx,
-    y: dy
-  } = Vector2.subtract(v1, v2)
+  const { x: dx, y: dy } = Vector2.subtract(v1, v2)
 
   if (dx === 0 && dy === 0) {
     return null
@@ -151,18 +138,8 @@ SVG.prototype.hull = function(edges) {
     return edges[0]
   }
 
-  const {
-    x1: p11,
-    y1: p12,
-    x2: p21,
-    y2: p22
-  } = edges[0]
-  const {
-    x1: p31,
-    y1: p32,
-    x2: p41,
-    y2: p42
-  } = edges[0].label === bondLabels.triple ? edges.slice(-2)[0] : edges.slice(-1)[0]
+  const { x1: p11, y1: p12, x2: p21, y2: p22 } = edges[0]
+  const { x1: p31, y1: p32, x2: p41, y2: p42 } = edges[0].label === bondLabels.triple ? edges.slice(-2)[0] : edges.slice(-1)[0]
   const points = [[p11, p12], [p21, p22], [p31, p32], [p41, p42]]
 
   // aneb: no matter the orientation, this orders the points such that the polygon can be drawn
@@ -175,12 +152,7 @@ SVG.prototype.transformPoints = function(label, matrix) {
   //  https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
   // newX = a * oldX + c * oldY
   // newY = b * oldX + d * oldY
-  const {
-    a,
-    b,
-    c,
-    d
-  } = matrix
+  const { a, b, c, d } = matrix
 
   return label.points.map(p => {
     const [x, y] = [Number(p[0]), Number(p[1])]

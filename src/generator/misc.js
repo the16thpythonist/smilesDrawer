@@ -30,17 +30,12 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100) => {
 const cliParams = () => {
   const {
     outputDirectory,
-    amount,
-    quality,
-    scale,
+    amount, quality, scale,
     concurrency,
-    labelType,
-    segment,
-    outputSvg,
-    outputLabels,
+    labelType, segment,
+    outputSvg, outputLabels,
     clean,
-    minSmilesLength,
-    maxSmilesLength,
+    minSmilesLength, maxSmilesLength,
     colors: colorMap,
     fromCsvFile: csvFile,
     fromCsvColumn: csvColumn

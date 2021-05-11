@@ -3,24 +3,14 @@ const fs = require('fs-extra')
 const puppeteer = require('puppeteer')
 const _ = require('lodash')
 const { JSDOM } = require('jsdom')
-const {
-  xml2js,
-  js2xml
-} = require('xml-js')
+const { xml2js, js2xml } = require('xml-js')
 
 const Parser = require('../drawer/Parser')
 const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
-const {
-  bondLabels,
-  labelTypes
-} = require('./types')
+const { bondLabels, labelTypes } = require('./types')
 
-const {
-  getPositionInfoFromSvg,
-  resizeImage,
-  drawMasksAroundTextElements
-} = require('./browser')
+const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
 function Renderer({
   outputDirectory,
@@ -51,10 +41,7 @@ function Renderer({
   this.drawer = new SvgDrawer({ colors })
   this.svg = new SVG()
 
-  const {
-    document,
-    XMLSerializer
-  } = (new JSDOM('')).window
+  const { document, XMLSerializer } = (new JSDOM('')).window
   this.document = document
   this.XMLSerializer = new XMLSerializer()
 }
@@ -273,10 +260,7 @@ Renderer.prototype.drawSinglePolygon = function({
 
 Renderer.prototype.drawMultiPolygon = function(edgeElements) {
   const color = this.svg.randomColor()
-  const {
-    id,
-    label
-  } = edgeElements[0]
+  const { id, label } = edgeElements[0]
   const points = edgeElements.map(e => this.getCornersOriented(e)).filter(e => !!e)
   return points.map(point => {
     return this.svg.createElement('polygon', {
@@ -340,10 +324,7 @@ Renderer.prototype.addLabels = function({
 
 Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   const svgXmlWithoutLabels = this.smilesToSvgXml(smiles)
-  const {
-    dom,
-    xml
-  } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
+  const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
 
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({
