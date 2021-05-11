@@ -2,6 +2,7 @@
   // TODO aneb: make configuration for explicit drawings, it does not work with the current drawer config
   // need to update the Atom.drawExplicit property
 
+  // TODO label aromatic only if circle is drawn, otherwise label as single/double only
   const fs = require('fs-extra')
 
   const Renderer = require('./src/generator/Renderer')

@@ -18,7 +18,8 @@ const {
 
 const {
   getPositionInfoFromSvg,
-  resizeImage
+  resizeImage,
+  drawMasksAroundTextElements
 } = require('./browser')
 
 function Renderer({
@@ -162,7 +163,11 @@ Renderer.prototype.groupLabels = function(labels) {
 
 Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality) {
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
-  const [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, this.scale)
+  let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, this.scale)
+
+  await page.setContent(updatedSvg, { waitUntil: 'domcontentloaded' })
+  updatedSvg = await page.evaluate(drawMasksAroundTextElements)
+
   const updatedSvgElement = await page.$('svg')
   const ops = [updatedSvgElement.screenshot({
     path: `${fileName}.jpg`,
@@ -346,10 +351,15 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
     xml
   })
 
-  const target = `${this.directory}/${this.uuid()}`
+  const id = this.uuid()
+  const target = `${this.directory}/${id}`
   await fs.ensureDir(target)
   await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, this.quality)
   await this.saveResizedImage(page, svgXmlWithLabels, `${target}/y`, 100)
+
+  // aneb: debugging only
+  // await this.saveResizedImage(page, svgXmlWithoutLabels, `${this.directory}/${id}-x`, this.quality)
+  // await this.saveResizedImage(page, svgXmlWithLabels, `${this.directory}/${id}-y`, 100)
 }
 
 Renderer.prototype.processBatch = async function(smilesList) {

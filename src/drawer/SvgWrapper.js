@@ -367,25 +367,17 @@ class SvgWrapper {
     let letterSpacing = 'normal'
     let textOrientation = 'mixed'
     let textDirection = 'direction: ltr;'
-    let xShift = -3.5
-    let yShift = 3.0
+    let xShift = null
+    let yShift = null
 
-    const roundCorners = 0
-    const maskSize = 7.5
-    const mask = this.svgHelper.createElement('rect', {
-      [`text-mask-${vertexIdLabel}`]: vertexIdValue,
-      x: pos.x - maskSize / 2,
-      y: pos.y - maskSize / 2,
-      rx: roundCorners,
-      ry: roundCorners,
-      width: maskSize,
-      height: maskSize,
-      fill: 'black'
-    })
+    const debug = false
+    const directionColors = {
+      right: 'red',
+      left: 'blue',
+      up: 'green',
+      down: 'yellow'
+    }
 
-    this.maskElements.push(mask)
-
-    // TODO aneb simplify this, possibly make method
     // determine writing mode
     if (/up|down/.test(direction) && !isTerminal) {
       writingMode = 'vertical-rl'
@@ -393,29 +385,48 @@ class SvgWrapper {
       letterSpacing = '-1px'
     }
 
-    if (direction === 'down' && !isTerminal) {
-      xShift = 0
-      yShift = -4
+    if (direction === 'right' && isTerminal) {
+      xShift = 1
+      yShift = 2
+    }
+    if (direction === 'right' && !isTerminal) {
+      xShift = -3.5
+      yShift = 3.5
     }
 
-    // aneb: added by myself
+    if (direction === 'left' && isTerminal) {
+      xShift = -1.5
+      yShift = 3
+      textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
+    }
+    if (direction === 'left' && !isTerminal) {
+      xShift = 3.5
+      yShift = 3.5
+      textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
+    }
+
+    if (direction === 'up' && isTerminal) {
+      xShift = 3.5
+      yShift = 3.5
+      textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
+    }
+    if (direction === 'up' && !isTerminal) {
+      xShift = 0.5
+      yShift = 5
+      textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
+    }
+
     if (direction === 'down' && isTerminal) {
       xShift = -3.5
-      yShift = 5.0
+      yShift = 3.5
+    }
+    if (direction === 'down' && !isTerminal) {
+      xShift = 0
+      yShift = -5
     }
 
-    if (direction === 'up' && !isTerminal) {
-      xShift = -2.5
-      yShift = 5
-    }
-
-    if (direction === 'left') {
-      xShift = 3
-      yShift = 4
-    }
-
-    if (direction === 'left' || (direction === 'up' && !isTerminal)) {
-      textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
+    if (xShift === null || yShift === null) {
+      throw new Error(`not implemented: conditions did not capture layout direction=${direction} and isTerminal=${isTerminal}`)
     }
 
     const textElem = this.svgHelper.createElement('text', {
@@ -424,7 +435,7 @@ class SvgWrapper {
       x: pos.x + xShift,
       y: pos.y + yShift,
       class: 'element',
-      fill: this.getColor(elementName),
+      fill: debug ? directionColors[direction] : this.getColor(elementName),
       style: `text-anchor: start;writing-mode: ${writingMode};text-orientation: ${textOrientation};letter-spacing: ${letterSpacing};${textDirection}`
     })
 

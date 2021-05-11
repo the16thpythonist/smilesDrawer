@@ -1,3 +1,34 @@
+function drawMasksAroundTextElements() {
+  const svg = document.querySelector('svg')
+  const mask = document.querySelector('mask')
+
+  const vertices = document.documentElement.querySelectorAll('[vertex-id]')
+
+  for (const vertex of vertices) {
+    const { x, y, width, height } = vertex.getBBox()
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+
+    const isRound = ['O', 'S'].some(v => vertex.textContent.trim().startsWith(v))
+    const round = isRound ? 10 : 1
+
+    console.log(vertex.textContent.trim().startsWith('O'))
+
+    rect.setAttributeNS(null, 'x', x)
+    rect.setAttributeNS(null, 'y', y)
+    rect.setAttributeNS(null, 'width', width)
+    rect.setAttributeNS(null, 'height', height)
+    rect.setAttributeNS(null, 'fill', 'black')
+
+    rect.setAttributeNS(null, 'rx', round)
+    rect.setAttributeNS(null, 'ry', round)
+
+    mask.appendChild(rect)
+  }
+  // eslint-disable-next-line no-undef
+  return new XMLSerializer().serializeToString(svg)
+}
+
 function getPositionInfoFromSvg() {
   const nodes = []
   const edges = []
@@ -60,5 +91,6 @@ function resizeImage(scale) {
 
 module.exports = {
   getPositionInfoFromSvg,
-  resizeImage
+  resizeImage,
+  drawMasksAroundTextElements
 }
