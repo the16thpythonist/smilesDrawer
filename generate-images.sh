@@ -4,7 +4,7 @@ node generate-images.js \
 --output-directory "generated-images" \
 --quality "100" \
 --colors "mono" \
---scale "4" \
+--size "512" \
 --concurrency "8" \
 --amount "10000" \
 --label-type "points" \

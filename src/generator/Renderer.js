@@ -12,7 +12,7 @@ const { bondLabels, labelTypes } = require('./types')
 
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
-function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelType, segment, outputSvg, outputLabels }) {
+function Renderer({ outputDirectory, quality, size, colors, concurrency, labelType, segment, outputSvg, outputLabels }) {
   this.document = null
   this.XMLSerializer = null
 
@@ -20,7 +20,7 @@ function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelT
 
   this.directory = outputDirectory
   this.quality = quality
-  this.scale = scale
+  this.size = size
   this.concurrency = concurrency
   this.labelType = labelType
   this.segment = segment
@@ -136,7 +136,7 @@ Renderer.prototype.groupLabels = function(labels) {
 
 Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality) {
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
-  let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, this.scale)
+  let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, this.size)
 
   await page.setContent(updatedSvg, { waitUntil: 'domcontentloaded' })
   updatedSvg = await page.evaluate(drawMasksAroundTextElements)

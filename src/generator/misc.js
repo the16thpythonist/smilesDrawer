@@ -30,7 +30,7 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100) => {
 const cliParams = () => {
   const {
     outputDirectory,
-    amount, quality, scale,
+    amount, quality, size,
     concurrency,
     labelType, segment,
     outputSvg, outputLabels,
@@ -48,7 +48,7 @@ const cliParams = () => {
     outputDirectory: path.resolve(outputDirectory),
     colors: colors[colorMap] || null,
     quality: Number(quality) || null,
-    scale: Number(scale) || null,
+    size: Number(size) || null,
     concurrency: Number(concurrency) || 4,
     labelType: labelType || null,
     segment: !!segment,
