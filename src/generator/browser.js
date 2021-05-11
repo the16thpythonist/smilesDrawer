@@ -4,34 +4,16 @@ function getPositionInfoFromSvg() {
 
   const vertices = document.documentElement.querySelectorAll('[vertex-id]')
   for (const vertex of vertices) {
-    const {
-      x,
-      y,
-      width,
-      height
-    } = vertex.getBBox()
+    const { x, y, width, height } = vertex.getBBox()
     const elements = Array.from(vertex.querySelectorAll('tspan')).map(c => c.textContent).filter(c => !!c)
     const id = vertex.getAttribute('vertex-id')
     const label = vertex.getAttribute('label')
-    nodes.push({
-      id,
-      label,
-      elements,
-      x,
-      y,
-      width,
-      height
-    })
+    nodes.push({ id, label, elements, x, y, width, height })
   }
 
   const bonds = document.documentElement.querySelectorAll('[edge-id]')
   for (const bond of bonds) {
-    const {
-      x,
-      y,
-      width,
-      height
-    } = bond.getBBox()
+    const { x, y, width, height } = bond.getBBox()
     const id = bond.getAttribute('edge-id')
     const label = bond.getAttribute('label')
     const x1 = bond.getAttribute('x1')
@@ -40,25 +22,10 @@ function getPositionInfoFromSvg() {
     const y2 = bond.getAttribute('y2')
 
     const points = bond.getAttribute('points')
-    edges.push({
-      id,
-      label,
-      x,
-      y,
-      width,
-      height,
-      x1,
-      y1,
-      x2,
-      y2,
-      points
-    })
+    edges.push({ id, label, x, y, width, height, x1, y1, x2, y2, points })
   }
 
-  return {
-    nodes,
-    edges
-  }
+  return { nodes, edges }
 }
 
 function resizeImage(scale) {
@@ -85,22 +52,8 @@ function resizeImage(scale) {
   const updatedSvg = new XMLSerializer().serializeToString(svg)
 
   // aneb: easiest way to make object out of it
-  const {
-    a,
-    b,
-    c,
-    d,
-    e,
-    f
-  } = svg.getScreenCTM()
-  const matrix = {
-    a,
-    b,
-    c,
-    d,
-    e,
-    f
-  }
+  const { a, b, c, d, e, f } = svg.getScreenCTM()
+  const matrix = { a, b, c, d, e, f }
 
   return [updatedSvg, labels, matrix]
 }
