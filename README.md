@@ -15,6 +15,7 @@ Parameter | Description
 `--quality` | Value in [0, 100] specifying image quality.
 `--colors` | Selects one of the [color](src/generator/colors.js) maps 
 `--size` | Value specifying by how much the generated image should be resized.
+`--preserve-aspect-ratio` | Documentation [here](https://developer.mozilla.org/de/docs/Web/SVG/Attribute/preserveAspectRatio).
 `--amount` | How many SMILES to read.
 `--concurrency` | How many headless browsers to start.
 `--label-type` | One of ```box```, ```oriented```, ```points``` or ```all```.

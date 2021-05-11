@@ -59,7 +59,7 @@ function getPositionInfoFromSvg() {
   return { nodes, edges }
 }
 
-function resizeImage(size) {
+function resizeImage({ size, preserveAspectRatio }) {
   // document.body.style.background = 'url("https://images.unsplash.com/photo-1566041510632-30055e21a9cf?ixid=MXwxMjA3fDB8MHxzZWFyY2h8Nnx8cGFwZXIlMjB0ZXh0dXJlfGVufDB8fDB8&ixlib=rb-1.2.1&w=1000&q=80")'
   // document.body.style.backgroundSize = 'cover'
   // document.body.style.backgroundRepeat = 'no-repeat'
@@ -70,6 +70,7 @@ function resizeImage(size) {
   // changing width and height is the proper way to do it, rendering it will recognize the new proportions
   svg.setAttributeNS(null, 'height', size)
   svg.setAttributeNS(null, 'width', size)
+  svg.setAttributeNS(null, 'preserveAspectRatio', preserveAspectRatio)
 
   const elements = document.documentElement.querySelectorAll('[label-id]')
   // aneb: find better way to do this?

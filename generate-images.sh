@@ -5,9 +5,11 @@ node generate-images.js \
 --quality "100" \
 --colors "mono" \
 --size "512" \
+--preserve-aspect-ratio "none" \
 --concurrency "8" \
---amount "10000" \
+--amount "100" \
 --label-type "points" \
 --min-smiles-length "0" \
 --max-smiles-length "1000" \
+--output-labels \
 --clean
