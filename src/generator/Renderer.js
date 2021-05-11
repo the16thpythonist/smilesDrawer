@@ -12,17 +12,7 @@ const { bondLabels, labelTypes } = require('./types')
 
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
-function Renderer({
-  outputDirectory,
-  quality,
-  scale,
-  colors,
-  concurrency,
-  labelType,
-  segment,
-  outputSvg,
-  outputLabels
-}) {
+function Renderer({ outputDirectory, quality, scale, colors, concurrency, labelType, segment, outputSvg, outputLabels }) {
   this.document = null
   this.XMLSerializer = null
 
@@ -138,11 +128,7 @@ Renderer.prototype.groupLabels = function(labels) {
   for (const [id, points] of Object.entries(groups)) {
     const label = points[0].label
     const xy = points.map(p => p.xy.toString()).join(' ')
-    result.push({
-      id,
-      label,
-      xy
-    })
+    result.push({ id, label, xy })
   }
 
   return _.sortBy(result, 'id')
@@ -165,10 +151,7 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
   if (this.outputLabels && labels.length) {
     const cleanLabels = labels
       .map(l => this.cleanupLabel(l))
-      .map(l => ({
-        ...l,
-        xy: this.svg.transformPoints(l, matrix)
-      }))
+      .map(l => ({ ...l, xy: this.svg.transformPoints(l, matrix) }))
 
     const finalLabels = this.groupLabels(cleanLabels)
 
@@ -196,12 +179,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.getCornersAligned = function({
-  x,
-  y,
-  width: w,
-  height: h
-}) {
+Renderer.prototype.getCornersAligned = function({ x, y, width: w, height: h }) {
   const dx = w
   const dy = h
 
@@ -223,11 +201,7 @@ Renderer.prototype.getCornersOriented = function(edge) {
   return this.svg.getEdgePointsOfBoxAroundLine(edge)
 }
 
-Renderer.prototype.drawPoints = function({
-  id,
-  label,
-  points
-}) {
+Renderer.prototype.drawPoints = function({ id, label, points }) {
   const color = this.svg.randomColor()
 
   // aneb: try to avoid overlapping points by using different sizes
@@ -244,11 +218,7 @@ Renderer.prototype.drawPoints = function({
   })
 }
 
-Renderer.prototype.drawSinglePolygon = function({
-  id,
-  label,
-  points
-}) {
+Renderer.prototype.drawSinglePolygon = function({ id, label, points }) {
   const color = this.svg.randomColor()
   return this.svg.createElement('polygon', {
     'label-id': `${id}-label`,
@@ -272,16 +242,10 @@ Renderer.prototype.drawMultiPolygon = function(edgeElements) {
   })
 }
 
-Renderer.prototype.addLabels = function({
-  dom,
-  xml
-}) {
+Renderer.prototype.addLabels = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
-  const nodeEdges = dom.nodes.map(n => ({
-    ...n,
-    points: this.getCornersAligned(n)
-  }))
+  const nodeEdges = dom.nodes.map(n => ({ ...n, points: this.getCornersAligned(n) }))
   const nodeLabels = this.labelType === labelTypes.points && !this.segment
     ? nodeEdges.map(n => this.drawPoints(n))
     : nodeEdges.map(n => this.drawSinglePolygon(n))
@@ -291,10 +255,7 @@ Renderer.prototype.addLabels = function({
   if (this.labelType === labelTypes.box) {
     const correctedEdges = dom.edges.map(e => ({ ...e, ...this.svg.correctBoundingBox(e) }))
     const merged = this.svg.mergeBoundingBoxes(correctedEdges)
-    const mergedWithPoints = merged.map(n => ({
-      ...n,
-      points: this.getCornersAligned(n)
-    }))
+    const mergedWithPoints = merged.map(n => ({ ...n, points: this.getCornersAligned(n) }))
     edgeLabels.push(...mergedWithPoints.map(e => this.drawSinglePolygon(e)))
   }
 
@@ -305,10 +266,7 @@ Renderer.prototype.addLabels = function({
   }
 
   if (this.labelType === labelTypes.points) {
-    const points = dom.edges.map(e => ({
-      ...e,
-      points: this.getCornersOriented(e)
-    })).filter(e => !!e.points)
+    const points = dom.edges.map(e => ({ ...e, points: this.getCornersOriented(e) })).filter(e => !!e.points)
     const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svg.hull(e))
     const hullBox = this.segment
       ? hull.map(edge => this.drawSinglePolygon(edge))
@@ -327,11 +285,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
 
   // aneb: these are only at the original size, the final labels are computed after image has been resized
-  const svgXmlWithLabels = this.addLabels({
-    dom,
-    xml
-  })
-
+  const svgXmlWithLabels = this.addLabels({ dom, xml })
   const id = this.uuid()
   const target = `${this.directory}/${id}`
   await fs.ensureDir(target)

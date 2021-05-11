@@ -96,12 +96,7 @@ SVG.prototype.mergeBoundingBoxes = function(boxes) {
   return Object.values(groups).map(g => this.getBoxWithMaxArea(g))
 }
 
-SVG.prototype.getEdgePointsOfBoxAroundLine = function({
-  x1,
-  y1,
-  x2,
-  y2
-}) {
+SVG.prototype.getEdgePointsOfBoxAroundLine = function({ x1, y1, x2, y2 }) {
   const v1 = new Vector2(x1, y1)
   const v2 = new Vector2(x2, y2)
   const { x: dx, y: dy } = Vector2.subtract(v1, v2)
