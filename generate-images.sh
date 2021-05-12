@@ -4,8 +4,8 @@ node generate-images.js \
 --output-directory "generated-images" \
 --quality "100" \
 --colors "mono" \
---size "384" \
---preserve-aspect-ratio "xMidYMid" \
+--size "512" \
+--preserve-aspect-ratio "none" \
 --concurrency "8" \
 --amount "2500" \
 --label-type "points" \
