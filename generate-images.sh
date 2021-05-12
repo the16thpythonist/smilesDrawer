@@ -4,10 +4,10 @@ node generate-images.js \
 --output-directory "generated-images" \
 --quality "100" \
 --colors "mono" \
---size "512" \
---preserve-aspect-ratio "none" \
+--size "384" \
+--preserve-aspect-ratio "xMidYMid" \
 --concurrency "8" \
---amount "100" \
+--amount "2500" \
 --label-type "points" \
 --min-smiles-length "0" \
 --max-smiles-length "1000" \

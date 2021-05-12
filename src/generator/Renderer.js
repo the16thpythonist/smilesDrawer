@@ -327,7 +327,9 @@ Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
   console.time(label)
 
   while (smilesList.length) {
-    console.log(`${new Date().toUTCString()} processing items ${iteration * clearInterval}-${iteration * clearInterval + clearInterval}/${totalItems}`)
+    const itemStart = iteration * clearInterval
+    const itemEnd = Math.min(itemStart + clearInterval, totalItems)
+    console.log(`${new Date().toUTCString()} processing items ${itemStart}-${itemEnd}/${totalItems}`)
     const currentBatch = smilesList.splice(0, clearInterval)
     const batchSize = Math.ceil(currentBatch.length / this.concurrency)
     const batches = _.chunk(currentBatch, batchSize)
