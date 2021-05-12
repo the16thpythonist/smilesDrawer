@@ -135,19 +135,24 @@ Renderer.prototype.groupLabels = function(labels) {
   return _.sortBy(result, 'id')
 }
 
-Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality) {
+Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality, jsonOnly = false) {
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
   let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, { size: this.size, preserveAspectRatio: this.preserveAspectRatio })
 
   await page.setContent(updatedSvg, { waitUntil: 'domcontentloaded' })
   updatedSvg = await page.evaluate(drawMasksAroundTextElements)
 
-  const updatedSvgElement = await page.$('svg')
-  const ops = [updatedSvgElement.screenshot({
-    path: `${fileName}.jpg`,
-    omitBackground: false,
-    quality: quality
-  })]
+  const ops = []
+
+  if (!jsonOnly) {
+    const updatedSvgElement = await page.$('svg')
+    const capture = updatedSvgElement.screenshot({
+      path: `${fileName}.jpg`,
+      omitBackground: false,
+      quality: quality
+    })
+    ops.push(capture)
+  }
 
   if (this.outputLabels && labels.length) {
     const cleanLabels = labels
@@ -290,12 +295,12 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   const id = this.uuid()
   const target = `${this.directory}/${id}`
   await fs.ensureDir(target)
-  await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, this.quality)
-  await this.saveResizedImage(page, svgXmlWithLabels, `${target}/y`, 100)
+  await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, this.quality, false)
+  await this.saveResizedImage(page, svgXmlWithLabels, `${target}/y`, 100, true)
 
   // aneb: debugging only
-  // await this.saveResizedImage(page, svgXmlWithoutLabels, `${this.directory}/${id}-x`, this.quality)
-  // await this.saveResizedImage(page, svgXmlWithLabels, `${this.directory}/${id}-y`, 100)
+  // await this.saveResizedImage(page, svgXmlWithoutLabels, `${this.directory}/${id}-x`, this.quality, false)
+  // await this.saveResizedImage(page, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
 }
 
 Renderer.prototype.processBatch = async function(smilesList) {
