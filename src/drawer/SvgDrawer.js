@@ -72,11 +72,6 @@ class SvgDrawer {
       }
     })
 
-    // Draw ring for implicitly defined aromatic rings
-    if (this.bridgedRing) {
-      return
-    }
-
     for (let i = 0; i < rings.length; i++) {
       const ring = rings[i]
       if (preprocessor.isRingAromatic(ring)) {
@@ -122,6 +117,8 @@ class SvgDrawer {
       const inRing = preprocessor.areVerticesInSameRing(vertexA, vertexB)
       const s = preprocessor.chooseSide(vertexA, vertexB, sides)
 
+      const label = edge.isPartOfAromaticRing ? bondLabels.aromaticDouble : bondLabels.double
+
       if (inRing) {
         // Always draw double bonds inside a ring
         // if the bond is shared by two rings, it is drawn in the larger
@@ -132,20 +129,14 @@ class SvgDrawer {
         normals[0].multiplyScalar(opts.bondSpacing)
         normals[1].multiplyScalar(opts.bondSpacing)
 
-        // Choose the normal that is on the same side as the center
-        let line
-
-        if (center.sameSideAs(vertexA.position, vertexB.position, Vector2.add(a, normals[0]))) {
-          line = new Line(Vector2.add(a, normals[0]), Vector2.add(b, normals[0]), elementA, elementB)
-        } else {
-          line = new Line(Vector2.add(a, normals[1]), Vector2.add(b, normals[1]), elementA, elementB)
-        }
+        const line = center.sameSideAs(vertexA.position, vertexB.position, Vector2.add(a, normals[0]))
+          ? new Line(Vector2.add(a, normals[0]), Vector2.add(b, normals[0]), elementA, elementB)
+          : new Line(Vector2.add(a, normals[1]), Vector2.add(b, normals[1]), elementA, elementB)
 
         line.shorten(opts.bondLength - opts.shortBondLength * opts.bondLength)
 
-        // The shortened edge
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.aromatic, line, edge.isPartOfAromaticRing)
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, bondLabels.aromatic, new Line(a, b, elementA, elementB))
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, label, line, edge.isPartOfAromaticRing)
+        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, label, new Line(a, b, elementA, elementB))
         return
       }
 
@@ -162,8 +153,7 @@ class SvgDrawer {
         return
       }
 
-      if ((s.sideCount[0] > s.sideCount[1]) ||
-        (s.totalSideCount[0] > s.totalSideCount[1])) {
+      if ((s.sideCount[0] > s.sideCount[1]) || (s.totalSideCount[0] > s.totalSideCount[1])) {
         this.multiplyNormals(normals, opts.bondSpacing)
 
         const line = new Line(Vector2.add(a, normals[0]), Vector2.add(b, normals[0]), elementA, elementB)
@@ -175,8 +165,7 @@ class SvgDrawer {
         return
       }
 
-      if ((s.sideCount[0] < s.sideCount[1]) ||
-        (s.totalSideCount[0] <= s.totalSideCount[1])) {
+      if ((s.sideCount[0] < s.sideCount[1]) || (s.totalSideCount[0] <= s.totalSideCount[1])) {
         this.multiplyNormals(normals, opts.bondSpacing)
 
         const line = new Line(Vector2.add(a, normals[1]), Vector2.add(b, normals[1]), elementA, elementB)
@@ -219,7 +208,7 @@ class SvgDrawer {
       return
     }
 
-    const label = preprocessor.areVerticesInSameRing(vertexA, vertexB) ? bondLabels.aromatic : bondLabels.single
+    const label = edge.isPartOfAromaticRing ? bondLabels.aromaticSingle : bondLabels.single
     svgWrapper.drawLine(edgeIdLabel, edgeIdValue, label, new Line(a, b, elementA, elementB, isChiralCenterA, isChiralCenterB))
   }
 
