@@ -135,7 +135,12 @@ class SvgDrawer {
 
         line.shorten(opts.bondLength - opts.shortBondLength * opts.bondLength)
 
-        svgWrapper.drawLine(edgeIdLabel, edgeIdValue, label, line, edge.isPartOfAromaticRing)
+        // aneb: this is the inner double bond line, it should not be drawn when ring is drawn
+        // this is still not 100% correct, whole ring is drawn with double bonds
+        if (!edge.isPartOfAromaticRing) {
+          svgWrapper.drawLine(edgeIdLabel, edgeIdValue, label, line)
+        }
+
         svgWrapper.drawLine(edgeIdLabel, edgeIdValue, label, new Line(a, b, elementA, elementB))
         return
       }

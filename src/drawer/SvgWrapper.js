@@ -263,7 +263,7 @@ class SvgWrapper {
       const endDash = startDash.clone()
       endDash.add(Vector2.multiplyScalar(dashOffset, 2.0))
 
-      this.drawLine(idLabel, idValue, bondLabel, new Line(startDash, endDash), null, gradient)
+      this.drawLine(idLabel, idValue, bondLabel, new Line(startDash, endDash), false, gradient)
     }
   }
 

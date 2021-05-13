@@ -339,7 +339,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   const svgXmlWithLabels = this.addLabels({ dom, xml })
   const id = this.uuid()
 
-  const flatOutput = true
+  const flatOutput = false
 
   if (!flatOutput) {
     const target = `${this.directory}/${id}`
