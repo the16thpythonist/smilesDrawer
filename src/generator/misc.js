@@ -18,7 +18,7 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100) => {
   for await (const line of rl) {
     const smiles = line.split(',')[smilesCol]
     result.push(smiles)
-    if (result.length >= 2 * n) {
+    if (result.length >= 1.25 * n) {
       break
     }
   }
