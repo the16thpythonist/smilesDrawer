@@ -1,3 +1,4 @@
+const crypto = require('crypto')
 const fs = require('fs-extra')
 const puppeteer = require('puppeteer')
 const _ = require('lodash')
@@ -35,6 +36,11 @@ function Renderer({ outputDirectory, quality, size, preserveAspectRatio, colors,
   this.document = document
   this.XMLSerializer = new XMLSerializer()
 }
+
+Renderer.prototype.uuid = function() {
+  return crypto.randomBytes(16).toString('hex')
+}
+
 Renderer.prototype.color = function(color, circle = false) {
   const fill = this.segment || circle ? color : 'none'
   return `fill: ${fill}; stroke: ${color}; stroke-width: 0.5`
@@ -332,7 +338,8 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
-  const id = Buffer.from(smiles).toString('base64').replace(/=/gi, '')
+
+  const id = this.uuid()
 
   const flatOutput = false
 

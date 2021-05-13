@@ -48,12 +48,12 @@ class Drawer {
       terminalCarbons: false,
       explicitHydrogens: true,
       overlapSensitivity: 0.01,
-      overlapResolutionIterations: 10,
+      overlapResolutionIterations: 2,
       compactDrawing: true,
       experimentalSSSR: false,
       kkThreshold: 0.1,
       kkInnerThreshold: 0.1,
-      kkMaxIteration: 20000,
+      kkMaxIteration: 2000,
       kkMaxInnerIteration: 50,
       kkMaxEnergy: 1e9
     }
