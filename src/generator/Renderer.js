@@ -22,14 +22,13 @@ function Renderer({ outputDirectory, quality, size, preserveAspectRatio, colors,
   this.quality = quality
   this.size = size
   this.preserveAspectRatio = preserveAspectRatio
+  this.colors = colors
   this.concurrency = concurrency
   this.labelType = labelType
   this.segment = segment
   this.outputSvg = outputSvg
   this.outputLabels = outputLabels
 
-  // TODO define options?
-  this.drawer = new SvgDrawer({ colors })
   this.svg = new SVG()
 
   const { document, XMLSerializer } = (new JSDOM('')).window
@@ -179,8 +178,54 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const tree = this.parser.parse(smiles)
 
-  this.drawer.draw(tree, svg)
-  this.svg.update(svg, { smiles })
+  const noiseValue = (baseValue, noiseFactor = 0.3) => {
+    const min = 0
+    const max = noiseFactor
+    const noise = Math.random() * (max - min) + min
+    return baseValue + baseValue * noise
+  }
+
+  const randomInt = (min, max) => {
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min + 1)) + min
+  }
+
+  const fonts = [
+    'Arial',
+    'Brush Script MT',
+    'Courier New',
+    'Courier New',
+    'Georgia',
+    'Helvetica',
+    'Times New Roman'
+  ]
+
+  const fontFamilies = ['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy']
+  const fontName = fonts[randomInt(0, fonts.length - 1)]
+  const fontFamily = fontFamilies[randomInt(0, fontFamilies.length - 1)]
+  const font = `${fontName}, ${fontFamily}`
+
+  const fontNoise = noiseValue(1, 0.5)
+  const bondNoise = noiseValue(1, 0.25)
+
+  // aneb: due to layout reasons, values are only increased to avoid imbalanced element sizes
+  const options = {
+    bondThickness: 0.6 * bondNoise,
+    bondLength: 25 * bondNoise,
+    shortBondLength: noiseValue(0.6, 0.2),
+    bondSpacing: 0.18 * 20 * bondNoise,
+    font: font,
+    fontSizeLarge: 7 * fontNoise,
+    fontSizeSmall: 4 * fontNoise,
+    padding: 25,
+    terminalCarbons: randomInt(0, 100) % 2 === 0,
+    explicitHydrogens: randomInt(0, 100) % 2 === 0
+  }
+  const drawer = new SvgDrawer({ colors: this.colors, options })
+
+  drawer.draw(tree, svg)
+  this.svg.update(svg, { smiles, options })
 
   return this.XMLSerializer.serializeToString(svg)
 }
@@ -293,14 +338,20 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
   const id = this.uuid()
-  const target = `${this.directory}/${id}`
-  await fs.ensureDir(target)
-  await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, this.quality, false)
-  await this.saveResizedImage(page, svgXmlWithLabels, `${target}/y`, 100, true)
+
+  const flatOutput = true
+
+  if (!flatOutput) {
+    const target = `${this.directory}/${id}`
+    await fs.ensureDir(target)
+    await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, this.quality, false)
+    await this.saveResizedImage(page, svgXmlWithLabels, `${target}/y`, 100, true)
+    return
+  }
 
   // aneb: debugging only
-  // await this.saveResizedImage(page, svgXmlWithoutLabels, `${this.directory}/${id}-x`, this.quality, false)
-  // await this.saveResizedImage(page, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
+  await this.saveResizedImage(page, svgXmlWithoutLabels, `${this.directory}/${id}-x`, this.quality, false)
+  await this.saveResizedImage(page, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
 }
 
 Renderer.prototype.processBatch = async function(smilesList) {

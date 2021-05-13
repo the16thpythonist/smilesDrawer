@@ -10,9 +10,9 @@ const Vector2 = require('./Vector2')
 const { bondLabels } = require('../generator/types')
 
 class SvgDrawer {
-  constructor({ colors }) {
+  constructor({ colors, options }) {
     this.colors = colors
-    this.preprocessor = new Drawer({})
+    this.preprocessor = new Drawer(options)
     this.opts = this.preprocessor.opts
   }
 

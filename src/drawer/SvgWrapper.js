@@ -67,12 +67,12 @@ class SvgWrapper {
 
     style.appendChild(document.createTextNode(`
                 .element {
-                    font: ${this.opts.fontSizeLarge}pt Helvetica, Arial, sans-serif;
+                    font: ${this.opts.fontSizeLarge}pt ${this.opts.font};
                     font-weight: bolder;
                     alignment-baseline: 'middle';
                 }
                 .sub {
-                    font: ${this.opts.fontSizeSmall}pt Helvetica, Arial, sans-serif;
+                    font: ${this.opts.fontSizeSmall}pt ${this.opts.font};
                     font-weight: bolder;
                 }
             `))

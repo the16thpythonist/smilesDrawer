@@ -39,6 +39,7 @@ class Drawer {
       bondLength: 25,
       shortBondLength: 0.85,
       bondSpacing: 0.18 * 20,
+      font: 'Helvetica, Arial, sans-serif',
       fontSizeLarge: 7,
       fontSizeSmall: 4,
       padding: 25,
@@ -60,9 +61,6 @@ class Drawer {
     this.opts = this.extend(true, this.defaultOptions, options)
     this.opts.halfBondSpacing = this.opts.bondSpacing / 2.0
     this.opts.bondLengthSq = this.opts.bondLength * this.opts.bondLength
-    // this.opts.halfFontSizeLarge = this.opts.fontSizeLarge / 2.0
-    // this.opts.quarterFontSizeLarge = this.opts.fontSizeLarge / 4.0
-    // this.opts.fifthFontSizeSmall = this.opts.fontSizeSmall / 5.0
   }
 
   initDraw(data) {
