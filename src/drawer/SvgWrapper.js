@@ -218,7 +218,8 @@ class SvgWrapper {
       cy: y + this.offsetY,
       r: r,
       fill: 'none',
-      stroke: this.getColor('C')
+      stroke: this.getColor('C'),
+      'stroke-width': 1
     })
 
     this.vertices.push(ring)

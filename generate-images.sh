@@ -2,7 +2,7 @@ node generate-images.js \
 --from-csv-file "data/pubchem.csv" \
 --from-csv-column "0" \
 --output-directory "generated-images" \
---quality "100" \
+--quality "10" \
 --colors "random" \
 --size "512" \
 --preserve-aspect-ratio "none" \
