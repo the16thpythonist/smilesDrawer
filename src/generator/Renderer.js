@@ -9,26 +9,28 @@ const Parser = require('../drawer/Parser')
 const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
 const { bondLabels, labelTypes } = require('./types')
-
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
-function Renderer({ outputDirectory, quality, size, preserveAspectRatio, colors, concurrency, labelType, segment, outputSvg, outputLabels }) {
+function Renderer({ outputDirectory, quality, size, preserveAspectRatio, colors, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
+  // aneb: find out why this does not work in above scope ...
+  const colorMaps = require('./colors')
+
   this.document = null
   this.XMLSerializer = null
 
   this.parser = Parser
-
   this.directory = outputDirectory
   this.quality = quality
   this.size = size
   this.preserveAspectRatio = preserveAspectRatio
   this.colors = colors
-  this.colors = colors
+  this.colorMaps = colorMaps
   this.concurrency = concurrency
   this.labelType = labelType
   this.segment = segment
   this.outputSvg = outputSvg
   this.outputLabels = outputLabels
+  this.outputFlat = outputFlat
 
   this.svg = new SVG()
 
@@ -176,7 +178,6 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
 }
 
 Renderer.prototype.smilesToSvgXml = function(smiles) {
-  const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const tree = this.parser.parse(smiles)
 
   const noiseValue = (baseValue, noiseFactor = 0.3) => {
@@ -223,10 +224,20 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     terminalCarbons: randomInt(0, 100) % 2 === 0,
     explicitHydrogens: randomInt(0, 100) % 2 === 0
   }
-  const drawer = new SvgDrawer({ colors: this.colors, options })
+
+  const colorsAvailable = Object.keys(this.colorMaps)
+  const colorMapIndex = this.colors === 'random' ? randomInt(0, colorsAvailable.length - 1) : colorsAvailable.indexOf(this.colors)
+  const colorMap = colorsAvailable[colorMapIndex]
+  const colors = this.colorMaps[colorMap]
+
+  const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND};`
+  const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  const drawer = new SvgDrawer({ colors, options })
 
   drawer.draw(tree, svg)
-  this.svg.update(svg, { smiles, options })
+
+  // aneb: must set other properties after drawing
+  this.svg.update(svg, { style, smiles })
 
   return this.XMLSerializer.serializeToString(svg)
 }
@@ -341,9 +352,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
   const id = this.uuid()
 
-  const flatOutput = false
-
-  if (!flatOutput) {
+  if (!this.outputFlat) {
     const target = `${this.directory}/${id}`
     await fs.ensureDir(target)
     await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, this.quality, false)

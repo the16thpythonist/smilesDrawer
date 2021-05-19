@@ -1,8 +1,6 @@
 const path = require('path')
 const fs = require('fs')
 const readline = require('readline')
-const colors = require('./colors')
-
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 const { labelTypes } = require('./types')
@@ -33,10 +31,10 @@ const cliParams = () => {
     amount, quality, size, preserveAspectRatio,
     concurrency,
     labelType, segment,
-    outputSvg, outputLabels,
+    outputSvg, outputLabels, outputFlat,
     clean,
     minSmilesLength, maxSmilesLength,
-    colors: colorMap,
+    colors,
     fromCsvFile: csvFile,
     fromCsvColumn: csvColumn
   } = yargs(hideBin(process.argv)).argv
@@ -46,7 +44,7 @@ const cliParams = () => {
     csvColumn: csvColumn,
     amount: Number(amount) || null,
     outputDirectory: path.resolve(outputDirectory),
-    colors: colors[colorMap] || null,
+    colors: colors || 'random',
     quality: Number(quality) || null,
     size: Number(size) || null,
     preserveAspectRatio: preserveAspectRatio || 'none',
@@ -55,6 +53,7 @@ const cliParams = () => {
     segment: !!segment,
     outputSvg: !!outputSvg,
     outputLabels: !!outputLabels,
+    outputFlat: !!outputFlat,
     clean: !!clean,
     maxSmilesLength: Number(maxSmilesLength) || 1000,
     minSmilesLength: Number(minSmilesLength) || 0
