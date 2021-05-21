@@ -530,6 +530,7 @@ class SvgWrapper {
       textElem.appendChild(pseudoElementElem)
     }
 
+    textElem.setAttributeNS(null, 'text', textElem.textContent)
     this.vertices.push(textElem)
   }
 

@@ -128,10 +128,11 @@ Renderer.prototype.cleanupLabel = function(label) {
 Renderer.prototype.groupLabels = function(labels) {
   const groups = _.groupBy(labels, 'label-id')
   const result = []
-  for (const [id, points] of Object.entries(groups)) {
-    const label = points[0].label
-    const xy = points.map(p => p.xy.toString()).join(' ')
-    result.push({ id, label, xy })
+  for (const [id, elementLabels] of Object.entries(groups)) {
+    const text = elementLabels[0].text
+    const label = elementLabels[0].label
+    const xy = elementLabels.map(p => p.xy.toString()).join(' ')
+    result.push({ id, label, xy, text })
   }
 
   return _.sortBy(result, 'id')
@@ -220,7 +221,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     font: font,
     fontSizeLarge: 7 * fontNoise,
     fontSizeSmall: 4 * fontNoise,
-    padding: 25,
+    padding: 35,
     terminalCarbons: randomInt(0, 100) % 2 === 0,
     explicitHydrogens: randomInt(0, 100) % 2 === 0
   }
@@ -264,7 +265,7 @@ Renderer.prototype.getCornersOriented = function(edge) {
   return this.svg.getEdgePointsOfBoxAroundLine(edge)
 }
 
-Renderer.prototype.drawPoints = function({ id, label, points }) {
+Renderer.prototype.drawPoints = function({ id, label, points, text }) {
   const color = this.svg.randomColor()
 
   // aneb: try to avoid overlapping points by using different sizes
@@ -273,6 +274,7 @@ Renderer.prototype.drawPoints = function({ id, label, points }) {
     return this.svg.createElement('circle', {
       'label-id': `${id}-label`,
       label: label,
+      text: text,
       cx: x,
       cy: y,
       r: size,
@@ -281,11 +283,12 @@ Renderer.prototype.drawPoints = function({ id, label, points }) {
   })
 }
 
-Renderer.prototype.drawSinglePolygon = function({ id, label, points }) {
+Renderer.prototype.drawSinglePolygon = function({ id, label, points, text }) {
   const color = this.svg.randomColor()
   return this.svg.createElement('polygon', {
     'label-id': `${id}-label`,
     label: label,
+    text: text,
     points: points.join(' '),
     style: this.color(color)
   })
@@ -308,10 +311,10 @@ Renderer.prototype.drawMultiPolygon = function(edgeElements) {
 Renderer.prototype.addLabels = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
-  const nodeEdges = dom.nodes.map(n => ({ ...n, points: this.getCornersAligned(n) }))
+  const nodeCorners = dom.nodes.map(n => ({ ...n, points: this.getCornersAligned(n) }))
   const nodeLabels = this.labelType === labelTypes.points && !this.segment
-    ? nodeEdges.map(n => this.drawPoints(n))
-    : nodeEdges.map(n => this.drawSinglePolygon(n))
+    ? nodeCorners.map(n => this.drawPoints(n))
+    : nodeCorners.map(n => this.drawSinglePolygon(n))
 
   const edgeLabels = []
 

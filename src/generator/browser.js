@@ -39,7 +39,8 @@ function getPositionInfoFromSvg() {
     const elements = Array.from(vertex.querySelectorAll('tspan')).map(c => c.textContent).filter(c => !!c)
     const id = vertex.getAttribute('vertex-id')
     const label = vertex.getAttribute('label')
-    nodes.push({ id, label, elements, x, y, width, height })
+    const text = vertex.textContent
+    nodes.push({ id, label, elements, x, y, width, height, text })
   }
 
   const bonds = document.documentElement.querySelectorAll('[edge-id]')
@@ -51,9 +52,9 @@ function getPositionInfoFromSvg() {
     const y1 = bond.getAttribute('y1')
     const x2 = bond.getAttribute('x2')
     const y2 = bond.getAttribute('y2')
-
+    const text = 'n/a'
     const points = bond.getAttribute('points')
-    edges.push({ id, label, x, y, width, height, x1, y1, x2, y2, points })
+    edges.push({ id, label, x, y, width, height, x1, y1, x2, y2, points, text })
   }
 
   return { nodes, edges }
