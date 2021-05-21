@@ -103,7 +103,7 @@ class SvgWrapper {
     const firstStopColor = this.getColor(line.getLeftElement()) || this.getColor('C')
     const firstStop = this.svgHelper.createElement('stop', {
       'stop-color': firstStopColor,
-      offset: '20%'
+      offset: `${this.opts.gradientOffset}%`
     })
 
     const secondStopColor = this.getColor(line.getRightElement() || this.getColor('C'))

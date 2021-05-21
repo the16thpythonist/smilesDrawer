@@ -209,21 +209,20 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   const fontFamily = fontFamilies[randomInt(0, fontFamilies.length - 1)]
   const font = `${fontName}, ${fontFamily}`
 
-  const baseNoise = noiseValue(1, 3)
-
   // aneb: due to layout reasons, values are only increased to avoid imbalanced element sizes
   const options = {
-    wedgeBaseWidth: 1.5 * baseNoise * noiseValue(1, 1.25),
-    dashedWedgeSpacing: 5 * noiseValue(1, 1.5),
-    dashedWedgeWidth: 4 * noiseValue(1, 1.25),
-    bondThickness: 0.6 * baseNoise * noiseValue(1, 0.25),
-    bondLength: 25 * baseNoise * noiseValue(1, 0.25),
+    gradientOffset: noiseValue(10, 5),
+    wedgeBaseWidth: noiseValue(1.5, 1.25),
+    dashedWedgeSpacing: noiseValue(5, 1.5),
+    dashedWedgeWidth: noiseValue(4, 1.25),
+    bondThickness: noiseValue(0.6, 0.25),
+    bondLength: noiseValue(25, 0.25),
     shortBondLength: noiseValue(0.5, 0.8),
-    bondSpacing: 0.18 * 20 * baseNoise * noiseValue(1, 0.9),
+    bondSpacing: noiseValue(0.18 * 20, 1),
     font: font,
-    fontSizeLarge: 7 * baseNoise * noiseValue(1, 0.25),
-    fontSizeSmall: 4 * baseNoise * noiseValue(1, 0.25),
-    padding: 35 * baseNoise,
+    fontSizeLarge: noiseValue(5, 1),
+    fontSizeSmall: noiseValue(3, 1),
+    padding: 35,
     terminalCarbons: randomInt(0, 100) % 2 === 0,
     explicitHydrogens: randomInt(0, 100) % 2 === 0
   }
