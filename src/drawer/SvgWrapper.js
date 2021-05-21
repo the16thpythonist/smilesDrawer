@@ -250,14 +250,14 @@ class SvgWrapper {
 
     const dir = Vector2.subtract(end, start).normalize()
     const length = line.getLength()
-    const step = 1.25 / (length / (this.opts.bondThickness * 3.0))
+    const step = 1 / (length / (this.opts.bondThickness * this.opts.dashedWedgeSpacing))
 
     const gradient = this.createGradient(line)
 
     for (let t = 0.0; t < 1.0; t += step) {
       const to = Vector2.multiplyScalar(dir, t * length)
       const startDash = Vector2.add(start, to)
-      const width = 1.5 * t
+      const width = this.opts.dashedWedgeWidth * t
       const dashOffset = Vector2.multiplyScalar(normals[0], width)
 
       startDash.subtract(dashOffset)
@@ -560,8 +560,8 @@ class SvgWrapper {
     const [start, end] = isRightChiralCenter ? [l, r] : [r, l]
 
     const t = Vector2.add(start, Vector2.multiplyScalar(normals[0], this.halfBondThickness))
-    const u = Vector2.add(end, Vector2.multiplyScalar(normals[0], 1.5 + this.halfBondThickness))
-    const v = Vector2.add(end, Vector2.multiplyScalar(normals[1], 1.5 + this.halfBondThickness))
+    const u = Vector2.add(end, Vector2.multiplyScalar(normals[0], this.opts.wedgeBaseWidth + this.halfBondThickness))
+    const v = Vector2.add(end, Vector2.multiplyScalar(normals[1], this.opts.wedgeBaseWidth + this.halfBondThickness))
     const w = Vector2.add(start, Vector2.multiplyScalar(normals[1], this.halfBondThickness))
 
     const polygon = this.svgHelper.createElement('polygon', {

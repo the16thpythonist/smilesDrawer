@@ -35,6 +35,9 @@ class Drawer {
     this.totalOverlapScore = 0
 
     this.defaultOptions = {
+      wedgeBaseWidth: 2,
+      dashedWedgeSpacing: 1.25,
+      dashedWedgeWidth: 1.5,
       bondThickness: 0.6,
       bondLength: 25,
       shortBondLength: 0.85,
@@ -58,7 +61,7 @@ class Drawer {
       kkMaxEnergy: 1e9
     }
 
-    this.opts = this.extend(true, this.defaultOptions, options)
+    this.opts = Object.assign(this.defaultOptions, options)
     this.opts.halfBondSpacing = this.opts.bondSpacing / 2.0
     this.opts.bondLengthSq = this.opts.bondLength * this.opts.bondLength
   }

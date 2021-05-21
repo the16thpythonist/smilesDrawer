@@ -7,9 +7,9 @@ node generate-images.js \
 --size "512" \
 --preserve-aspect-ratio "none" \
 --concurrency "8" \
---amount "2500" \
 --label-type "points" \
 --min-smiles-length "0" \
 --max-smiles-length "1000" \
 --output-labels \
+--amount "2500" \
 --clean
