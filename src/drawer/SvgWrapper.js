@@ -254,7 +254,7 @@ class SvgWrapper {
 
     const gradient = this.createGradient(line)
 
-    for (let t = 0.0; t < 1.0; t += step) {
+    for (let t = -step / 10; t < 1.0; t += step) {
       const to = Vector2.multiplyScalar(dir, t * length)
       const startDash = Vector2.add(start, to)
       const width = this.opts.dashedWedgeWidth * t
