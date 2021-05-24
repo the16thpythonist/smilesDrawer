@@ -198,7 +198,6 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     'Arial',
     'Brush Script MT',
     'Courier New',
-    'Courier New',
     'Georgia',
     'Helvetica',
     'Times New Roman'
