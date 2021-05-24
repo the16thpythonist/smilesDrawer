@@ -132,11 +132,13 @@ class SvgWrapper {
    * appropriately as one of those text types.
    * @param {String} text the actual text
    * @param {String} shift the type of text, either 'sub', or 'super'
+   * @param color
    */
-  createSubSuperScripts(text, shift) {
+  createSubSuperScripts(text, shift, color = null) {
     const attributes = {
       'baseline-shift': shift,
-      class: 'sub'
+      class: 'sub',
+      color: color
     }
     const textNode = document.createTextNode(text)
     return this.svgHelper.createElement('tspan', attributes, [textNode])
@@ -430,13 +432,15 @@ class SvgWrapper {
       throw new Error(`not implemented: conditions did not capture layout direction=${direction} and isTerminal=${isTerminal}`)
     }
 
+    const currentColor = this.getColor(elementName)
     const textElem = this.svgHelper.createElement('text', {
       [`${vertexIdLabel}`]: vertexIdValue,
       label: vertexLabel,
+      direction: direction,
       x: pos.x + xShift,
       y: pos.y + yShift,
       class: 'element',
-      fill: debug ? directionColors[direction] : this.getColor(elementName),
+      fill: debug ? directionColors[direction] : currentColor,
       style: `text-anchor: start;writing-mode: ${writingMode};text-orientation: ${textOrientation};letter-spacing: ${letterSpacing};${textDirection}`
     })
 
@@ -455,11 +459,11 @@ class SvgWrapper {
 
     // Charge
     if (charge) {
-      this.svgHelper.appendChildren(textNode, [this.createSubSuperScripts(this.getChargeText(charge), 'super')])
+      this.svgHelper.appendChildren(textNode, [this.createSubSuperScripts(this.getChargeText(charge), 'super', currentColor)])
     }
 
     if (isotope > 0) {
-      this.svgHelper.appendChildren(textNode, [this.createSubSuperScripts(isotope.toString(), 'super')])
+      this.svgHelper.appendChildren(textNode, [this.createSubSuperScripts(isotope.toString(), 'super', currentColor)])
     }
 
     // TODO: Better handle exceptions
@@ -484,7 +488,7 @@ class SvgWrapper {
       textElem.appendChild(hydrogenElem)
 
       if (hydrogens > 1) {
-        const hydrogenCountElem = this.createSubSuperScripts(hydrogens, 'sub')
+        const hydrogenCountElem = this.createSubSuperScripts(hydrogens, 'sub', currentColor)
         hydrogenElem.appendChild(hydrogenCountElem)
       }
     }
@@ -505,7 +509,7 @@ class SvgWrapper {
       pseudoElementElem.setAttributeNS(null, 'fill', this.getColor(element))
 
       if (elementCharge !== 0) {
-        const elementChargeElem = this.createSubSuperScripts(this.getChargeText(elementCharge), 'super')
+        const elementChargeElem = this.createSubSuperScripts(this.getChargeText(elementCharge), 'super', currentColor)
         pseudoElementElem.appendChild(elementChargeElem)
       }
 
@@ -517,20 +521,19 @@ class SvgWrapper {
         pseudoElementElem.appendChild(pseudoHydrogenElem)
 
         if (hydrogenCount > 1) {
-          const hydrogenCountElem = this.createSubSuperScripts(hydrogenCount, 'sub')
+          const hydrogenCountElem = this.createSubSuperScripts(hydrogenCount, 'sub', currentColor)
           pseudoHydrogenElem.appendChild(hydrogenCountElem)
         }
       }
 
       if (elementCount > 1) {
-        const elementCountElem = this.createSubSuperScripts(elementCount, 'sub')
+        const elementCountElem = this.createSubSuperScripts(elementCount, 'sub', currentColor)
         pseudoElementElem.appendChild(elementCountElem)
       }
 
       textElem.appendChild(pseudoElementElem)
     }
 
-    textElem.setAttributeNS(null, 'text', textElem.textContent)
     this.vertices.push(textElem)
   }
 

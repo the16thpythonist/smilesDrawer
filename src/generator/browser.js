@@ -39,7 +39,15 @@ function getPositionInfoFromSvg() {
     const elements = Array.from(vertex.querySelectorAll('tspan')).map(c => c.textContent).filter(c => !!c)
     const id = vertex.getAttribute('vertex-id')
     const label = vertex.getAttribute('label')
-    const text = vertex.textContent
+    const direction = vertex.getAttributeNS(null, 'direction')
+    const children = Array.from(vertex.children).map(c => c.textContent)
+
+    if (direction === 'up' || direction === 'left') {
+      children.reverse()
+    }
+
+    const text = children.join('').replace(/\s/g, '')
+
     nodes.push({ id, label, elements, x, y, width, height, text })
   }
 
