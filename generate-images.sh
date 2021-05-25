@@ -2,7 +2,7 @@ node generate-images.js \
 --from-csv-file "data/pubchem.csv" \
 --from-csv-column "0" \
 --output-directory "generated-images" \
---quality "10" \
+--quality "random" \
 --colors "random" \
 --size "512" \
 --preserve-aspect-ratio "none" \
@@ -11,5 +11,5 @@ node generate-images.js \
 --min-smiles-length "0" \
 --max-smiles-length "1000" \
 --output-labels \
---amount "2500" \
+--amount "5000" \
 --clean

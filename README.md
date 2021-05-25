@@ -12,7 +12,7 @@ Parameter | Description
 `--from-csv-file` | Path to a CSV file. It can have one column only.
 `--from-csv-column` | Specifies which column of CSV to read. Set to 0 for CVS with only one column.
 `--output-directory` | Output directory.
-`--quality` | Value in [0, 100] specifying image quality.
+`--quality` | Value in [0, 100] specifying image quality. Or 'random'.
 `--colors` | Selects one of the [color](src/generator/colors.js) maps 
 `--size` | Value specifying by how much the generated image should be resized.
 `--preserve-aspect-ratio` | Documentation [here](https://developer.mozilla.org/de/docs/Web/SVG/Attribute/preserveAspectRatio).

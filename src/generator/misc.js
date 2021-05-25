@@ -45,7 +45,7 @@ const cliParams = () => {
     amount: Number(amount) || null,
     outputDirectory: path.resolve(outputDirectory),
     colors: colors || 'random',
-    quality: Number(quality) || null,
+    quality: quality || null,
     size: Number(size) || null,
     preserveAspectRatio: preserveAspectRatio || 'none',
     concurrency: Number(concurrency) || 4,

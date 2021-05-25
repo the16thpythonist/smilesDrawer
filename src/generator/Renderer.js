@@ -11,6 +11,19 @@ const SVG = require('./SVG')
 const { bondLabels, labelTypes } = require('./types')
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
+const randomInt = (min, max) => {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+const noiseValue = (baseValue, noiseFactor = 0.3) => {
+  const min = 0
+  const max = noiseFactor
+  const noise = Math.random() * (max - min) + min
+  return baseValue + baseValue * noise
+}
+
 function Renderer({ outputDirectory, quality, size, preserveAspectRatio, colors, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
   // aneb: find out why this does not work in above scope ...
   const colorMaps = require('./colors')
@@ -181,22 +194,8 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
 Renderer.prototype.smilesToSvgXml = function(smiles) {
   const tree = this.parser.parse(smiles)
 
-  const noiseValue = (baseValue, noiseFactor = 0.3) => {
-    const min = 0
-    const max = noiseFactor
-    const noise = Math.random() * (max - min) + min
-    return baseValue + baseValue * noise
-  }
-
-  const randomInt = (min, max) => {
-    min = Math.ceil(min)
-    max = Math.floor(max)
-    return Math.floor(Math.random() * (max - min + 1)) + min
-  }
-
   const fonts = [
     'Arial',
-    'Brush Script MT',
     'Courier New',
     'Georgia',
     'Helvetica',
@@ -355,16 +354,18 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
   const id = this.uuid()
 
+  const quality = Number(this.quality) || randomInt(1, 100)
+
   if (!this.outputFlat) {
     const target = `${this.directory}/${id}`
     await fs.ensureDir(target)
-    await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, this.quality, false)
+    await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, quality, false)
     await this.saveResizedImage(page, svgXmlWithLabels, `${target}/y`, 100, true)
     return
   }
 
   // aneb: debugging only
-  await this.saveResizedImage(page, svgXmlWithoutLabels, `${this.directory}/${id}-x`, this.quality, false)
+  await this.saveResizedImage(page, svgXmlWithoutLabels, `${this.directory}/${id}-x`, quality, false)
   await this.saveResizedImage(page, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
 }
 
