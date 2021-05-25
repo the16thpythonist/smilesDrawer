@@ -197,12 +197,16 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   const fonts = [
     'Arial',
     'Courier New',
-    'Georgia',
-    'Helvetica',
     'Times New Roman'
   ]
 
-  const fontFamilies = ['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy']
+  const fontFamilies = [
+    'serif',
+    'sans-serif',
+    'monospace',
+    'cursive',
+    'fantasy'
+  ]
   const fontName = fonts[randomInt(0, fonts.length - 1)]
   const fontFamily = fontFamilies[randomInt(0, fontFamilies.length - 1)]
   const font = `${fontName}, ${fontFamily}`
@@ -220,7 +224,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     font: font,
     fontSizeLarge: noiseValue(5, 1),
     fontSizeSmall: noiseValue(3, 1),
-    padding: 35,
+    padding: 50,
     terminalCarbons: randomInt(0, 100) % 2 === 0,
     explicitHydrogens: randomInt(0, 100) % 2 === 0
   }
