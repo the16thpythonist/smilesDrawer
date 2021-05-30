@@ -11,5 +11,5 @@ node generate-images.js \
 --min-smiles-length "0" \
 --max-smiles-length "1000" \
 --output-labels \
---amount "5000" \
+--amount "10000" \
 --clean
