@@ -366,8 +366,8 @@ class SvgWrapper {
       y: y + this.offsetY
     }
 
+    const letterSpacing = this.opts.letterSpacing
     let writingMode = 'horizontal-tb'
-    let letterSpacing = 'normal'
     let textOrientation = 'mixed'
     let textDirection = 'direction: ltr;'
     let xShift = null
@@ -385,7 +385,6 @@ class SvgWrapper {
     if (/up|down/.test(direction) && !isTerminal) {
       writingMode = 'vertical-rl'
       textOrientation = 'upright'
-      letterSpacing = '-1px'
     }
 
     if (direction === 'right' && isTerminal) {

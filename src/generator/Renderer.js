@@ -213,6 +213,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
 
   // aneb: due to layout reasons, values are only increased to avoid imbalanced element sizes
   const options = {
+    letterSpacing: `${randomInt(-2, 3)}px`,
     gradientOffset: noiseValue(10, 5),
     wedgeBaseWidth: noiseValue(1.5, 1.25),
     dashedWedgeSpacing: noiseValue(5, 1.5),
