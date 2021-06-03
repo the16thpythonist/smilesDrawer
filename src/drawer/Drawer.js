@@ -35,6 +35,7 @@ class Drawer {
     this.totalOverlapScore = 0
 
     this.defaultOptions = {
+      strokeWidth: 1,
       letterSpacing: '0px',
       gradientOffset: 25,
       wedgeBaseWidth: 2,

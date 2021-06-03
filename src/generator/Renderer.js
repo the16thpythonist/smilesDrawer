@@ -58,7 +58,7 @@ Renderer.prototype.uuid = function() {
 
 Renderer.prototype.color = function(color, circle = false) {
   const fill = this.segment || circle ? color : 'none'
-  return `fill: ${fill}; stroke: ${color}; stroke-width: 0.5`
+  return `fill: ${fill}; stroke: ${color};`
 }
 
 Renderer.prototype.makeEdgeAttributesNumeric = function(edge) {
@@ -213,8 +213,9 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
 
   // aneb: due to layout reasons, values are only increased to avoid imbalanced element sizes
   const options = {
+    strokeWidth: `${randomInt(0.5, 4)}`,
     letterSpacing: `${randomInt(-2, 3)}px`,
-    gradientOffset: noiseValue(10, 5),
+    gradientOffset: noiseValue(10, 10),
     wedgeBaseWidth: noiseValue(1.5, 1.25),
     dashedWedgeSpacing: noiseValue(5, 1.5),
     dashedWedgeWidth: noiseValue(4, 1.25),

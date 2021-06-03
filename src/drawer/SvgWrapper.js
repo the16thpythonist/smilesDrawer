@@ -100,16 +100,16 @@ class SvgWrapper {
     const toX = r.x + this.offsetX
     const toY = r.y + this.offsetY
 
-    const firstStopColor = this.getColor(line.getLeftElement()) || this.getColor('C')
+    const firstStopColor = this.getColor(line.getLeftElement())
     const firstStop = this.svgHelper.createElement('stop', {
       'stop-color': firstStopColor,
       offset: `${this.opts.gradientOffset}%`
     })
 
-    const secondStopColor = this.getColor(line.getRightElement() || this.getColor('C'))
+    const secondStopColor = this.getColor(line.getRightElement())
     const secondStop = this.svgHelper.createElement('stop', {
       'stop-color': secondStopColor,
-      offset: '100%'
+      offset: '0%'
     })
 
     const gradientAttributes = {
@@ -221,7 +221,7 @@ class SvgWrapper {
       r: r,
       fill: 'none',
       stroke: this.getColor('C'),
-      'stroke-width': 1
+      'stroke-width': this.opts.strokeWidth
     })
 
     this.vertices.push(ring)
@@ -280,9 +280,8 @@ class SvgWrapper {
    * @param {String} gradient gradient url. Defaults to null.
    */
   drawLine(idLabel, idValue, bondLabel, line, dashed = false, gradient = null) {
-    // aneb: this actually has no parameter, if needed, add parameter for stroke-width
     const styles = [
-      ['stroke-width', '1'],
+      ['stroke-width', this.opts.strokeWidth],
       ['stroke-linecap', 'round'],
       ['stroke-dasharray', dashed ? '5, 5' : 'none']
     ].map(sub => sub.join(':')).join(';')
