@@ -195,24 +195,28 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   const tree = this.parser.parse(smiles)
 
   const fonts = [
-    'Arial',
-    'Courier New',
-    'Times New Roman'
+    'Arial', 'Averia Gruesa Libre',
+    'Big Shoulders Stencil Text',
+    'Caveat', 'Cinzel', 'Cutive Mono',
+    'DotGothic16',
+    'IM Fell Double Pica SC',
+    'Karma', 'Love Ya Like A Sister', 'Loved by the King',
+    'Macondo',
+    'Nanum Pen Script', 'New Tegomin', 'News Cycle',
+    'Orbitron',
+    'Satisfy', 'Sepctral', 'Shadows Into Light Two', 'Space Mono', 'Special Elite', 'Stardos Stencil',
+    'VT323',
+    'Wallpoet'
   ]
 
-  const fontFamilies = [
-    'serif',
-    'sans-serif',
-    'monospace',
-    'cursive',
-    'fantasy'
-  ]
-  const fontName = fonts[randomInt(0, fonts.length - 1)]
-  const fontFamily = fontFamilies[randomInt(0, fontFamilies.length - 1)]
-  const font = `${fontName}, ${fontFamily}`
+  const fontWeights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+
+  const font = fonts[randomInt(0, fonts.length - 1)]
+  const fontWeight = fontWeights[randomInt(0, fontWeights.length - 1)]
 
   // aneb: due to layout reasons, values are only increased to avoid imbalanced element sizes
   const options = {
+    strokeLength: `${noiseValue(0.1, 25)}`,
     strokeWidth: `${randomInt(0.5, 4)}`,
     letterSpacing: `${randomInt(-2, 3)}px`,
     gradientOffset: noiseValue(10, 10),
@@ -224,8 +228,9 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     shortBondLength: noiseValue(0.5, 0.8),
     bondSpacing: noiseValue(0.18 * 20, 1),
     font: font,
-    fontSizeLarge: noiseValue(5, 1),
-    fontSizeSmall: noiseValue(3, 1),
+    fontWeight: fontWeight,
+    fontSizeLarge: noiseValue(5, 2),
+    fontSizeSmall: noiseValue(3, 3),
     padding: 50,
     terminalCarbons: randomInt(0, 100) % 2 === 0,
     explicitHydrogens: randomInt(0, 100) % 2 === 0
@@ -360,7 +365,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
   const id = this.uuid()
 
-  const quality = Number(this.quality) || randomInt(1, 100)
+  const quality = Number(this.quality) || randomInt(10, 25)
 
   if (!this.outputFlat) {
     const target = `${this.directory}/${id}`

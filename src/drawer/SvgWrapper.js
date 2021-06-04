@@ -65,17 +65,19 @@ class SvgWrapper {
     const masks = this.svgHelper.createElement('mask', { id: 'text-mask' })
     const paths = this.svgHelper.createElement('g', { mask: 'url(#text-mask)' })
 
+    const fontUrl = encodeURI(`https://fonts.googleapis.com/css?family=${this.opts.font}`)
+    style.appendChild(document.createTextNode(`@import url('${fontUrl}');`))
     style.appendChild(document.createTextNode(`
-                .element {
-                    font: ${this.opts.fontSizeLarge}pt ${this.opts.font};
-                    font-weight: bolder;
-                    alignment-baseline: 'middle';
-                }
-                .sub {
-                    font: ${this.opts.fontSizeSmall}pt ${this.opts.font};
-                    font-weight: bolder;
-                }
-            `))
+    .element {
+        font: ${this.opts.fontSizeLarge}pt ${this.opts.font};
+        font-weight: ${this.opts.fontWeight};
+        alignment-baseline: 'middle';
+    }
+    .sub {
+        font: ${this.opts.fontSizeSmall}pt ${this.opts.font};
+        font-weight: ${this.opts.fontWeight};
+    }
+    `))
 
     this.svgHelper.appendChildren(paths, pathChildNodes)
     this.svgHelper.appendChildren(vertices, this.vertices)
@@ -276,14 +278,13 @@ class SvgWrapper {
    * @param idValue
    * @param bondLabel
    * @param {Line} line A line.
-   * @param {Boolean} dashed defaults to false.
    * @param {String} gradient gradient url. Defaults to null.
    */
-  drawLine(idLabel, idValue, bondLabel, line, dashed = false, gradient = null) {
+  drawLine(idLabel, idValue, bondLabel, line, gradient = null) {
     const styles = [
       ['stroke-width', this.opts.strokeWidth],
       ['stroke-linecap', 'round'],
-      ['stroke-dasharray', dashed ? '5, 5' : 'none']
+      ['stroke-dasharray', this.opts.strokeLength]
     ].map(sub => sub.join(':')).join(';')
 
     const l = line.getLeftVector()
