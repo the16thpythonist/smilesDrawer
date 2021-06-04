@@ -209,7 +209,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     'Wallpoet'
   ]
 
-  const fontWeights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+  const fontWeights = [100, 300, 500, 700, 900]
 
   const font = fonts[randomInt(0, fonts.length - 1)]
   const fontWeight = fontWeights[randomInt(0, fontWeights.length - 1)]
