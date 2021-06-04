@@ -197,16 +197,16 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   const fonts = [
     'Arial', 'Averia Gruesa Libre',
     'Big Shoulders Stencil Text',
-    'Caveat', 'Cinzel', 'Cutive Mono',
+    'Caveat', 'Cinzel',
+    'Cutive Mono',
     'DotGothic16',
     'IM Fell Double Pica SC',
-    'Karma', 'Love Ya Like A Sister', 'Loved by the King',
+    'Karma',
+    'Love Ya Like A Sister',
     'Macondo',
-    'Nanum Pen Script', 'New Tegomin', 'News Cycle',
-    'Orbitron',
-    'Satisfy', 'Sepctral', 'Shadows Into Light Two', 'Space Mono', 'Special Elite', 'Stardos Stencil',
-    'VT323',
-    'Wallpoet'
+    'New Tegomin', 'News Cycle',
+    'Spectral', 'Space Mono', 'Special Elite', 'Stardos Stencil',
+    'VT323'
   ]
 
   const fontWeights = [100, 300, 500, 700, 900]
@@ -217,7 +217,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   // aneb: due to layout reasons, values are only increased to avoid imbalanced element sizes
   const options = {
     strokeLength: `${noiseValue(0.1, 10)}`,
-    strokeWidth: `${randomInt(0.5, 4)}`,
+    strokeWidth: `${noiseValue(0.5, 6)}`,
     letterSpacing: `${randomInt(-2, 3)}px`,
     gradientOffset: noiseValue(10, 10),
     wedgeBaseWidth: noiseValue(1.5, 1.25),
