@@ -284,7 +284,7 @@ class SvgWrapper {
     const styles = [
       ['stroke-width', this.opts.strokeWidth],
       ['stroke-linecap', 'round'],
-      ['stroke-dasharray', this.opts.strokeLength]
+      ['stroke-dasharray', `${this.opts.strokeLength},${this.opts.strokeLength * 1.5}`]
     ].map(sub => sub.join(':')).join(';')
 
     const l = line.getLeftVector()

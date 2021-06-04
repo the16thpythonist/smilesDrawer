@@ -216,7 +216,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
 
   // aneb: due to layout reasons, values are only increased to avoid imbalanced element sizes
   const options = {
-    strokeLength: `${noiseValue(0.1, 25)}`,
+    strokeLength: `${noiseValue(0.1, 10)}`,
     strokeWidth: `${randomInt(0.5, 4)}`,
     letterSpacing: `${randomInt(-2, 3)}px`,
     gradientOffset: noiseValue(10, 10),
