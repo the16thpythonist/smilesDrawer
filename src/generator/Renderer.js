@@ -151,7 +151,7 @@ Renderer.prototype.groupLabels = function(labels) {
   return _.sortBy(result, 'id')
 }
 
-Renderer.prototype.saveResizedImage = async function(page, svg, fileName, quality, jsonOnly = false) {
+Renderer.prototype.saveResizedImage = async function(page, svg, graphEdges, fileName, quality, jsonOnly = false) {
   await page.setContent(svg, { waitUntil: 'domcontentloaded' })
   let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, { size: this.size, preserveAspectRatio: this.preserveAspectRatio })
 
@@ -177,6 +177,7 @@ Renderer.prototype.saveResizedImage = async function(page, svg, fileName, qualit
 
     const finalLabels = this.groupLabels(cleanLabels)
 
+    ops.push(fs.writeFile(`${fileName}-graph.json`, JSON.stringify(graphEdges, null, 2)))
     ops.push(fs.writeFile(`${fileName}.json`, JSON.stringify(finalLabels, null, 2)))
   }
 
@@ -250,7 +251,9 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   // aneb: must set other properties after drawing
   this.svg.update(svg, { style, smiles })
 
-  return this.XMLSerializer.serializeToString(svg)
+  const graphEdges = drawer.preprocessor.graph.edges.map(e => [e.sourceId, e.targetId])
+
+  return [this.XMLSerializer.serializeToString(svg), graphEdges]
 }
 
 Renderer.prototype.getCornersAligned = function({ x, y, width: w, height: h }) {
@@ -357,7 +360,7 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
 }
 
 Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
-  const svgXmlWithoutLabels = this.smilesToSvgXml(smiles)
+  const [svgXmlWithoutLabels, graphEdges] = this.smilesToSvgXml(smiles)
   const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
 
   // aneb: these are only at the original size, the final labels are computed after image has been resized
@@ -370,14 +373,14 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   if (!this.outputFlat) {
     const target = `${this.directory}/${id}`
     await fs.ensureDir(target)
-    await this.saveResizedImage(page, svgXmlWithoutLabels, `${target}/x`, quality, false)
-    await this.saveResizedImage(page, svgXmlWithLabels, `${target}/y`, 100, true)
+    await this.saveResizedImage(page, svgXmlWithoutLabels, graphEdges, `${target}/x`, quality, false)
+    await this.saveResizedImage(page, svgXmlWithLabels, graphEdges, `${target}/y`, 100, true)
     return
   }
 
   // aneb: debugging only
-  await this.saveResizedImage(page, svgXmlWithoutLabels, `${this.directory}/${id}-x`, quality, false)
-  await this.saveResizedImage(page, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
+  await this.saveResizedImage(page, svgXmlWithoutLabels, graphEdges, `${this.directory}/${id}-x`, quality, false)
+  await this.saveResizedImage(page, svgXmlWithLabels, graphEdges, `${this.directory}/${id}-y`, 100, true)
 }
 
 Renderer.prototype.processBatch = async function(smilesList) {
