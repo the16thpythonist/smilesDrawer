@@ -1,5 +1,5 @@
 node generate-images.js \
---from-csv-file "data/pubchem.csv" \
+--from-csv-file "data/zinc_250k.csv" \
 --from-csv-column "0" \
 --output-directory "generated-images" \
 --quality "random" \
@@ -9,7 +9,7 @@ node generate-images.js \
 --concurrency "8" \
 --label-type "points" \
 --min-smiles-length "0" \
---max-smiles-length "1000" \
+--max-smiles-length "500" \
 --output-labels \
---amount "10000" \
+--amount "50000" \
 --clean
