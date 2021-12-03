@@ -179,7 +179,7 @@ Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName
 
     const finalLabels = this.groupLabels(cleanLabels)
 
-    ops.push(fs.writeFile(`${fileName}-meta.json`, JSON.stringify({ smiles }, null, 2)))
+    // ops.push(fs.writeFile(`${fileName}-meta.json`, JSON.stringify({ smiles }, null, 2)))
     ops.push(fs.writeFile(`${fileName}.json`, JSON.stringify(finalLabels, null, 2)))
   }
 
