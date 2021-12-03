@@ -215,7 +215,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     font: font,
     fontWeight: fontWeight,
     fontSizeLarge: noiseValue(5, 2),
-    fontSizeSmall: noiseValue(3, 3),
+    fontSizeSmall: noiseValue(3, 2),
     padding: 50,
     terminalCarbons: randomInt(0, 100) % 2 === 0,
     explicitHydrogens: randomInt(0, 100) % 2 === 0
