@@ -2,14 +2,16 @@ node generate-images.js \
 --from-csv-file "data/zinc_250k.csv" \
 --from-csv-column "0" \
 --output-directory "generated-images" \
---quality "random" \
+--quality "100" \
 --colors "random" \
 --size "512" \
+--fonts "Arial" \
+--font-weights "100,200" \
 --preserve-aspect-ratio "none" \
---concurrency "8" \
+--concurrency "16" \
 --label-type "points" \
 --min-smiles-length "0" \
 --max-smiles-length "500" \
 --output-labels \
---amount "50000" \
+--amount "5000" \
 --clean

@@ -24,7 +24,7 @@ const noiseValue = (baseValue, noiseFactor = 0.3) => {
   return baseValue + baseValue * noise
 }
 
-function Renderer({ outputDirectory, quality, size, preserveAspectRatio, colors, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
+function Renderer({ outputDirectory, quality, size, fonts, fontWeights, preserveAspectRatio, colors, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
   // aneb: find out why this does not work in above scope ...
   const colorMaps = require('./colors')
 
@@ -35,6 +35,8 @@ function Renderer({ outputDirectory, quality, size, preserveAspectRatio, colors,
   this.directory = outputDirectory
   this.quality = quality
   this.size = size
+  this.fonts = fonts
+  this.fontWeights = fontWeights
   this.preserveAspectRatio = preserveAspectRatio
   this.colors = colors
   this.colorMaps = colorMaps
@@ -194,26 +196,8 @@ Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName
 
 Renderer.prototype.smilesToSvgXml = function(smiles) {
   const tree = this.parser.parse(smiles)
-
-  const fonts = [
-    'Arial', 'Averia Gruesa Libre',
-    'Big Shoulders Stencil Text',
-    'Caveat', 'Cinzel',
-    'Cutive Mono',
-    'DotGothic16',
-    'IM Fell Double Pica SC',
-    'Karma',
-    'Love Ya Like A Sister',
-    'Macondo',
-    'New Tegomin', 'News Cycle',
-    'Spectral', 'Space Mono', 'Special Elite', 'Stardos Stencil',
-    'VT323'
-  ]
-
-  const fontWeights = [100, 300, 500, 700, 900]
-
-  const font = fonts[randomInt(0, fonts.length - 1)]
-  const fontWeight = fontWeights[randomInt(0, fontWeights.length - 1)]
+  const font = this.fonts[randomInt(0, this.fonts.length - 1)]
+  const fontWeight = this.fontWeights[randomInt(0, this.fontWeights.length - 1)]
 
   // aneb: due to layout reasons, values are only increased to avoid imbalanced element sizes
   const options = {

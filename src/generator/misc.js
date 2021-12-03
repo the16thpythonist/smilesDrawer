@@ -28,7 +28,7 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100) => {
 const cliParams = () => {
   const {
     outputDirectory,
-    amount, quality, size, preserveAspectRatio,
+    amount, quality, size, fonts, fontWeights, preserveAspectRatio,
     concurrency,
     labelType, segment,
     outputSvg, outputLabels, outputFlat,
@@ -47,6 +47,8 @@ const cliParams = () => {
     colors: colors || 'random',
     quality: quality || null,
     size: Number(size) || null,
+    fonts: fonts ? fonts.split(',') : ['Arial'],
+    fontWeights: fontWeights ? fontWeights.split(',').map(x => Number(x)) : [200],
     preserveAspectRatio: preserveAspectRatio || 'none',
     concurrency: Number(concurrency) || 4,
     labelType: labelType || null,
