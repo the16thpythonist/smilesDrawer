@@ -203,7 +203,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   const options = {
     strokeLength: `${noiseValue(0.1, 10)}`,
     strokeWidth: `${noiseValue(0.5, 6)}`,
-    letterSpacing: `${randomInt(-2, 3)}px`,
+    letterSpacing: `${randomInt(0, 1)}px`,
     gradientOffset: noiseValue(10, 10),
     wedgeBaseWidth: noiseValue(1.5, 1.25),
     dashedWedgeSpacing: noiseValue(5, 1.5),
@@ -214,8 +214,8 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     bondSpacing: noiseValue(0.18 * 20, 1),
     font: font,
     fontWeight: fontWeight,
-    fontSizeLarge: noiseValue(5, 2),
-    fontSizeSmall: noiseValue(3, 2),
+    fontSizeLarge: noiseValue(10, 0.5),
+    fontSizeSmall: noiseValue(6, 0.5),
     padding: 50,
     terminalCarbons: randomInt(0, 100) % 2 === 0,
     explicitHydrogens: randomInt(0, 100) % 2 === 0
