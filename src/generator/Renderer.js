@@ -54,10 +54,6 @@ function Renderer({ outputDirectory, quality, size, fonts, fontWeights, preserve
   this.XMLSerializer = new XMLSerializer()
 }
 
-Renderer.prototype.uuid = function() {
-  return crypto.randomBytes(16).toString('hex')
-}
-
 Renderer.prototype.color = function(color, circle = false) {
   const fill = this.segment || circle ? color : 'none'
   return `fill: ${fill}; stroke: ${color};`
@@ -348,7 +344,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
 
-  const id = this.uuid()
+  const id = crypto.createHash('sha256').update(smiles).digest('hex')
 
   const quality = Number(this.quality) || randomInt(10, 25)
 
