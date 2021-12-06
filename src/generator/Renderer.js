@@ -387,7 +387,7 @@ Renderer.prototype.processBatch = async function(smilesList) {
 Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   const totalItems = smilesList.length
-  const clearInterval = Math.min(smilesList.length, 500)
+  const clearInterval = Math.min(smilesList.length, 25000)
   let iteration = 0
   console.time(label)
 
@@ -399,6 +399,7 @@ Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
     const batchSize = Math.ceil(currentBatch.length / this.concurrency)
     const batches = _.chunk(currentBatch, batchSize)
 
+    process.setMaxListeners(this.concurrency)
     await Promise.all(batches.map((batch, index) => this.processBatch(batch)))
 
     ++iteration
