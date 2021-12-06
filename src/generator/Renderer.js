@@ -195,24 +195,26 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   const font = this.fonts[randomInt(0, this.fonts.length - 1)]
   const fontWeight = this.fontWeights[randomInt(0, this.fontWeights.length - 1)]
 
-  // aneb: due to layout reasons, values are only increased to avoid imbalanced element sizes
+  // aneb: need to keep layout relatively constant
+  const baseValue = Math.round(noiseValue(10, 2))
+
   const options = {
-    strokeLength: `${noiseValue(0.1, 10)}`,
-    strokeWidth: `${noiseValue(0.5, 6)}`,
-    letterSpacing: `${randomInt(0, 1)}px`,
+    overlapSensitivity: 1e-5,
+    overlapResolutionIterations: 50,
+    strokeWidth: `${noiseValue(0.5, 2)}`,
     gradientOffset: noiseValue(10, 10),
-    wedgeBaseWidth: noiseValue(1.5, 1.25),
-    dashedWedgeSpacing: noiseValue(5, 1.5),
-    dashedWedgeWidth: noiseValue(4, 1.25),
-    bondThickness: noiseValue(0.6, 0.25),
-    bondLength: noiseValue(25, 0.25),
-    shortBondLength: noiseValue(0.5, 0.8),
-    bondSpacing: noiseValue(0.18 * 20, 1),
+    wedgeBaseWidth: baseValue * 0.33,
+    dashedWedgeSpacing: baseValue * 0.4,
+    dashedWedgeWidth: baseValue * 0.75,
+    bondThickness: baseValue * 0.05,
+    bondLength: baseValue * 3,
+    shortBondLength: 0.85,
+    bondSpacing: baseValue * 0.20 * 0.18 * 15,
     font: font,
     fontWeight: fontWeight,
-    fontSizeLarge: noiseValue(10, 0.5),
-    fontSizeSmall: noiseValue(6, 0.5),
-    padding: 50,
+    fontSizeLarge: baseValue * 0.80,
+    fontSizeSmall: baseValue * 0.50,
+    padding: baseValue * 5,
     terminalCarbons: randomInt(0, 100) % 2 === 0,
     explicitHydrogens: randomInt(0, 100) % 2 === 0
   }

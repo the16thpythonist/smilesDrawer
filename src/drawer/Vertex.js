@@ -218,11 +218,7 @@ class Vertex {
    */
   getTextDirection(vertices) {
     const neighbours = this.getDrawnNeighbours(vertices)
-    const angles = Array()
-
-    for (let i = 0; i < neighbours.length; i++) {
-      angles.push(this.getAngle(vertices[neighbours[i]].position))
-    }
+    const angles = neighbours.map(n => this.getAngle(vertices[n].position))
 
     let textAngle = MathHelper.meanAngle(angles)
 
@@ -230,17 +226,19 @@ class Vertex {
     const halfPi = Math.PI / 2.0
     textAngle = Math.round(Math.round(textAngle / halfPi) * halfPi)
 
+    if (textAngle === 0) {
+      return 'right'
+    }
     if (textAngle === 2) {
       return 'down'
-    } else if (textAngle === -2) {
-      return 'up'
-    } else if (textAngle === 0 || textAngle === -0) {
-      return 'right' // is checking for -0 necessary?
-    } else if (textAngle === 3 || textAngle === -3) {
-      return 'left'
-    } else {
-      return 'down' // default to down
     }
+    if (textAngle === 3 || textAngle === -3) {
+      return 'left'
+    }
+    if (textAngle === -2) {
+      return 'up'
+    }
+    return 'right'
   }
 
   /**
@@ -328,10 +326,7 @@ class Vertex {
     const neighbours = this.getNeighbours()
 
     for (let i = 0; i < neighbours.length; i++) {
-      if (ArrayHelper.contains(vertices[neighbours[i]].value.rings, {
-          value: ringId
-        }) &&
-        neighbours[i] != previousVertexId) {
+      if (ArrayHelper.contains(vertices[neighbours[i]].value.rings, { value: ringId }) && neighbours[i] !== previousVertexId) {
         return neighbours[i]
       }
     }

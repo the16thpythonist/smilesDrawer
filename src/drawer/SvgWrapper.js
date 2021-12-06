@@ -43,12 +43,6 @@ class SvgWrapper {
     })
 
     this.maskElements.push(mask)
-    this.charges = {
-      1: '+',
-      2: '2+',
-      '-1': '-',
-      '-2': '2-'
-    }
   }
 
   getColor(element) {
@@ -56,7 +50,13 @@ class SvgWrapper {
   }
 
   getChargeText(charge) {
-    return this.charges[charge] || ''
+    const charges = {
+      1: '+',
+      2: '2+',
+      '-1': '-',
+      '-2': '2-'
+    }
+    return charges[charge] || ''
   }
 
   constructSvg() {
@@ -283,8 +283,7 @@ class SvgWrapper {
   drawLine(idLabel, idValue, bondLabel, line, gradient = null) {
     const styles = [
       ['stroke-width', this.opts.strokeWidth],
-      ['stroke-linecap', 'round'],
-      ['stroke-dasharray', `${this.opts.strokeLength},${this.opts.strokeLength * 1.5}`]
+      ['stroke-linecap', 'round']
     ].map(sub => sub.join(':')).join(';')
 
     const l = line.getLeftVector()
@@ -360,18 +359,21 @@ class SvgWrapper {
    * @param {Number} attachedPseudoElement.hyrogenCount The number of hydrogens attached to each atom matching the key.
    */
   drawText(vertexIdLabel, vertexIdValue, vertexLabel, x, y, elementName, hydrogens, direction, isTerminal, charge, isotope, attachedPseudoElement = {}) {
-    // TODO aneb: clean up this mess ...
     const pos = {
       x: x + this.offsetX,
       y: y + this.offsetY
     }
 
-    const letterSpacing = this.opts.letterSpacing
+    let letterSpacing = 0
     let writingMode = 'horizontal-tb'
     let textOrientation = 'mixed'
     let textDirection = 'direction: ltr;'
     let xShift = null
     let yShift = null
+
+    if (charge > 0) {
+      direction = 'right'
+    }
 
     const debug = false
     const directionColors = {
@@ -385,37 +387,38 @@ class SvgWrapper {
     if (/up|down/.test(direction) && !isTerminal) {
       writingMode = 'vertical-rl'
       textOrientation = 'upright'
+      letterSpacing = -2
     }
 
     if (direction === 'right' && isTerminal) {
-      xShift = 1
-      yShift = 2
+      xShift = -1
+      yShift = 4
     }
     if (direction === 'right' && !isTerminal) {
-      xShift = -3.0
-      yShift = 3.0
+      xShift = -5.0
+      yShift = 5.0
     }
 
     if (direction === 'left' && isTerminal) {
       xShift = -1.5
       yShift = 3
-      textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
+      textDirection = 'direction: rtl;'
     }
     if (direction === 'left' && !isTerminal) {
       xShift = 3.5
       yShift = 3.5
-      textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
+      textDirection = 'direction: rtl;'
     }
 
     if (direction === 'up' && isTerminal) {
-      xShift = 4.0
-      yShift = 3.5
-      textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
+      xShift = 2.0
+      yShift = 4.5
+      textDirection = 'direction: rtl;'
     }
     if (direction === 'up' && !isTerminal) {
       xShift = 2
       yShift = 6
-      textDirection = 'direction: rtl; unicode-bidi: bidi-override;'
+      textDirection = 'direction: rtl;'
     }
 
     if (direction === 'down' && isTerminal) {
@@ -440,7 +443,7 @@ class SvgWrapper {
       y: pos.y + yShift,
       class: 'element',
       fill: debug ? directionColors[direction] : currentColor,
-      style: `text-anchor: start;writing-mode: ${writingMode};text-orientation: ${textOrientation};letter-spacing: ${letterSpacing};${textDirection}`
+      style: `text-anchor: start;writing-mode: ${writingMode};text-orientation: ${textOrientation};letter-spacing: ${letterSpacing}px;${textDirection}`
     })
 
     const textNode = this.svgHelper.createElement('tspan')
