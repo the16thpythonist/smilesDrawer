@@ -24,22 +24,44 @@ const noiseValue = (baseValue, noiseFactor = 0.3) => {
   return baseValue + baseValue * noise
 }
 
-function Renderer({ outputDirectory, quality, size, fonts, fontWeights, preserveAspectRatio, colors, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
+const imageFilter = () => {
+  const r = randomInt(0, 9)
+
+  // aneb: 10% of images do not get any filter
+  if (r === 5) {
+    return ''
+  }
+
+  const filters = {
+    'hue-rotate': ['0deg', '30deg', '60deg', '90deg'],
+    blur: ['0.50px', '0.75px', '1px', '1.1px', '1.2px', '1.25px', '1.3px'],
+    invert: ['5%', '10%', '15%'],
+    grayscale: ['0%', '20%', '40%', '60%', '80%', '100%'],
+    contrast: ['50%', '75%', '100%', '125%', '150%']
+  }
+
+  let filterChain = ''
+  for (const [filter, value] of Object.entries(filters)) {
+    filterChain += ` ${filter}(${_.sample(value)})`
+  }
+
+  return `filter: ${filterChain};`
+}
+
+function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRatio, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
   // aneb: find out why this does not work in above scope ...
-  const colorMaps = require('./colors')
+  const colorMap = require('./colors')
 
   this.document = null
   this.XMLSerializer = null
 
   this.parser = Parser
   this.directory = outputDirectory
-  this.quality = quality
   this.size = size
   this.fonts = fonts
   this.fontWeights = fontWeights
   this.preserveAspectRatio = preserveAspectRatio
-  this.colors = colors
-  this.colorMaps = colorMaps
+  this.colorMap = colorMap
   this.concurrency = concurrency
   this.labelType = labelType
   this.segment = segment
@@ -47,7 +69,7 @@ function Renderer({ outputDirectory, quality, size, fonts, fontWeights, preserve
   this.outputLabels = outputLabels
   this.outputFlat = outputFlat
 
-  this.svg = new SVG()
+  this.svgHelper = new SVG()
 
   const { document, XMLSerializer } = (new JSDOM('')).window
   this.document = document
@@ -171,7 +193,7 @@ Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName
   if (this.outputLabels && labels.length) {
     const cleanLabels = labels
       .map(l => this.cleanupLabel(l))
-      .map(l => ({ ...l, xy: this.svg.transformPoints(l, matrix) }))
+      .map(l => ({ ...l, xy: this.svgHelper.transformPoints(l, matrix) }))
 
     const finalLabels = this.groupLabels(cleanLabels)
 
@@ -196,42 +218,40 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   const fontWeight = this.fontWeights[randomInt(0, this.fontWeights.length - 1)]
 
   // aneb: need to keep layout relatively constant
-  const baseValue = Math.round(noiseValue(10, 2))
+  const baseValue = Math.round(this.size / noiseValue(5, 5))
 
   const options = {
     overlapSensitivity: 1e-5,
     overlapResolutionIterations: 50,
-    strokeWidth: `${noiseValue(0.5, 2)}`,
+    strokeWidth: `${noiseValue(1.5, 2)}`,
     gradientOffset: noiseValue(10, 10),
     wedgeBaseWidth: baseValue * 0.33,
-    dashedWedgeSpacing: baseValue * 0.4,
+    dashedWedgeSpacing: baseValue * 0.2,
     dashedWedgeWidth: baseValue * 0.75,
-    bondThickness: baseValue * 0.05,
+    bondThickness: baseValue * 0.1,
     bondLength: baseValue * 3,
     shortBondLength: 0.85,
     bondSpacing: baseValue * 0.20 * 0.18 * 15,
     font: font,
     fontWeight: fontWeight,
-    fontSizeLarge: baseValue * 0.80,
+    fontSizeLarge: baseValue * 0.99,
     fontSizeSmall: baseValue * 0.50,
     padding: baseValue * 5,
     terminalCarbons: randomInt(0, 100) % 2 === 0,
     explicitHydrogens: randomInt(0, 100) % 2 === 0
   }
 
-  const colorsAvailable = Object.keys(this.colorMaps)
-  const colorMapIndex = this.colors === 'random' ? randomInt(0, colorsAvailable.length - 1) : colorsAvailable.indexOf(this.colors)
-  const colorMap = colorsAvailable[colorMapIndex]
-  const colors = this.colorMaps[colorMap]
-
-  const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND};`
+  // aneb: filter includes ";" or is empty string
+  const filter = imageFilter()
+  const colors = this.colorMap
+  const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND};${filter}`
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const drawer = new SvgDrawer({ colors, options })
 
   drawer.draw(tree, svg)
 
   // aneb: must set other properties after drawing
-  this.svg.update(svg, { style, smiles })
+  this.svgHelper.update(svg, { style, smiles })
 
   return this.XMLSerializer.serializeToString(svg)
 }
@@ -255,16 +275,16 @@ Renderer.prototype.getCornersOriented = function(edge) {
     return [edge.points]
   }
 
-  return this.svg.getEdgePointsOfBoxAroundLine(edge)
+  return this.svgHelper.getEdgePointsOfBoxAroundLine(edge)
 }
 
 Renderer.prototype.drawPoints = function({ id, label, points, text }) {
-  const color = this.svg.randomColor()
+  const color = this.svgHelper.randomColor()
 
   // aneb: try to avoid overlapping points by using different sizes
   const size = _.floor(_.random(true) * 5 + 2) / 10
   return points.map(([x, y]) => {
-    return this.svg.createElement('circle', {
+    return this.svgHelper.createElement('circle', {
       'label-id': `${id}-label`,
       label: label,
       text: text,
@@ -277,8 +297,8 @@ Renderer.prototype.drawPoints = function({ id, label, points, text }) {
 }
 
 Renderer.prototype.drawSinglePolygon = function({ id, label, points, text }) {
-  const color = this.svg.randomColor()
-  return this.svg.createElement('polygon', {
+  const color = this.svgHelper.randomColor()
+  return this.svgHelper.createElement('polygon', {
     'label-id': `${id}-label`,
     label: label,
     text: text,
@@ -288,11 +308,11 @@ Renderer.prototype.drawSinglePolygon = function({ id, label, points, text }) {
 }
 
 Renderer.prototype.drawMultiPolygon = function(edgeElements) {
-  const color = this.svg.randomColor()
+  const color = this.svgHelper.randomColor()
   const { id, label } = edgeElements[0]
   const points = edgeElements.map(e => this.getCornersOriented(e)).filter(e => !!e)
   return points.map(point => {
-    return this.svg.createElement('polygon', {
+    return this.svgHelper.createElement('polygon', {
       'label-id': `${id}-label`,
       label: label,
       points: point.join(' '),
@@ -312,8 +332,8 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
   const edgeLabels = []
 
   if (this.labelType === labelTypes.box) {
-    const correctedEdges = dom.edges.map(e => ({ ...e, ...this.svg.correctBoundingBox(e) }))
-    const merged = this.svg.mergeBoundingBoxes(correctedEdges)
+    const correctedEdges = dom.edges.map(e => ({ ...e, ...this.svgHelper.correctBoundingBox(e) }))
+    const merged = this.svgHelper.mergeBoundingBoxes(correctedEdges)
     const mergedWithPoints = merged.map(n => ({ ...n, points: this.getCornersAligned(n) }))
     edgeLabels.push(...mergedWithPoints.map(e => this.drawSinglePolygon(e)))
   }
@@ -326,7 +346,7 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
 
   if (this.labelType === labelTypes.points) {
     const points = dom.edges.map(e => ({ ...e, points: this.getCornersOriented(e) })).filter(e => !!e.points)
-    const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svg.hull(e))
+    const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svgHelper.hull(e))
     const hullBox = this.segment
       ? hull.map(edge => this.drawSinglePolygon(edge))
       : hull.map(edge => this.drawPoints(edge))
@@ -334,7 +354,7 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
     edgeLabels.push(hullBox)
   }
 
-  this.svg.appendChildren(svg, [...nodeLabels, ...edgeLabels])
+  this.svgHelper.appendChildren(svg, [...nodeLabels, ...edgeLabels])
 
   return this.XMLSerializer.serializeToString(svg)
 }
@@ -348,7 +368,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
   const id = crypto.createHash('sha256').update(smiles).digest('hex')
 
-  const quality = Number(this.quality) || randomInt(10, 25)
+  const quality = randomInt(80, 100)
 
   if (!this.outputFlat) {
     const target = `${this.directory}/${id}`

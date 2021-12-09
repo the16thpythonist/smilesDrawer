@@ -2,8 +2,6 @@ node generate-images.js \
 --from-csv-file "data/zinc_250k.csv" \
 --from-csv-column "0" \
 --output-directory "generated-images" \
---quality "100" \
---colors "random" \
 --size "512" \
 --fonts "Arial" \
 --font-weights "100,200" \

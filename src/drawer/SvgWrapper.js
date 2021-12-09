@@ -8,7 +8,6 @@ const { document } = (new JSDOM('')).window
 
 class SvgWrapper {
   constructor(target, options, colors) {
-    // TODO change naming everywhere and give this a proper name
     this.svgHelper = new SVG()
 
     this.svg = target

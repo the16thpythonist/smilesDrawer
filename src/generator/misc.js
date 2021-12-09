@@ -28,13 +28,12 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100) => {
 const cliParams = () => {
   const {
     outputDirectory,
-    amount, quality, size, fonts, fontWeights, preserveAspectRatio,
+    amount, size, fonts, fontWeights, preserveAspectRatio,
     concurrency,
     labelType, segment,
     outputSvg, outputLabels, outputFlat,
     clean,
     minSmilesLength, maxSmilesLength,
-    colors,
     fromCsvFile: csvFile,
     fromCsvColumn: csvColumn
   } = yargs(hideBin(process.argv)).argv
@@ -44,8 +43,6 @@ const cliParams = () => {
     csvColumn: csvColumn,
     amount: Number(amount) || null,
     outputDirectory: path.resolve(outputDirectory),
-    colors: colors || 'random',
-    quality: quality || null,
     size: Number(size) || null,
     fonts: fonts ? fonts.split(',') : ['Arial'],
     fontWeights: fontWeights ? fontWeights.split(',').map(x => Number(x)) : [200],
