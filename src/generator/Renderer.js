@@ -383,13 +383,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
 }
 
-Renderer.prototype.processBatch = async function(smilesList) {
-  const browserOptions = {
-    headless: true,
-    devtools: false
-  }
-  const browser = await puppeteer.launch(browserOptions)
-
+Renderer.prototype.processBatch = async function(browser, smilesList) {
   for (const smiles of smilesList) {
     try {
       const page = await browser.newPage()
@@ -399,19 +393,20 @@ Renderer.prototype.processBatch = async function(smilesList) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
     }
   }
-
-  const pages = await browser.pages()
-  await Promise.all(pages.map(p => p.close()))
-  await browser.close()
 }
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
-  process.setMaxListeners(this.concurrency)
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   const totalItems = smilesList.length
   const clearInterval = Math.min(smilesList.length, 1000)
   let iteration = 0
   console.time(label)
+
+  const browserOptions = {
+    headless: true,
+    devtools: false
+  }
+  const browser = await puppeteer.launch(browserOptions)
 
   while (smilesList.length) {
     const itemStart = iteration * clearInterval
@@ -425,9 +420,11 @@ Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
       console.log(`iteration ${iteration}:`, key, (value / 1e6).toFixed(1), 'MB')
     }
 
-    await Promise.all(batches.map((batch, index) => this.processBatch(batch)))
+    await Promise.all(batches.map((batch, index) => this.processBatch(browser, batch)))
     ++iteration
   }
+
+  await browser.close()
 
   console.timeEnd(label)
 }
