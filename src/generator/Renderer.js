@@ -422,7 +422,7 @@ Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
     const batches = _.chunk(currentBatch, batchSize)
 
     for (const [key, value] of Object.entries(process.memoryUsage())) {
-      console.log(`iteration ${itemStart}:`, key, (value / 1e6).toFixed(1), 'MB')
+      console.log(`iteration ${iteration}:`, key, (value / 1e6).toFixed(1), 'MB')
     }
 
     await Promise.all(batches.map((batch, index) => this.processBatch(batch)))
