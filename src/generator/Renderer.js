@@ -389,11 +389,12 @@ Renderer.prototype.processBatch = async function(smilesList) {
     devtools: false
   }
   const browser = await puppeteer.launch(browserOptions)
-  const page = await browser.newPage()
 
   for (const smiles of smilesList) {
     try {
+      const page = await browser.newPage()
       await this.imageFromSmilesString(page, smiles)
+      await page.close()
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
     }
