@@ -409,7 +409,7 @@ Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
   process.setMaxListeners(this.concurrency)
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   const totalItems = smilesList.length
-  const clearInterval = Math.min(smilesList.length, 500)
+  const clearInterval = Math.min(smilesList.length, 5000)
   let iteration = 0
   console.time(label)
 
