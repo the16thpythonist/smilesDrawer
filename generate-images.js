@@ -14,6 +14,7 @@
     : Object.values(labelTypes).filter(t => t !== labelTypes.all)
 
   if (conf.clean) {
+    console.log(`deleting ${conf.outputDirectory}`)
     await fs.emptyDir(conf.outputDirectory)
   }
 
