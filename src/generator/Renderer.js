@@ -409,7 +409,7 @@ Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
   process.setMaxListeners(this.concurrency)
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   const totalItems = smilesList.length
-  const clearInterval = Math.min(smilesList.length, 5000)
+  const clearInterval = Math.min(smilesList.length, 1000)
   let iteration = 0
   console.time(label)
 
@@ -421,13 +421,11 @@ Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
     const batchSize = Math.ceil(currentBatch.length / this.concurrency)
     const batches = _.chunk(currentBatch, batchSize)
 
-    const memoryBefore = (process.memoryUsage().rss / 1e6).toFixed(0)
-    console.log(`iteration ${iteration} - RSS before ${memoryBefore} MB`)
+    for (const [key, value] of Object.entries(process.memoryUsage())) {
+      console.log(`iteration ${itemStart}:`, key, (value / 1e6).toFixed(1), 'MB')
+    }
 
     await Promise.all(batches.map((batch, index) => this.processBatch(batch)))
-
-    const memoryAfter = (process.memoryUsage().rss / 1e6).toFixed(0)
-    console.log(`iteration ${iteration} - RSS before ${memoryAfter} MB`)
     ++iteration
   }
 
