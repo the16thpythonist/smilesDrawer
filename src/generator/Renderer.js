@@ -52,9 +52,6 @@ function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRat
   // aneb: find out why this does not work in above scope ...
   const colorMap = require('./colors')
 
-  this.document = null
-  this.XMLSerializer = null
-
   this.parser = Parser
   this.directory = outputDirectory
   this.size = size
@@ -383,49 +380,33 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
 }
 
-Renderer.prototype.processBatch = async function(browser, smilesList) {
+Renderer.prototype.processBatch = async function(index, smilesList) {
+  const browserOptions = {
+    headless: true,
+    devtools: false
+  }
+  const browser = await puppeteer.launch(browserOptions)
+
   const page = await browser.newPage()
-  for (const smiles of smilesList) {
+  for (const [i, smiles] of smilesList.entries()) {
     try {
+      if (i % 10 === 0) {
+        console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done`)
+      }
+
       await this.imageFromSmilesString(page, smiles)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
     }
   }
-  await page.close()
+  await browser.close()
 }
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
-  const totalItems = smilesList.length
-  const clearInterval = Math.min(smilesList.length, 100)
-  let iteration = 0
   console.time(label)
-
-  const browserOptions = {
-    headless: true,
-    devtools: false
-  }
-
-  while (smilesList.length) {
-    const browser = await puppeteer.launch(browserOptions)
-
-    const itemStart = iteration * clearInterval
-    const itemEnd = Math.min(itemStart + clearInterval, totalItems)
-    console.log(`${new Date().toUTCString()} processing items ${itemStart}-${itemEnd}/${totalItems}`)
-    const currentBatch = smilesList.splice(0, clearInterval)
-    const batchSize = Math.ceil(currentBatch.length / this.concurrency)
-    const batches = _.chunk(currentBatch, batchSize)
-
-    for (const [key, value] of Object.entries(process.memoryUsage())) {
-      console.log(`iteration ${iteration}:`, key, (value / 1e6).toFixed(1), 'MB')
-    }
-
-    await Promise.all(batches.map((batch, index) => this.processBatch(browser, batch)))
-    await browser.close()
-    ++iteration
-  }
-
+  const batches = _.chunk(smilesList, Math.ceil(smilesList.length / this.concurrency))
+  await Promise.all(batches.map((batch, index) => this.processBatch(index, batch, batches.length)))
   console.timeEnd(label)
 }
 
