@@ -387,22 +387,17 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, existing
   await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
 }
 
-Renderer.prototype.processBatch = async function(index, smilesList) {
+Renderer.prototype.processBatch = async function(index, smilesList, existing) {
   const browserOptions = {
     headless: true,
     devtools: false
   }
   const browser = await puppeteer.launch(browserOptions)
-  const cmd = `find ${this.directory} -type f -name 'x.jpg'`
-  console.log(cmd)
-
-  let existing = await exec(cmd, { maxBuffer: 10 * 1024 * 1024 })
-  existing = existing.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
 
   const page = await browser.newPage()
   for (const [i, smiles] of smilesList.entries()) {
     try {
-      if (i % 10 === 0) {
+      if (i % 100 === 0) {
         console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done`)
       }
 
@@ -415,10 +410,16 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
 }
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
+  const cmd = `find ${this.directory} -type f -name 'x.jpg'`
+  console.log(cmd)
+
+  let existing = await exec(cmd, { maxBuffer: 10 * 1024 * 1024 })
+  existing = existing.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
+
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   console.time(label)
   const batches = _.chunk(smilesList, Math.ceil(smilesList.length / this.concurrency))
-  await Promise.all(batches.map((batch, index) => this.processBatch(index, batch, batches.length)))
+  await Promise.all(batches.map((batch, index) => this.processBatch(index, batch, existing)))
   console.timeEnd(label)
 }
 
