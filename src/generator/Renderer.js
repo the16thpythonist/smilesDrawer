@@ -365,10 +365,16 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
   const id = crypto.createHash('sha256').update(smiles).digest('hex')
 
-  const quality = randomInt(80, 100)
+  const quality = randomInt(50, 100)
 
   if (!this.outputFlat) {
     const target = `${this.directory}/${id}`
+
+    const exists = await fs.exists(`${target}/x.jpg`)
+    if (exists) {
+      return
+    }
+
     await fs.ensureDir(target)
     await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${target}/x`, quality, false)
     await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${target}/y`, 100, true)
