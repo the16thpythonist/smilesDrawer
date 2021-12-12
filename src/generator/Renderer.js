@@ -1,6 +1,8 @@
 const crypto = require('crypto')
 const fs = require('fs-extra')
 const puppeteer = require('puppeteer')
+const util = require('util')
+const exec = util.promisify(require('child_process').exec)
 const _ = require('lodash')
 const { JSDOM } = require('jsdom')
 const { xml2js, js2xml } = require('xml-js')
@@ -356,7 +358,7 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
+Renderer.prototype.imageFromSmilesString = async function(page, smiles, existing) {
   const svgXmlWithoutLabels = this.smilesToSvgXml(smiles)
   const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
 
@@ -370,8 +372,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   if (!this.outputFlat) {
     const target = `${this.directory}/${id}`
 
-    const exists = await fs.exists(`${target}/x.jpg`)
-    if (exists) {
+    if (existing.includes(id)) {
       return
     }
 
@@ -392,6 +393,8 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
     devtools: false
   }
   const browser = await puppeteer.launch(browserOptions)
+  let existing = await exec(`find ${this.directory} -type f -name 'x.jpg'`)
+  existing = existing.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
 
   const page = await browser.newPage()
   for (const [i, smiles] of smilesList.entries()) {
@@ -400,7 +403,7 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
         console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done`)
       }
 
-      await this.imageFromSmilesString(page, smiles)
+      await this.imageFromSmilesString(page, smiles, existing)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
     }
