@@ -362,7 +362,6 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, existing
   const id = crypto.createHash('sha256').update(smiles).digest('hex')
 
   if (!this.outputFlat && existing.includes(id)) {
-    console.log(`skipping ${id}`)
     return
   }
 
