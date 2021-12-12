@@ -359,22 +359,23 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
 }
 
 Renderer.prototype.imageFromSmilesString = async function(page, smiles, existing) {
+  const id = crypto.createHash('sha256').update(smiles).digest('hex')
+
+  if (!this.outputFlat && existing.includes(id)) {
+    console.log(`skipping ${id}`)
+    return
+  }
+
   const svgXmlWithoutLabels = this.smilesToSvgXml(smiles)
   const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
 
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
 
-  const id = crypto.createHash('sha256').update(smiles).digest('hex')
-
   const quality = randomInt(50, 100)
 
   if (!this.outputFlat) {
     const target = `${this.directory}/${id}`
-
-    if (existing.includes(id)) {
-      return
-    }
 
     await fs.ensureDir(target)
     await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${target}/x`, quality, false)
@@ -393,7 +394,10 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
     devtools: false
   }
   const browser = await puppeteer.launch(browserOptions)
-  let existing = await exec(`find ${this.directory} -type f -name 'x.jpg'`, { maxBuffer: 10 * 1024 * 1024 })
+  const cmd = `find ${this.directory} -type f -name 'x.jpg'`
+  console.log(cmd)
+
+  let existing = await exec(cmd, { maxBuffer: 10 * 1024 * 1024 })
   existing = existing.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
 
   const page = await browser.newPage()
