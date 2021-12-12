@@ -99,7 +99,7 @@ Renderer.prototype.makeEdgeAttributesNumeric = function(edge) {
 
 Renderer.prototype.positionInfoFromSvgXml = async function(page, xml) {
   // aneb: need to open browser, getBBox is not available via jsdom as it does not render
-  await page.setContent(xml, { waitUntil: 'domcontentloaded' })
+  await page.setContent(xml, { waitUntil: 'domcontentloaded', timeout: 3000 })
 
   const dom = await page.evaluate(getPositionInfoFromSvg)
   dom.edges = dom.edges.map(e => this.makeEdgeAttributesNumeric(e))
