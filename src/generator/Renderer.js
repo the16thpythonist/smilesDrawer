@@ -75,6 +75,10 @@ function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRat
   this.XMLSerializer = new XMLSerializer()
 }
 
+Renderer.prototype.id = function(x) {
+  return crypto.createHash('sha256').update(x).digest('hex')
+}
+
 Renderer.prototype.color = function(color, circle = false) {
   const fill = this.segment || circle ? color : 'none'
   return `fill: ${fill}; stroke: ${color};`
@@ -359,7 +363,7 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
 }
 
 Renderer.prototype.imageFromSmilesString = async function(page, smiles, existing) {
-  const id = crypto.createHash('sha256').update(smiles).digest('hex')
+  const id = this.id(smiles)
 
   if (!this.outputFlat && existing.includes(id)) {
     return
@@ -416,9 +420,12 @@ Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
   let existing = await exec(cmd, { maxBuffer: 10 * 1024 * 1024 })
   existing = existing.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
 
+  const nonExisting = smilesList.filter(x => !existing.includes(this.id(x)))
+  console.log(`removed ${smilesList.length - nonExisting.length} items, ${nonExisting.length} left`)
+
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   console.time(label)
-  const batches = _.chunk(smilesList, Math.ceil(smilesList.length / this.concurrency))
+  const batches = _.chunk(nonExisting, Math.ceil(nonExisting.length / this.concurrency))
   await Promise.all(batches.map((batch, index) => this.processBatch(index, batch, existing)))
   console.timeEnd(label)
 }
