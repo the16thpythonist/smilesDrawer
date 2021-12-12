@@ -393,7 +393,7 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
     devtools: false
   }
   const browser = await puppeteer.launch(browserOptions)
-  let existing = await exec(`find ${this.directory} -type f -name 'x.jpg'`)
+  let existing = await exec(`find ${this.directory} -type f -name 'x.jpg'`, { maxBuffer: 1000 * 1024 })
   existing = existing.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
 
   const page = await browser.newPage()
