@@ -13,6 +13,8 @@ const SVG = require('./SVG')
 const { bondLabels, labelTypes } = require('./types')
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
+let maxLength = 0
+
 const setIntersection = (setA, setB) => {
   const _intersection = new Set()
   for (const elem of setB) {
@@ -191,6 +193,11 @@ Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName
 
   await page.setContent(updatedSvg, this.setContentOptions)
   updatedSvg = await page.evaluate(drawMasksAroundTextElements)
+
+  if (updatedSvg.length > maxLength) {
+    console.log(`maxLength increased from ${maxLength} to ${updatedSvg.length}`)
+    maxLength = updatedSvg.length
+  }
 
   const ops = []
 
@@ -404,62 +411,19 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 }
 
 Renderer.prototype.processBatch = async function(index, smilesList) {
-  const args = [
-    '--autoplay-policy=user-gesture-required',
-    '--disable-background-networking',
-    '--disable-background-timer-throttling',
-    '--disable-backgrounding-occluded-windows',
-    '--disable-breakpad',
-    '--disable-client-side-phishing-detection',
-    '--disable-component-update',
-    '--disable-default-apps',
-    '--disable-dev-shm-usage',
-    '--disable-domain-reliability',
-    '--disable-extensions',
-    '--disable-features=AudioServiceOutOfProcess',
-    '--disable-hang-monitor',
-    '--disable-ipc-flooding-protection',
-    '--disable-notifications',
-    '--disable-offer-store-unmasked-wallet-cards',
-    '--disable-popup-blocking',
-    '--disable-print-preview',
-    '--disable-prompt-on-repost',
-    '--disable-renderer-backgrounding',
-    '--disable-setuid-sandbox',
-    '--disable-speech-api',
-    '--disable-sync',
-    '--hide-scrollbars',
-    '--ignore-gpu-blacklist',
-    '--metrics-recording-only',
-    '--mute-audio',
-    '--no-default-browser-check',
-    '--no-first-run',
-    '--no-pings',
-    '--no-sandbox',
-    '--no-zygote',
-    '--password-store=basic',
-    '--use-gl=swiftshader',
-    '--use-mock-keychain'
-  ]
-
   const browserOptions = {
     headless: true,
-    devtools: false,
-    args: args
+    devtools: false
   }
 
   const logSize = Math.min(smilesList.length, 100)
-  let browser = await puppeteer.launch(browserOptions)
-  let page = await browser.newPage()
+  const browser = await puppeteer.launch(browserOptions)
+  const page = await browser.newPage()
 
   for (const [i, smiles] of smilesList.entries()) {
     try {
       if (i % logSize === 0) {
         console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done`)
-        await page.close()
-        await browser.close()
-        page = await browser.newPage()
-        browser = await puppeteer.launch(browserOptions)
       }
 
       await this.imageFromSmilesString(page, smiles)
