@@ -449,7 +449,7 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
   }
 
   const logSize = Math.min(smilesList.length, 100)
-  const browser = await puppeteer.launch(browserOptions)
+  let browser = await puppeteer.launch(browserOptions)
   let page = await browser.newPage()
 
   for (const [i, smiles] of smilesList.entries()) {
@@ -457,7 +457,9 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
       if (i % logSize === 0) {
         console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done`)
         await page.close()
+        await browser.close()
         page = await browser.newPage()
+        browser = await puppeteer.launch(browserOptions)
       }
 
       await this.imageFromSmilesString(page, smiles)
