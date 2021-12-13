@@ -77,6 +77,7 @@ function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRat
   this.outputSvg = outputSvg
   this.outputLabels = outputLabels
   this.outputFlat = outputFlat
+  this.setContentOptions = { waitUntil: 'domcontentloaded', timeout: 2000 }
 
   this.svgHelper = new SVG()
 
@@ -113,7 +114,7 @@ Renderer.prototype.makeEdgeAttributesNumeric = function(edge) {
 
 Renderer.prototype.positionInfoFromSvgXml = async function(page, xml) {
   // aneb: need to open browser, getBBox is not available via jsdom as it does not render
-  await page.setContent(xml, { waitUntil: 'domcontentloaded', timeout: 3000 })
+  await page.setContent(xml, this.setContentOptions)
 
   const dom = await page.evaluate(getPositionInfoFromSvg)
   dom.edges = dom.edges.map(e => this.makeEdgeAttributesNumeric(e))
@@ -185,10 +186,10 @@ Renderer.prototype.groupLabels = function(labels) {
 }
 
 Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName, quality, jsonOnly = false) {
-  await page.setContent(svg, { waitUntil: 'domcontentloaded' })
+  await page.setContent(svg, this.setContentOptions)
   let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, { size: this.size, preserveAspectRatio: this.preserveAspectRatio })
 
-  await page.setContent(updatedSvg, { waitUntil: 'domcontentloaded' })
+  await page.setContent(updatedSvg, this.setContentOptions)
   updatedSvg = await page.evaluate(drawMasksAroundTextElements)
 
   const ops = []
@@ -385,8 +386,15 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
     const target = `${this.directory}/${id}`
 
     await fs.ensureDir(target)
-    await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${target}/x`, quality, false)
-    await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${target}/y`, 100, true)
+
+    try {
+      await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${target}/x`, quality, false)
+      await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${target}/y`, 100, true)
+    } catch (e) {
+      console.log(e)
+      await fs.remove(target)
+    }
+
     return
   }
 
@@ -396,17 +404,60 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 }
 
 Renderer.prototype.processBatch = async function(index, smilesList) {
+  const args = [
+    '--autoplay-policy=user-gesture-required',
+    '--disable-background-networking',
+    '--disable-background-timer-throttling',
+    '--disable-backgrounding-occluded-windows',
+    '--disable-breakpad',
+    '--disable-client-side-phishing-detection',
+    '--disable-component-update',
+    '--disable-default-apps',
+    '--disable-dev-shm-usage',
+    '--disable-domain-reliability',
+    '--disable-extensions',
+    '--disable-features=AudioServiceOutOfProcess',
+    '--disable-hang-monitor',
+    '--disable-ipc-flooding-protection',
+    '--disable-notifications',
+    '--disable-offer-store-unmasked-wallet-cards',
+    '--disable-popup-blocking',
+    '--disable-print-preview',
+    '--disable-prompt-on-repost',
+    '--disable-renderer-backgrounding',
+    '--disable-setuid-sandbox',
+    '--disable-speech-api',
+    '--disable-sync',
+    '--hide-scrollbars',
+    '--ignore-gpu-blacklist',
+    '--metrics-recording-only',
+    '--mute-audio',
+    '--no-default-browser-check',
+    '--no-first-run',
+    '--no-pings',
+    '--no-sandbox',
+    '--no-zygote',
+    '--password-store=basic',
+    '--use-gl=swiftshader',
+    '--use-mock-keychain'
+  ]
+
   const browserOptions = {
     headless: true,
-    devtools: false
+    devtools: false,
+    args: args
   }
-  const browser = await puppeteer.launch(browserOptions)
+
   const logSize = Math.min(smilesList.length, 100)
-  const page = await browser.newPage()
+  const browser = await puppeteer.launch(browserOptions)
+  let page = await browser.newPage()
+
   for (const [i, smiles] of smilesList.entries()) {
     try {
       if (i % logSize === 0) {
         console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done`)
+        await page.close()
+        page = await browser.newPage()
       }
 
       await this.imageFromSmilesString(page, smiles)
@@ -414,6 +465,9 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
     }
   }
+
+  console.log(`${new Date().toUTCString()} worker ${index}: done`)
+  await page.close()
   await browser.close()
 }
 
