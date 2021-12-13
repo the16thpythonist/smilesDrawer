@@ -410,7 +410,7 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
     args: ['--js-flags=--expose-gc']
   }
 
-  const logSize = Math.min(smilesList.length, 10)
+  const logSize = Math.min(smilesList.length, 100)
   const browser = await puppeteer.launch(browserOptions)
   const page = await browser.newPage()
 
