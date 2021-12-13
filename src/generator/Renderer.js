@@ -13,6 +13,16 @@ const SVG = require('./SVG')
 const { bondLabels, labelTypes } = require('./types')
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
+const setIntersection = (setA, setB) => {
+  const _intersection = new Set()
+  for (const elem of setB) {
+    if (setA.has(elem)) {
+      _intersection.add(elem)
+    }
+  }
+  return _intersection
+}
+
 const randomInt = (min, max) => {
   min = Math.ceil(min)
   max = Math.floor(max)
@@ -362,19 +372,13 @@ Renderer.prototype.addLabels = function({ dom, xml }) {
   return this.XMLSerializer.serializeToString(svg)
 }
 
-Renderer.prototype.imageFromSmilesString = async function(page, smiles, existing) {
-  const id = this.id(smiles)
-
-  if (!this.outputFlat && existing.includes(id)) {
-    return
-  }
-
+Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   const svgXmlWithoutLabels = this.smilesToSvgXml(smiles)
   const { dom, xml } = await this.positionInfoFromSvgXml(page, svgXmlWithoutLabels)
 
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
-
+  const id = this.id(smiles)
   const quality = randomInt(50, 100)
 
   if (!this.outputFlat) {
@@ -391,21 +395,21 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles, existing
   await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
 }
 
-Renderer.prototype.processBatch = async function(index, smilesList, existing) {
+Renderer.prototype.processBatch = async function(index, smilesList) {
   const browserOptions = {
     headless: true,
     devtools: false
   }
   const browser = await puppeteer.launch(browserOptions)
-
+  const logSize = Math.min(smilesList.length, 100)
   const page = await browser.newPage()
   for (const [i, smiles] of smilesList.entries()) {
     try {
-      if (i % 100 === 0) {
+      if (i % logSize === 0) {
         console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done`)
       }
 
-      await this.imageFromSmilesString(page, smiles, existing)
+      await this.imageFromSmilesString(page, smiles)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
     }
@@ -414,19 +418,32 @@ Renderer.prototype.processBatch = async function(index, smilesList, existing) {
 }
 
 Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
-  const cmd = `find ${this.directory} -type f -name 'x.jpg'`
-  console.log(cmd)
-
-  let existing = await exec(cmd, { maxBuffer: 10 * 1024 * 1024 })
-  existing = existing.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
-
-  const nonExisting = smilesList.filter(x => !existing.includes(this.id(x)))
-  console.log(`removed ${smilesList.length - nonExisting.length} items, ${nonExisting.length} left`)
-
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   console.time(label)
-  const batches = _.chunk(nonExisting, Math.ceil(nonExisting.length / this.concurrency))
-  await Promise.all(batches.map((batch, index) => this.processBatch(index, batch, existing)))
+
+  const xCmd = `find ${this.directory} -type f -name 'x.*'`
+  const yCmd = `find ${this.directory} -type f -name 'y.*'`
+  console.log(xCmd)
+  console.log(yCmd)
+
+  let x = await exec(xCmd, { maxBuffer: 100 * 1024 * 1024 })
+  let y = await exec(yCmd, { maxBuffer: 100 * 1024 * 1024 })
+  x = x.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
+  y = y.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
+
+  const existing = setIntersection(new Set(x), new Set(y))
+
+  const smilesToId = {}
+  for (const smiles of smilesList) {
+    const id = this.id(smiles)
+    smilesToId[smiles] = existing.has(id) ? null : id
+  }
+
+  const missing = smilesList.filter(x => !!smilesToId[x])
+  console.log(`removed ${smilesList.length - missing.length} items, ${missing.length} left`)
+
+  const batches = _.chunk(missing, Math.ceil(missing.length / this.concurrency))
+  await Promise.all(batches.map((batch, index) => this.processBatch(index, batch)))
   console.timeEnd(label)
 }
 
