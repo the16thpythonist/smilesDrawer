@@ -13,8 +13,6 @@ const SVG = require('./SVG')
 const { bondLabels, labelTypes } = require('./types')
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
-let maxLength = 0
-
 const setIntersection = (setA, setB) => {
   const _intersection = new Set()
   for (const elem of setB) {
@@ -193,11 +191,6 @@ Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName
 
   await page.setContent(updatedSvg, this.setContentOptions)
   updatedSvg = await page.evaluate(drawMasksAroundTextElements)
-
-  if (updatedSvg.length > maxLength) {
-    console.log(`maxLength increased from ${maxLength} to ${updatedSvg.length}`)
-    maxLength = updatedSvg.length
-  }
 
   const ops = []
 
@@ -413,17 +406,29 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 Renderer.prototype.processBatch = async function(index, smilesList) {
   const browserOptions = {
     headless: true,
-    devtools: false
+    devtools: false,
+    args: ['--js-flags=--expose-gc']
   }
 
-  const logSize = Math.min(smilesList.length, 100)
+  const logSize = Math.min(smilesList.length, 10)
   const browser = await puppeteer.launch(browserOptions)
   const page = await browser.newPage()
 
   for (const [i, smiles] of smilesList.entries()) {
     try {
       if (i % logSize === 0) {
-        console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done`)
+        const { JSHeapUsedSize: usedBefore, JSHeapTotalSize: totalBefore } = await page.metrics()
+        // eslint-disable-next-line no-undef
+        await page.evaluate(() => gc())
+        const { JSHeapUsedSize: usedAfter, JSHeapTotalSize: totalAfter } = await page.metrics()
+
+        const metrics = JSON.stringify({
+          usedBeforeMB: (usedBefore / 1e6).toFixed(2),
+          usedAfterMB: (usedAfter / 1e6).toFixed(2),
+          totalBeforeMB: (totalBefore / 1e6).toFixed(2),
+          totalAfterMB: (totalAfter / 1e6).toFixed(2)
+        })
+        console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done (${metrics})`)
       }
 
       await this.imageFromSmilesString(page, smiles)
