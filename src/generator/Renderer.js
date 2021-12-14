@@ -23,24 +23,11 @@ const setIntersection = (setA, setB) => {
   return _intersection
 }
 
-const randomInt = (min, max) => {
-  min = Math.ceil(min)
-  max = Math.floor(max)
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-const noiseValue = (baseValue, noiseFactor = 0.3) => {
-  const min = 0
-  const max = noiseFactor
-  const noise = Math.random() * (max - min) + min
-  return baseValue + baseValue * noise
-}
-
 const imageFilter = () => {
-  const r = randomInt(0, 9)
+  const r = _.random(0, 10)
 
-  // aneb: 10% of images do not get any filter
-  if (r === 5) {
+  // aneb: 90% of images do not get any filter
+  if (r > 0) {
     return ''
   }
 
@@ -228,31 +215,29 @@ Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName
 
 Renderer.prototype.smilesToSvgXml = function(smiles) {
   const tree = this.parser.parse(smiles)
-  const font = this.fonts[randomInt(0, this.fonts.length - 1)]
-  const fontWeight = this.fontWeights[randomInt(0, this.fontWeights.length - 1)]
 
   // aneb: need to keep layout relatively constant
-  const baseValue = Math.round(this.size / noiseValue(5, 5))
+  const baseValue = Math.round(this.size * 0.1)
 
   const options = {
     overlapSensitivity: 1e-5,
     overlapResolutionIterations: 50,
-    strokeWidth: `${noiseValue(1.5, 2)}`,
-    gradientOffset: noiseValue(10, 10),
-    wedgeBaseWidth: baseValue * 0.33,
-    dashedWedgeSpacing: baseValue * 0.2,
-    dashedWedgeWidth: baseValue * 0.75,
-    bondThickness: baseValue * 0.1,
-    bondLength: baseValue * 3,
-    shortBondLength: 0.85,
-    bondSpacing: baseValue * 0.20 * 0.18 * 15,
-    font: font,
-    fontWeight: fontWeight,
-    fontSizeLarge: baseValue * 0.99,
-    fontSizeSmall: baseValue * 0.50,
-    padding: baseValue * 5,
-    terminalCarbons: randomInt(0, 100) % 2 === 0,
-    explicitHydrogens: randomInt(0, 100) % 2 === 0
+    strokeWidth: _.sample([5, 7.5, 10, 12.5, 15]),
+    gradientOffset: _.sample([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]),
+    wedgeBaseWidth: baseValue * _.sample([0.2, 0.3, 0.4, 0.5]),
+    dashedWedgeSpacing: baseValue * _.sample([0.05, 0.75, 0.1, 0.125]),
+    dashedWedgeWidth: baseValue * _.sample([0.6, 0.7, 0.7, 0.8, 0.9]),
+    bondThickness: baseValue * _.sample([0.1, 0.15, 0.2]),
+    bondLength: baseValue * _.sample([2, 2.5, 3, 3.5, 4]),
+    shortBondLength: _.sample([0.7, 0.75, 0.8, 0.85]),
+    bondSpacing: baseValue * _.sample([0.15, 0.2, 0.25, 0.5]),
+    font: _.sample(this.font),
+    fontWeight: _.sample(this.fontWeights),
+    fontSizeLarge: baseValue * _.sample([0.8, 0.85, 0.9, 0.95]),
+    fontSizeSmall: baseValue * _.sample([0.5, 0.55, 0.6, 0.65]),
+    padding: baseValue * _.sample([5, 7.5, 10, 12.5, 15]),
+    terminalCarbons: _.sample([true, false]),
+    explicitHydrogens: _.sample([true, false])
   }
 
   // aneb: filter includes ";" or is empty string
@@ -380,7 +365,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
   const id = this.id(smiles)
-  const quality = randomInt(50, 100)
+  const quality = _.random(10, 80)
 
   if (!this.outputFlat) {
     const target = `${this.directory}/${id}`
