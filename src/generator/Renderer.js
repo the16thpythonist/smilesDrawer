@@ -28,7 +28,7 @@ function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRat
   this.outputSvg = outputSvg
   this.outputLabels = outputLabels
   this.outputFlat = outputFlat
-  this.setContentOptions = { waitUntil: 'domcontentloaded', timeout: 1000 }
+  this.waitOptions = { waitUntil: 'domcontentloaded', timeout: 1000 }
 
   this.svgHelper = new SVG()
 
@@ -65,7 +65,7 @@ Renderer.prototype.makeEdgeAttributesNumeric = function(edge) {
 
 Renderer.prototype.positionInfoFromSvgXml = async function(page, xml) {
   // aneb: need to open browser, getBBox is not available via jsdom as it does not render
-  await page.setContent(xml, this.setContentOptions)
+  await page.setContent(xml, this.waitOptions)
 
   const dom = await page.evaluate(getPositionInfoFromSvg)
   dom.edges = dom.edges.map(e => this.makeEdgeAttributesNumeric(e))
@@ -137,10 +137,10 @@ Renderer.prototype.groupLabels = function(labels) {
 }
 
 Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName, quality, jsonOnly = false) {
-  await page.setContent(svg, this.setContentOptions)
+  await page.setContent(svg, this.waitOptions)
   let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, { size: this.size, preserveAspectRatio: this.preserveAspectRatio })
 
-  await page.setContent(updatedSvg, this.setContentOptions)
+  await page.setContent(updatedSvg, this.waitOptions)
   updatedSvg = await page.evaluate(drawMasksAroundTextElements)
 
   const ops = []
@@ -352,15 +352,15 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
 Renderer.prototype.generateImages = async function(context, index, smilesList) {
   // TODO aneb: try to load fonts on-demand (https://github.com/puppeteer/puppeteer/issues/422)
-  let page = await context.newPage()
+  const page = await context.newPage()
 
   for (const [i, smiles] of smilesList.entries()) {
     try {
-      if (i % 10 === 0) {
-        await page.close()
-        page = await context.newPage()
-      }
-      await page.reload()
+      // if (i % 10 === 0) {
+      //   await page.close()
+      //   page = await context.newPage()
+      // }
+      await page.reload(this.waitOptions)
       await this.imageFromSmilesString(page, smiles)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
