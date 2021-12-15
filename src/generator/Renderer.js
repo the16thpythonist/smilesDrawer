@@ -222,7 +222,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   const options = {
     overlapSensitivity: 1e-5,
     overlapResolutionIterations: 50,
-    strokeWidth: _.sample([5, 7.5, 10, 12.5, 15]),
+    strokeWidth: _.sample([5, 6, 7, 8, 9, 10]),
     gradientOffset: _.sample([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]),
     wedgeBaseWidth: baseValue * _.sample([0.2, 0.3, 0.4, 0.5]),
     dashedWedgeSpacing: baseValue * _.sample([0.07, 0.08, 0.09, 0.1]),
