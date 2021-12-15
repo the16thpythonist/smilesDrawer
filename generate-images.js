@@ -11,9 +11,6 @@
 
   process.setMaxListeners(conf.concurrency)
 
-  console.log('reading smiles file')
-  const smilesList = await readSmilesFromCsv(conf.csvFile, conf.csvColumn, conf.amount)
-
   if (conf.clean) {
     console.log(`deleting ${conf.outputDirectory}`)
     await fs.emptyDir(conf.outputDirectory)
@@ -21,8 +18,12 @@
 
   await fs.ensureDir(conf.outputDirectory)
 
-  const valid = smilesList.filter(s => s.length >= conf.minSmilesLength && s.length <= conf.maxSmilesLength).slice(0, conf.amount)
-  console.log(`found ${valid.length} SMILES strings with length between ${conf.minSmilesLength} and ${conf.maxSmilesLength} characters`)
+  console.log('reading smiles file')
+  const smilesList = (await readSmilesFromCsv(conf.csvFile, conf.csvColumn, conf.amount))
+    .filter(s => s.length >= conf.minSmilesLength && s.length <= conf.maxSmilesLength)
+    .slice(0, conf.amount)
+
+  console.log(`found ${smilesList.length} SMILES strings with length between ${conf.minSmilesLength} and ${conf.maxSmilesLength} characters`)
 
   const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
   console.time(label)
