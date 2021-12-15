@@ -355,31 +355,14 @@ Renderer.prototype.generateImages = async function(index, smilesList) {
   // TODO aneb: try to load fonts on-demand (https://github.com/puppeteer/puppeteer/issues/422)
   const browserOptions = {
     headless: true,
-    devtools: false,
-    args: ['--js-flags=--expose-gc']
+    devtools: false
   }
 
-  const logSize = Math.min(smilesList.length, 100)
   const browser = await puppeteer.launch(browserOptions)
   const page = await browser.newPage()
 
-  for (const [i, smiles] of smilesList.entries()) {
+  for (const smiles of smilesList) {
     try {
-      if (i % logSize === 0) {
-        const { JSHeapUsedSize: usedBefore, JSHeapTotalSize: totalBefore } = await page.metrics()
-        // eslint-disable-next-line no-undef
-        await page.evaluate(() => gc())
-        const { JSHeapUsedSize: usedAfter, JSHeapTotalSize: totalAfter } = await page.metrics()
-
-        const metrics = JSON.stringify({
-          usedBeforeMB: (usedBefore / 1e6).toFixed(2),
-          usedAfterMB: (usedAfter / 1e6).toFixed(2),
-          totalBeforeMB: (totalBefore / 1e6).toFixed(2),
-          totalAfterMB: (totalAfter / 1e6).toFixed(2)
-        })
-        console.log(`${new Date().toUTCString()} worker ${index}: ${i}/${smilesList.length} done (${metrics})`)
-      }
-
       await this.imageFromSmilesString(page, smiles)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
