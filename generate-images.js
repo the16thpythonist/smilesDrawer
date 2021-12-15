@@ -52,7 +52,7 @@
   console.log(`removed ${smilesList.length - missing.length} items, ${missing.length} left`)
 
   // aneb: clear state after every n images
-  const numberOfBatches = Math.round(conf.amount / 250)
+  const numberOfBatches = Math.round(conf.amount / 1000)
   const batches = _.chunk(missing, Math.round(conf.amount / numberOfBatches))
 
   const userDataDir = path.join('user-data', uuid())
@@ -61,16 +61,7 @@
   const browserOptions = {
     userDataDir: userDataDir,
     headless: true,
-    devtools: false,
-    handleSIGINT: false,
-    handleSIGTERM: false,
-    handleSIGHUP: false,
-    dumpio: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--js-flags="--max-old-space-size=128"'
-    ]
+    devtools: false
   }
 
   for (const [index, batch] of batches.entries()) {
@@ -79,9 +70,9 @@
     console.log(`${new Date().toUTCString()} processing batch ${index + 1}/${batches.length}`)
     const chunks = _.chunk(batch, Math.ceil(batch.length / conf.concurrency))
     await Promise.all(chunks.map((chunk, index) => new Renderer(conf).generateImages(context, index, chunk)))
+
     // aneb: docs say chrome may spawn child process, kill them
     // https://docs.browserless.io/blog/2019/03/13/more-observations.html
-
     await browser.close()
     await browser.disconnect()
     treekill(browser.process().pid, 'SIGKILL')
