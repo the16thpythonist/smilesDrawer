@@ -225,12 +225,12 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     strokeWidth: _.sample([5, 7.5, 10, 12.5, 15]),
     gradientOffset: _.sample([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]),
     wedgeBaseWidth: baseValue * _.sample([0.2, 0.3, 0.4, 0.5]),
-    dashedWedgeSpacing: baseValue * _.sample([0.05, 0.75, 0.1, 0.125]),
+    dashedWedgeSpacing: baseValue * _.sample([0.07, 0.08, 0.09, 0.1]),
     dashedWedgeWidth: baseValue * _.sample([0.6, 0.7, 0.7, 0.8, 0.9]),
     bondThickness: baseValue * _.sample([0.1, 0.15, 0.2]),
     bondLength: baseValue * _.sample([2, 2.5, 3, 3.5, 4]),
     shortBondLength: _.sample([0.7, 0.75, 0.8, 0.85]),
-    bondSpacing: baseValue * _.sample([0.15, 0.2, 0.25, 0.5]),
+    bondSpacing: baseValue * _.sample([0.2, 0.25, 0.5]),
     font: _.sample(this.font),
     fontWeight: _.sample(this.fontWeights),
     fontSizeLarge: baseValue * _.sample([0.8, 0.85, 0.9, 0.95]),
@@ -240,10 +240,8 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     explicitHydrogens: _.sample([true, false])
   }
 
-  // aneb: filter includes ";" or is empty string
-  const filter = imageFilter()
   const colors = this.colorMap
-  const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND};${filter}`
+  const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND}`
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const drawer = new SvgDrawer({ colors, options })
 
@@ -389,6 +387,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 }
 
 Renderer.prototype.processBatch = async function(index, smilesList) {
+  // TODO aneb: try to load fonts on-demand (https://github.com/puppeteer/puppeteer/issues/422)
   const browserOptions = {
     headless: true,
     devtools: false,
