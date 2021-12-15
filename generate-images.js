@@ -52,7 +52,7 @@
   console.log(`removed ${smilesList.length - missing.length} items, ${missing.length} left`)
 
   // aneb: clear state after every n images
-  const numberOfBatches = Math.round(conf.amount / 1000)
+  const numberOfBatches = Math.round(conf.amount / 250)
   const batches = _.chunk(missing, Math.round(conf.amount / numberOfBatches))
 
   const userDataDir = path.join('user-data', uuid())
