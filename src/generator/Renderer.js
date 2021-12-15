@@ -64,7 +64,7 @@ function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRat
   this.outputSvg = outputSvg
   this.outputLabels = outputLabels
   this.outputFlat = outputFlat
-  this.setContentOptions = { waitUntil: 'domcontentloaded', timeout: 2000 }
+  this.setContentOptions = { waitUntil: 'domcontentloaded', timeout: 5000 }
 
   this.svgHelper = new SVG()
 
