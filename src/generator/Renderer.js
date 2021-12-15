@@ -352,14 +352,14 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
 Renderer.prototype.generateImages = async function(context, index, smilesList) {
   // TODO aneb: try to load fonts on-demand (https://github.com/puppeteer/puppeteer/issues/422)
-  const page = await context.newPage()
+  let page = await context.newPage()
 
   for (const [i, smiles] of smilesList.entries()) {
     try {
-      // if (i % 10 === 0) {
-      //   await page.close()
-      //   page = await context.newPage()
-      // }
+      if (i % 10 === 0) {
+        await page.close()
+        page = await context.newPage()
+      }
       await page.reload(this.waitOptions)
       await this.imageFromSmilesString(page, smiles)
     } catch (e) {
