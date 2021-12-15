@@ -1,5 +1,5 @@
 (async() => {
-  const puppeteer = require('puppeteer');
+  const puppeteer = require('puppeteer')
   const fs = require('fs-extra')
   const util = require('util')
   const _ = require('lodash')
@@ -58,9 +58,10 @@
 
   for (const [index, batch] of batches.entries()) {
     const browser = await puppeteer.launch(browserOptions)
+    const context = await browser.createIncognitoBrowserContext()
     console.log(`${new Date().toUTCString()} processing batch ${index + 1}/${batches.length}`)
     const chunks = _.chunk(batch, Math.ceil(batch.length / conf.concurrency))
-    await Promise.all(chunks.map((chunk, index) => new Renderer(conf).generateImages(browser, index, chunk)))
+    await Promise.all(chunks.map((chunk, index) => new Renderer(conf).generateImages(context, index, chunk)))
     await browser.close()
   }
 
