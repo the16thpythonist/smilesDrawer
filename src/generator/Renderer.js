@@ -231,7 +231,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     bondLength: baseValue * _.sample([2, 2.5, 3, 3.5, 4]),
     shortBondLength: _.sample([0.7, 0.75, 0.8, 0.85]),
     bondSpacing: baseValue * _.sample([0.2, 0.25, 0.5]),
-    font: _.sample(this.font),
+    font: _.sample(this.fonts),
     fontWeight: _.sample(this.fontWeights),
     fontSizeLarge: baseValue * _.sample([0.8, 0.85, 0.9, 0.95]),
     fontSizeSmall: baseValue * _.sample([0.5, 0.55, 0.6, 0.65]),
