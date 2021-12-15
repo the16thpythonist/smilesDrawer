@@ -1,8 +1,7 @@
 const crypto = require('crypto')
 const fs = require('fs-extra')
 const puppeteer = require('puppeteer')
-const util = require('util')
-const exec = util.promisify(require('child_process').exec)
+
 const _ = require('lodash')
 const { JSDOM } = require('jsdom')
 const { xml2js, js2xml } = require('xml-js')
@@ -13,46 +12,12 @@ const SVG = require('./SVG')
 const { bondLabels, labelTypes } = require('./types')
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
-const setIntersection = (setA, setB) => {
-  const _intersection = new Set()
-  for (const elem of setB) {
-    if (setA.has(elem)) {
-      _intersection.add(elem)
-    }
-  }
-  return _intersection
-}
-
-const imageFilter = () => {
-  const r = _.random(0, 10)
-
-  // aneb: 90% of images do not get any filter
-  if (r > 0) {
-    return ''
-  }
-
-  const filters = {
-    'hue-rotate': ['0deg', '30deg', '60deg', '90deg'],
-    blur: ['0.50px', '0.75px', '1px', '1.1px', '1.2px', '1.25px', '1.3px'],
-    invert: ['5%', '10%', '15%'],
-    grayscale: ['0%', '20%', '40%', '60%', '80%', '100%'],
-    contrast: ['50%', '75%', '100%', '125%', '150%']
-  }
-
-  let filterChain = ''
-  for (const [filter, value] of Object.entries(filters)) {
-    filterChain += ` ${filter}(${_.sample(value)})`
-  }
-
-  return `filter: ${filterChain};`
-}
-
 function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRatio, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
   // aneb: find out why this does not work in above scope ...
   const colorMap = require('./colors')
 
   this.parser = Parser
-  this.directory = outputDirectory
+  this.outputDirectory = outputDirectory
   this.size = size
   this.fonts = fonts
   this.fontWeights = fontWeights
@@ -366,7 +331,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   const quality = _.random(10, 80)
 
   if (!this.outputFlat) {
-    const target = `${this.directory}/${id}`
+    const target = `${this.outputDirectory}/${id}`
 
     await fs.ensureDir(target)
 
@@ -382,11 +347,11 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   }
 
   // aneb: debugging only
-  await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${this.directory}/${id}-x`, quality, false)
-  await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.directory}/${id}-y`, 100, true)
+  await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${this.outputDirectory}/${id}-x`, quality, false)
+  await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.outputDirectory}/${id}-y`, 100, true)
 }
 
-Renderer.prototype.processBatch = async function(index, smilesList) {
+Renderer.prototype.generateImages = async function(index, smilesList) {
   // TODO aneb: try to load fonts on-demand (https://github.com/puppeteer/puppeteer/issues/422)
   const browserOptions = {
     headless: true,
@@ -424,36 +389,6 @@ Renderer.prototype.processBatch = async function(index, smilesList) {
   console.log(`${new Date().toUTCString()} worker ${index}: done`)
   await page.close()
   await browser.close()
-}
-
-Renderer.prototype.imagesFromSmilesList = async function(smilesList) {
-  const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
-  console.time(label)
-
-  const xCmd = `find ${this.directory} -type f -name 'x.*'`
-  const yCmd = `find ${this.directory} -type f -name 'y.*'`
-  console.log(xCmd)
-  console.log(yCmd)
-
-  let x = await exec(xCmd, { maxBuffer: 100 * 1024 * 1024 })
-  let y = await exec(yCmd, { maxBuffer: 100 * 1024 * 1024 })
-  x = x.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
-  y = y.stdout.split('\n').map(x => x.split('/').slice(-2)[0])
-
-  const existing = setIntersection(new Set(x), new Set(y))
-
-  const smilesToId = {}
-  for (const smiles of smilesList) {
-    const id = this.id(smiles)
-    smilesToId[smiles] = existing.has(id) ? null : id
-  }
-
-  const missing = smilesList.filter(x => !!smilesToId[x])
-  console.log(`removed ${smilesList.length - missing.length} items, ${missing.length} left`)
-
-  const batches = _.chunk(missing, Math.ceil(missing.length / this.concurrency))
-  await Promise.all(batches.map((batch, index) => this.processBatch(index, batch)))
-  console.timeEnd(label)
 }
 
 module.exports = Renderer

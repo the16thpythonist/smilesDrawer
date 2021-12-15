@@ -1,3 +1,4 @@
+const crypto = require('crypto')
 const path = require('path')
 const fs = require('fs')
 const readline = require('readline')
@@ -71,7 +72,23 @@ const cliParams = () => {
   return config
 }
 
+const hash = function(x) {
+  return crypto.createHash('sha256').update(x).digest('hex')
+}
+
+const setIntersection = (setA, setB) => {
+  const _intersection = new Set()
+  for (const elem of setB) {
+    if (setA.has(elem)) {
+      _intersection.add(elem)
+    }
+  }
+  return _intersection
+}
+
 module.exports = {
   readSmilesFromCsv,
-  cliParams
+  cliParams,
+  hash,
+  setIntersection
 }
