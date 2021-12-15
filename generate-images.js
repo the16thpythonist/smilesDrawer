@@ -81,8 +81,9 @@
     await Promise.all(chunks.map((chunk, index) => new Renderer(conf).generateImages(context, index, chunk)))
     // aneb: docs say chrome may spawn child process, kill them
     // https://docs.browserless.io/blog/2019/03/13/more-observations.html
-    // await browser.close()
-    browser.disconnect()
+
+    await browser.close()
+    await browser.disconnect()
     treekill(browser.process().pid, 'SIGKILL')
   }
 
