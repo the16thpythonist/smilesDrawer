@@ -1,6 +1,5 @@
 const crypto = require('crypto')
 const fs = require('fs-extra')
-const puppeteer = require('puppeteer')
 
 const _ = require('lodash')
 const { JSDOM } = require('jsdom')
@@ -351,11 +350,9 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.outputDirectory}/${id}-y`, 100, true)
 }
 
-Renderer.prototype.generateImages = async function(index, smilesList) {
+Renderer.prototype.generateImages = async function(browser, index, smilesList) {
   // TODO aneb: try to load fonts on-demand (https://github.com/puppeteer/puppeteer/issues/422)
-  const browserOptions = { headless: true, devtools: false }
 
-  const browser = await puppeteer.launch(browserOptions)
   let page = await browser.newPage()
 
   for (const [i, smiles] of smilesList.entries()) {
@@ -372,7 +369,6 @@ Renderer.prototype.generateImages = async function(index, smilesList) {
   }
 
   await page.close()
-  await browser.close()
 }
 
 module.exports = Renderer

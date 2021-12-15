@@ -1,4 +1,5 @@
 (async() => {
+  const puppeteer = require('puppeteer');
   const fs = require('fs-extra')
   const util = require('util')
   const _ = require('lodash')
@@ -49,14 +50,18 @@
   const missing = smilesList.filter(x => !!smilesToId[x])
   console.log(`removed ${smilesList.length - missing.length} items, ${missing.length} left`)
 
-  // aneb: clear state after every 1000 images
-  const numberOfBatches = Math.round(conf.amount / 1000)
+  // aneb: clear state after every n images
+  const numberOfBatches = Math.round(conf.amount / 250)
   const batches = _.chunk(missing, Math.round(conf.amount / numberOfBatches))
 
+  const browserOptions = { headless: true, devtools: false }
+
   for (const [index, batch] of batches.entries()) {
+    const browser = await puppeteer.launch(browserOptions)
     console.log(`${new Date().toUTCString()} processing batch ${index + 1}/${batches.length}`)
     const chunks = _.chunk(batch, Math.ceil(batch.length / conf.concurrency))
-    await Promise.all(chunks.map((chunk, index) => new Renderer(conf).generateImages(index, chunk)))
+    await Promise.all(chunks.map((chunk, index) => new Renderer(conf).generateImages(browser, index, chunk)))
+    await browser.close()
   }
 
   console.timeEnd(label)
