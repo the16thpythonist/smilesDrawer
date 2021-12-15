@@ -29,7 +29,7 @@ function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRat
   this.outputSvg = outputSvg
   this.outputLabels = outputLabels
   this.outputFlat = outputFlat
-  this.setContentOptions = { waitUntil: 'domcontentloaded', timeout: 2000 }
+  this.setContentOptions = { waitUntil: 'domcontentloaded', timeout: 500 }
 
   this.svgHelper = new SVG()
 
@@ -353,16 +353,18 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
 Renderer.prototype.generateImages = async function(index, smilesList) {
   // TODO aneb: try to load fonts on-demand (https://github.com/puppeteer/puppeteer/issues/422)
-  const browserOptions = {
-    headless: true,
-    devtools: false
-  }
+  const browserOptions = { headless: true, devtools: false }
 
   const browser = await puppeteer.launch(browserOptions)
-  const page = await browser.newPage()
+  let page = await browser.newPage()
 
-  for (const smiles of smilesList) {
+  for (const [i, smiles] of smilesList.entries()) {
     try {
+      if (i % 10 === 0) {
+        await page.close()
+        page = await browser.newPage()
+      }
+
       await this.imageFromSmilesString(page, smiles)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
