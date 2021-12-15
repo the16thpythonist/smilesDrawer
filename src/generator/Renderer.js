@@ -342,8 +342,8 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.outputDirectory}/${id}-y`, 100, true)
 }
 
-Renderer.prototype.generateImages = async function(context, index, smilesList) {
-  const page = await context.newPage()
+Renderer.prototype.generateImages = async function(browser, index, smilesList) {
+  const page = await browser.newPage()
 
   for (const smiles of smilesList) {
     try {
