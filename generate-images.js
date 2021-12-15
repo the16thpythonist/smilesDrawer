@@ -58,7 +58,7 @@
   const browserOptions = { headless: true, devtools: false }
 
   for (const [index, batch] of batches.entries()) {
-    const browser = await puppeteer.launch(browserOptions)
+    let browser = await puppeteer.launch(browserOptions)
     const context = await browser.createIncognitoBrowserContext()
     console.log(`${new Date().toUTCString()} processing batch ${index + 1}/${batches.length}`)
     const chunks = _.chunk(batch, Math.ceil(batch.length / conf.concurrency))
@@ -67,6 +67,7 @@
     // https://docs.browserless.io/blog/2019/03/13/more-observations.html
     // await browser.close()
     treekill(browser.process().pid, 'SIGKILL')
+    browser = null
   }
 
   console.timeEnd(label)

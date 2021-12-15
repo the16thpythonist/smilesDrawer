@@ -368,6 +368,7 @@ Renderer.prototype.generateImages = async function(context, index, smilesList) {
   }
 
   await page.close()
+  page = null
 }
 
 module.exports = Renderer
