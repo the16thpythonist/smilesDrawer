@@ -1,4 +1,6 @@
 (async() => {
+  const { v4: uuid } = require('uuid')
+  const path = require('path')
   const treekill = require('tree-kill')
   const puppeteer = require('puppeteer')
   const fs = require('fs-extra')
@@ -10,8 +12,6 @@
   const { readSmilesFromCsv, cliParams, hash, setIntersection } = require('./src/generator/misc')
 
   const conf = cliParams()
-
-  process.setMaxListeners(conf.concurrency)
 
   if (conf.clean) {
     console.log(`deleting ${conf.outputDirectory}`)
@@ -55,10 +55,26 @@
   const numberOfBatches = Math.round(conf.amount / 1000)
   const batches = _.chunk(missing, Math.round(conf.amount / numberOfBatches))
 
-  const browserOptions = { headless: true, devtools: false }
+  const userDataDir = path.join('user-data', uuid())
+  await fs.ensureDir(userDataDir)
+
+  const browserOptions = {
+    userDataDir: userDataDir,
+    headless: true,
+    devtools: false,
+    handleSIGINT: false,
+    handleSIGTERM: false,
+    handleSIGHUP: false,
+    dumpio: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--js-flags="--max-old-space-size=128"'
+    ]
+  }
 
   for (const [index, batch] of batches.entries()) {
-    let browser = await puppeteer.launch(browserOptions)
+    const browser = await puppeteer.launch(browserOptions)
     const context = await browser.createIncognitoBrowserContext()
     console.log(`${new Date().toUTCString()} processing batch ${index + 1}/${batches.length}`)
     const chunks = _.chunk(batch, Math.ceil(batch.length / conf.concurrency))
@@ -66,9 +82,10 @@
     // aneb: docs say chrome may spawn child process, kill them
     // https://docs.browserless.io/blog/2019/03/13/more-observations.html
     // await browser.close()
+    browser.disconnect()
     treekill(browser.process().pid, 'SIGKILL')
-    browser = null
   }
 
+  await fs.remove(userDataDir)
   console.timeEnd(label)
 })()

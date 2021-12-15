@@ -45,7 +45,7 @@ const cliParams = () => {
     amount: Number(amount) || null,
     outputDirectory: path.resolve(outputDirectory),
     size: Number(size) || null,
-    fonts: fonts ? fonts.split(',') : ['Arial'],
+    fonts: fonts ? fonts.split(',') : ['Roboto'],
     fontWeights: fontWeights ? fontWeights.split(',').map(x => Number(x)) : [200],
     preserveAspectRatio: preserveAspectRatio || 'none',
     concurrency: Number(concurrency) || 4,

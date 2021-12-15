@@ -5,3 +5,4 @@ yarn-error.log
 *.svg
 generated-images/**/*
 *.log
+user-data

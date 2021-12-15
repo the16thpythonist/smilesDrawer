@@ -28,7 +28,7 @@ function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRat
   this.outputSvg = outputSvg
   this.outputLabels = outputLabels
   this.outputFlat = outputFlat
-  this.waitOptions = { waitUntil: 'domcontentloaded', timeout: 5000 }
+  this.waitOptions = { waitUntil: 'domcontentloaded', timeout: 10000 }
 
   this.svgHelper = new SVG()
 
@@ -331,17 +331,9 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 
   if (!this.outputFlat) {
     const target = `${this.outputDirectory}/${id}`
-
     await fs.ensureDir(target)
-
-    try {
-      await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${target}/x`, quality, false)
-      await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${target}/y`, 100, true)
-    } catch (e) {
-      console.log(e)
-      await fs.remove(target)
-    }
-
+    await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${target}/x`, quality, false)
+    await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${target}/y`, 100, true)
     return
   }
 
@@ -351,16 +343,10 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
 }
 
 Renderer.prototype.generateImages = async function(context, index, smilesList) {
-  // TODO aneb: try to load fonts on-demand (https://github.com/puppeteer/puppeteer/issues/422)
-  let page = await context.newPage()
+  const page = await context.newPage()
 
-  for (const [i, smiles] of smilesList.entries()) {
+  for (const smiles of smilesList) {
     try {
-      if (i % 10 === 0) {
-        await page.close()
-        page = await context.newPage()
-      }
-      await page.reload(this.waitOptions)
       await this.imageFromSmilesString(page, smiles)
     } catch (e) {
       console.error(`failed to process SMILES string '${smiles}'`, e.message)
@@ -368,7 +354,6 @@ Renderer.prototype.generateImages = async function(context, index, smilesList) {
   }
 
   await page.close()
-  page = null
 }
 
 module.exports = Renderer

@@ -64,8 +64,15 @@ class SvgWrapper {
     const masks = this.svgHelper.createElement('mask', { id: 'text-mask' })
     const paths = this.svgHelper.createElement('g', { mask: 'url(#text-mask)' })
 
-    const fontUrl = encodeURI(`https://fonts.googleapis.com/css?family=${this.opts.font}`)
-    style.appendChild(document.createTextNode(`@import url('${fontUrl}');`))
+    const fontUrl = encodeURI(`https://fonts.googleapis.com/css?family=${encodeURIComponent(this.opts.font)}`)
+
+    style.appendChild(document.createTextNode(`
+    @import url('${fontUrl}');
+    body {
+      font-family: '${this.opts.font}', sans-serif;
+    }
+    `))
+
     style.appendChild(document.createTextNode(`
     .element {
         font: ${this.opts.fontSizeLarge}pt ${this.opts.font};

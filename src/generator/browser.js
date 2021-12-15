@@ -12,8 +12,6 @@ function drawMasksAroundTextElements() {
     const isRound = ['O', 'S'].some(v => vertex.textContent.trim().startsWith(v))
     const round = isRound ? 10 : 1
 
-    console.log(vertex.textContent.trim().startsWith('O'))
-
     rect.setAttributeNS(null, 'x', x)
     rect.setAttributeNS(null, 'y', y)
     rect.setAttributeNS(null, 'width', width)
