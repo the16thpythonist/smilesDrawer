@@ -369,7 +369,6 @@ Renderer.prototype.generateImages = async function(index, smilesList) {
     }
   }
 
-  console.log(`${new Date().toUTCString()} worker ${index}: done`)
   await page.close()
   await browser.close()
 }
