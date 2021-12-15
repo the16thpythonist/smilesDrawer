@@ -54,7 +54,7 @@
   const batches = _.chunk(missing, Math.round(conf.amount / numberOfBatches))
 
   for (const [index, batch] of batches.entries()) {
-    console.log(`processing batch ${index + 1}/${batches.length}`)
+    console.log(`${new Date().toUTCString()} processing batch ${index + 1}/${batches.length}`)
     const chunks = _.chunk(batch, Math.ceil(batch.length / conf.concurrency))
     await Promise.all(chunks.map((chunk, index) => new Renderer(conf).generateImages(index, chunk)))
   }
