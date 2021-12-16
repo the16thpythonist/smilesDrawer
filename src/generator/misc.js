@@ -29,7 +29,7 @@ const readSmilesFromCsv = async(file, smilesCol, n = 100) => {
 const cliParams = () => {
   const {
     outputDirectory,
-    amount, size, fonts, fontWeights, preserveAspectRatio,
+    amount, batchSize, size, fonts, fontWeights, preserveAspectRatio,
     concurrency,
     labelType, segment,
     outputSvg, outputLabels, outputFlat,
@@ -43,6 +43,7 @@ const cliParams = () => {
     csvFile: path.resolve(csvFile),
     csvColumn: csvColumn,
     amount: Number(amount) || null,
+    batchSize: Number(batchSize) || 100,
     outputDirectory: path.resolve(outputDirectory),
     size: Number(size) || null,
     fonts: fonts ? fonts.split(',') : ['Roboto'],
@@ -86,9 +87,14 @@ const setIntersection = (setA, setB) => {
   return _intersection
 }
 
+const wait = ms => new Promise((resolve, reject) => {
+  setTimeout(resolve, ms)
+})
+
 module.exports = {
   readSmilesFromCsv,
   cliParams,
   hash,
-  setIntersection
+  setIntersection,
+  wait
 }

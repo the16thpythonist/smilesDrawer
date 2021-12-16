@@ -342,18 +342,4 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.outputDirectory}/${id}-y`, 100, true)
 }
 
-Renderer.prototype.generateImages = async function(browser, index, smilesList) {
-  const page = await browser.newPage()
-
-  for (const smiles of smilesList) {
-    try {
-      await this.imageFromSmilesString(page, smiles)
-    } catch (e) {
-      console.error(`failed to process SMILES string '${smiles}'`, e.message)
-    }
-  }
-
-  await page.close()
-}
-
 module.exports = Renderer

@@ -2,14 +2,13 @@
   const { v4: uuid } = require('uuid')
   const path = require('path')
   const treekill = require('tree-kill')
-  const puppeteer = require('puppeteer')
   const fs = require('fs-extra')
   const util = require('util')
   const _ = require('lodash')
   const exec = util.promisify(require('child_process').exec)
+  const { fork } = require('child_process')
 
-  const Renderer = require('./src/generator/Renderer')
-  const { readSmilesFromCsv, cliParams, hash, setIntersection } = require('./src/generator/misc')
+  const { readSmilesFromCsv, cliParams, hash, setIntersection, wait } = require('./src/generator/misc')
 
   const conf = cliParams()
 
@@ -52,8 +51,10 @@
   console.log(`removed ${smilesList.length - missing.length} items, ${missing.length} left`)
 
   // aneb: clear state after every n images
-  const numberOfBatches = Math.round(conf.amount / 1000)
+  const numberOfBatches = Math.round(conf.amount / conf.batchSize)
   const batches = _.chunk(missing, Math.round(conf.amount / numberOfBatches))
+
+  console.log(`processing ${conf.amount} images in ${batches.length} (batch size ${conf.batchSize}, concurrency ${conf.concurrency})`)
 
   const userDataDir = path.join('user-data', uuid())
   await fs.ensureDir(userDataDir)
@@ -64,21 +65,46 @@
     devtools: false
   }
 
-  for (const [index, batch] of batches.entries()) {
-    if (global.gc) {
-      global.gc()
+  const debug = typeof v8debug === 'object'
+  const children = {}
+  let done = 0
+  for (const [index, smilesList] of batches.entries()) {
+    const message = { conf, smilesList, browserOptions }
+
+    const args = { }
+
+    // aneb: inspector error are IDE-related and do not occur when calling node from command line
+    if (debug) {
+      const offset = (index % conf.concurrency) + 1
+      const port = process.debugPort + offset
+
+      console.log(`adding debug port ${port}`)
+      args.execArgv = [`--inspect=${port}`]
     }
 
-    const browser = await puppeteer.launch(browserOptions)
-    console.log(`${new Date().toUTCString()} processing batch ${index + 1}/${batches.length}`)
-    const chunks = _.chunk(batch, Math.ceil(batch.length / conf.concurrency))
-    await Promise.all(chunks.map((chunk, index) => new Renderer(conf).generateImages(browser, index, chunk)))
+    const child = fork('src/worker.js', args)
+    children[child.pid] = child
 
-    // aneb: docs say chrome may spawn child process, kill them
-    // https://docs.browserless.io/blog/2019/03/13/more-observations.html
-    await browser.close()
-    await browser.disconnect()
-    treekill(browser.process().pid, 'SIGKILL')
+    child.on('exit', function(code) {
+      done += 1
+      const state = code ? 'FAIL' : 'SUCCESS'
+
+      console.log(`${new Date().toUTCString()} - ${state} ${done}/${batches.length} done`)
+
+      delete children[this.pid]
+      treekill(this.pid, 'SIGKILL')
+    })
+
+    child.send(message)
+
+    while (Object.keys(children).length >= conf.concurrency) {
+      await wait(1000)
+    }
+  }
+
+  // aneb: must also wait for last processes to finish
+  while (Object.keys(children).length !== 0) {
+    await wait(100)
   }
 
   await fs.remove(userDataDir)
