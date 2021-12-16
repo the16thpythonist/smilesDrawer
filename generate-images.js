@@ -62,7 +62,7 @@
   const numberOfBatches = Math.round(conf.amount / conf.batchSize)
   const batches = _.chunk(missing, Math.round(conf.amount / numberOfBatches))
 
-  console.log(`processing ${conf.amount} images in ${batches.length} (batch size ${conf.batchSize}, concurrency ${conf.concurrency})`)
+  console.log(`processing ${conf.amount} images in ${batches.length} batches (batch size ${conf.batchSize}, concurrency ${conf.concurrency})`)
 
   const userDataDir = path.join('user-data', uuid())
   await fs.ensureDir(userDataDir)
@@ -91,7 +91,11 @@
     }
 
     const child = fork('src/worker.js', args)
-    children[child.pid] = child
+    children[child.pid] = { }
+
+    child.on('message', function({ browserPid }) {
+      children[this.pid] = { browserPid }
+    })
 
     child.on('exit', function(code) {
       done += 1
@@ -99,8 +103,9 @@
 
       console.log(`${new Date().toUTCString()} - ${state} ${done}/${batches.length} done`)
 
-      delete children[this.pid]
+      treekill(children[this.pid].browserPid, 'SIGKILL')
       treekill(this.pid, 'SIGKILL')
+      delete children[this.pid]
     })
 
     child.send(message)
