@@ -8,6 +8,14 @@
   const exec = util.promisify(require('child_process').exec)
   const { fork } = require('child_process')
 
+  const oldCwd = process.cwd()
+  const newCwd = path.resolve(path.dirname(__filename))
+
+  if (oldCwd !== newCwd) {
+    console.log(`changing working directory from ${oldCwd} to ${newCwd}`)
+    process.chdir(newCwd)
+  }
+
   const { readSmilesFromCsv, cliParams, hash, setIntersection, wait } = require('./src/generator/misc')
 
   const conf = cliParams()
