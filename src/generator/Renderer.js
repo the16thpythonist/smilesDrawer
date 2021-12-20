@@ -191,7 +191,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     wedgeBaseWidth: baseValue * _.sample([0.2, 0.3, 0.4, 0.5]),
     dashedWedgeSpacing: baseValue * _.sample([0.07, 0.08, 0.09, 0.1]),
     dashedWedgeWidth: baseValue * _.sample([0.6, 0.7, 0.7, 0.8, 0.9]),
-    bondThickness: baseValue * _.sample([0.1, 0.15, 0.2]),
+    bondThickness: baseValue * _.sample([0.1, 0.15, 0.2, 0.25]),
     bondLength: baseValue * _.sample([2, 2.5, 3, 3.5, 4]),
     shortBondLength: _.sample([0.7, 0.75, 0.8, 0.85]),
     bondSpacing: baseValue * _.sample([0.2, 0.25, 0.5]),
@@ -205,7 +205,8 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
   }
 
   const colors = this.colorMap
-  const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND}`
+  const hueRotate = _.random(0, 180)
+  const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND};filter: hue-rotate(${hueRotate}deg)`
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const drawer = new SvgDrawer({ colors, options })
 
@@ -327,7 +328,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
   const id = this.id(smiles)
-  const quality = _.random(10, 80)
+  const quality = _.random(50, 100)
 
   if (!this.outputFlat) {
     const target = `${this.outputDirectory}/${id}`

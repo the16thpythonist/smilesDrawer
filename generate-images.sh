@@ -2,16 +2,16 @@ node generate-images.js \
   --from-csv-file "data/zinc_charged_wedges.csv" \
   --from-csv-column "0" \
   --output-directory "dumps" \
-  --size "512"  \
-  --fonts "Roboto,Open Sans,Lato,Poppins,Raleway" \
-  --font-weights "400,800" \
+  --size "512" \
+  --fonts "Roboto,Roboto Mono,Open Sans,Lato,Poppins,Raleway,PT Sans,Muka,Playfair Display,Bebas Neue,Josefin Sans" \
+  --font-weights "400,600,800,900" \
   --preserve-aspect-ratio "none" \
-  --concurrency "64" \
+  --concurrency "4" \
   --label-type "points" \
   --min-smiles-length "0" \
   --max-smiles-length "500" \
   --output-labels \
-  --amount "10000" \
+  --amount "50000" \
   --batch-size "100" \
   --output-flat \
   --clean
