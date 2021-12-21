@@ -156,14 +156,15 @@ Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName
   }
 
   if (this.outputLabels && labels.length) {
-    const cleanLabels = labels
+    labels = labels
       .map(l => this.cleanupLabel(l))
       .map(l => ({ ...l, xy: this.svgHelper.transformPoints(l, matrix) }))
 
-    const finalLabels = this.groupLabels(cleanLabels)
+    labels = this.groupLabels(labels)
+    const result = { labels, smiles }
 
     // ops.push(fs.writeFile(`${fileName}-meta.json`, JSON.stringify({ smiles }, null, 2)))
-    ops.push(fs.writeFile(`${fileName}.json`, JSON.stringify(finalLabels, null, 2)))
+    ops.push(fs.writeFile(`${fileName}.json`, JSON.stringify(result, null, 2)))
   }
 
   if (this.outputSvg) {
