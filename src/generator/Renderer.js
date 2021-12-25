@@ -200,14 +200,13 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     fontWeight: _.sample(this.fontWeights),
     fontSizeLarge: baseValue * _.sample([0.8, 0.85, 0.9, 0.95]),
     fontSizeSmall: baseValue * _.sample([0.5, 0.55, 0.6, 0.65]),
-    padding: baseValue * _.sample([5, 7.5, 10, 12.5, 15]),
+    padding: baseValue * _.sample([5, 7.5, 10]),
     terminalCarbons: _.sample([true, false]),
     explicitHydrogens: _.sample([true, false])
   }
 
   const colors = this.colorMap
-  const hueRotate = _.random(0, 180)
-  const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND};filter: hue-rotate(${hueRotate}deg)`
+  const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND}`
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const drawer = new SvgDrawer({ colors, options })
 
