@@ -34,7 +34,7 @@
 
   console.log(`found ${smilesList.length} SMILES strings with length between ${conf.minSmilesLength} and ${conf.maxSmilesLength} characters`)
 
-  const label = `generating ${smilesList.length} images with concurrency ${this.concurrency}`
+  const label = `generating ${smilesList.length} images with concurrency ${conf.concurrency}`
   console.time(label)
 
   const xCmd = `find ${conf.outputDirectory} -type f -name 'x.*'`

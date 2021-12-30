@@ -11,7 +11,7 @@ const SVG = require('./SVG')
 const { bondLabels, labelTypes } = require('./types')
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
-function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRatio, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
+function Renderer({ outputDirectory, size, fonts, fontWeights, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
   // aneb: find out why this does not work in above scope ...
   const colorMap = require('./colors')
 
@@ -20,7 +20,6 @@ function Renderer({ outputDirectory, size, fonts, fontWeights, preserveAspectRat
   this.size = size
   this.fonts = fonts
   this.fontWeights = fontWeights
-  this.preserveAspectRatio = preserveAspectRatio
   this.colorMap = colorMap
   this.concurrency = concurrency
   this.labelType = labelType
@@ -138,7 +137,11 @@ Renderer.prototype.groupLabels = function(labels) {
 
 Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName, quality, jsonOnly = false) {
   await page.setContent(svg, this.waitOptions)
-  let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, { size: this.size, preserveAspectRatio: this.preserveAspectRatio })
+  const distortionFactor = 33
+  const distortion = _.random(-distortionFactor, +distortionFactor, false) / 100
+  const heigth = this.size - (this.size * distortion / 2)
+  const width = this.size + (this.size * distortion / 2)
+  let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, { heigth, width })
 
   await page.setContent(updatedSvg, this.waitOptions)
   updatedSvg = await page.evaluate(drawMasksAroundTextElements)
@@ -200,7 +203,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     fontWeight: _.sample(this.fontWeights),
     fontSizeLarge: baseValue * _.sample([0.8, 0.85, 0.9, 0.95]),
     fontSizeSmall: baseValue * _.sample([0.5, 0.55, 0.6, 0.65]),
-    padding: baseValue * _.sample([5, 7.5, 10]),
+    padding: this.size * _.sample([0.8]),
     terminalCarbons: _.sample([true, false]),
     explicitHydrogens: _.sample([true, false])
   }
@@ -328,7 +331,7 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
   const id = this.id(smiles)
-  const quality = _.random(50, 100)
+  const quality = 100
 
   if (!this.outputFlat) {
     const target = `${this.outputDirectory}/${id}`
