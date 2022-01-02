@@ -139,9 +139,9 @@ Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName
   await page.setContent(svg, this.waitOptions)
   const distortionFactor = 33
   const distortion = _.random(-distortionFactor, +distortionFactor, false) / 100
-  const heigth = this.size - (this.size * distortion / 2)
+  const height = this.size - (this.size * distortion / 2)
   const width = this.size + (this.size * distortion / 2)
-  let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, { heigth, width })
+  let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, { height, width })
 
   await page.setContent(updatedSvg, this.waitOptions)
   updatedSvg = await page.evaluate(drawMasksAroundTextElements)
@@ -203,7 +203,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     fontWeight: _.sample(this.fontWeights),
     fontSizeLarge: baseValue * _.sample([0.8, 0.85, 0.9, 0.95]),
     fontSizeSmall: baseValue * _.sample([0.5, 0.55, 0.6, 0.65]),
-    padding: this.size * _.sample([0.8]),
+    padding: baseValue * _.sample([5, 7.5, 10, 12.5, 15]),
     terminalCarbons: _.sample([true, false]),
     explicitHydrogens: _.sample([true, false])
   }
