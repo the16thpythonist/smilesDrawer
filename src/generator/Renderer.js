@@ -8,10 +8,10 @@ const { xml2js, js2xml } = require('xml-js')
 const Parser = require('../drawer/Parser')
 const SvgDrawer = require('../drawer/SvgDrawer')
 const SVG = require('./SVG')
-const { bondLabels, labelTypes } = require('./types')
+const { bondLabels } = require('./types')
 const { getPositionInfoFromSvg, resizeImage, drawMasksAroundTextElements } = require('./browser')
 
-function Renderer({ outputDirectory, size, fonts, fontWeights, concurrency, labelType, segment, outputSvg, outputLabels, outputFlat }) {
+function Renderer({ outputDirectory, size, fonts, fontWeights, concurrency, outputSvg, outputLabels, outputFlat }) {
   // aneb: find out why this does not work in above scope ...
   const colorMap = require('./colors')
 
@@ -22,8 +22,6 @@ function Renderer({ outputDirectory, size, fonts, fontWeights, concurrency, labe
   this.fontWeights = fontWeights
   this.colorMap = colorMap
   this.concurrency = concurrency
-  this.labelType = labelType
-  this.segment = segment
   this.outputSvg = outputSvg
   this.outputLabels = outputLabels
   this.outputFlat = outputFlat
@@ -41,7 +39,7 @@ Renderer.prototype.id = function(x) {
 }
 
 Renderer.prototype.color = function(color, circle = false) {
-  const fill = this.segment || circle ? color : 'none'
+  const fill = circle ? color : 'none'
   return `fill: ${fill}; stroke: ${color};`
 }
 
@@ -261,63 +259,17 @@ Renderer.prototype.drawPoints = function({ id, label, points, text }) {
   })
 }
 
-Renderer.prototype.drawSinglePolygon = function({ id, label, points, text }) {
-  const color = this.svgHelper.randomColor()
-  return this.svgHelper.createElement('polygon', {
-    'label-id': `${id}-label`,
-    label: label,
-    text: text,
-    points: points.join(' '),
-    style: this.color(color)
-  })
-}
-
-Renderer.prototype.drawMultiPolygon = function(edgeElements) {
-  const color = this.svgHelper.randomColor()
-  const { id, label } = edgeElements[0]
-  const points = edgeElements.map(e => this.getCornersOriented(e)).filter(e => !!e)
-  return points.map(point => {
-    return this.svgHelper.createElement('polygon', {
-      'label-id': `${id}-label`,
-      label: label,
-      points: point.join(' '),
-      style: this.color(color)
-    })
-  })
-}
-
 Renderer.prototype.addLabels = function({ dom, xml }) {
   const svg = new JSDOM(xml).window.document.documentElement.querySelector('svg')
 
   const nodeCorners = dom.nodes.map(n => ({ ...n, points: this.getCornersAligned(n) }))
-  const nodeLabels = this.labelType === labelTypes.points && !this.segment
-    ? nodeCorners.map(n => this.drawPoints(n))
-    : nodeCorners.map(n => this.drawSinglePolygon(n))
-
+  const nodeLabels = nodeCorners.map(n => this.drawPoints(n))
   const edgeLabels = []
 
-  if (this.labelType === labelTypes.box) {
-    const correctedEdges = dom.edges.map(e => ({ ...e, ...this.svgHelper.correctBoundingBox(e) }))
-    const merged = this.svgHelper.mergeBoundingBoxes(correctedEdges)
-    const mergedWithPoints = merged.map(n => ({ ...n, points: this.getCornersAligned(n) }))
-    edgeLabels.push(...mergedWithPoints.map(e => this.drawSinglePolygon(e)))
-  }
-
-  if (this.labelType === labelTypes.oriented) {
-    const groupedEdges = _.groupBy(dom.edges, 'id')
-    const tightBoxes = Object.values(groupedEdges).map(edge => this.drawMultiPolygon(edge))
-    edgeLabels.push(tightBoxes)
-  }
-
-  if (this.labelType === labelTypes.points) {
-    const points = dom.edges.map(e => ({ ...e, points: this.getCornersOriented(e) })).filter(e => !!e.points)
-    const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svgHelper.hull(e))
-    const hullBox = this.segment
-      ? hull.map(edge => this.drawSinglePolygon(edge))
-      : hull.map(edge => this.drawPoints(edge))
-
-    edgeLabels.push(hullBox)
-  }
+  const points = dom.edges.map(e => ({ ...e, points: this.getCornersOriented(e) })).filter(e => !!e.points)
+  const hull = Object.values(_.groupBy(points, 'id')).map(e => this.svgHelper.hull(e))
+  const hullBox = hull.map(edge => this.drawPoints(edge))
+  edgeLabels.push(hullBox)
 
   this.svgHelper.appendChildren(svg, [...nodeLabels, ...edgeLabels])
 
@@ -331,18 +283,17 @@ Renderer.prototype.imageFromSmilesString = async function(page, smiles) {
   // aneb: these are only at the original size, the final labels are computed after image has been resized
   const svgXmlWithLabels = this.addLabels({ dom, xml })
   const id = this.id(smiles)
-  const quality = 100
 
   if (!this.outputFlat) {
     const target = `${this.outputDirectory}/${id}`
     await fs.ensureDir(target)
-    await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${target}/x`, quality, false)
+    await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${target}/x`, 100, false)
     await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${target}/y`, 100, true)
     return
   }
 
   // aneb: debugging only
-  await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${this.outputDirectory}/${id}-x`, quality, false)
+  await this.saveResizedImage(page, smiles, svgXmlWithoutLabels, `${this.outputDirectory}/${id}-x`, 100, false)
   await this.saveResizedImage(page, smiles, svgXmlWithLabels, `${this.outputDirectory}/${id}-y`, 100, true)
 }
 

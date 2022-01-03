@@ -8,14 +8,4 @@ const bondLabels = {
   wedgeDashed: 'wedge-dashed-bond'
 }
 
-const labelTypes = {
-  box: 'box',
-  oriented: 'oriented',
-  points: 'points',
-  all: 'all'
-}
-
-module.exports = {
-  bondLabels,
-  labelTypes
-}
+module.exports = { bondLabels }

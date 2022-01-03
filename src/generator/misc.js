@@ -4,7 +4,6 @@ const fs = require('fs')
 const readline = require('readline')
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
-const { labelTypes } = require('./types')
 
 const readSmilesFromCsv = async(file, smilesCol, n = 100) => {
   const stream = fs.createReadStream(file)
@@ -31,7 +30,6 @@ const cliParams = () => {
     outputDirectory,
     amount, batchSize, size, fonts, fontWeights,
     concurrency,
-    labelType, segment,
     outputSvg, outputLabels, outputFlat,
     clean,
     minSmilesLength, maxSmilesLength,
@@ -49,18 +47,12 @@ const cliParams = () => {
     fonts: fonts ? fonts.split(',') : ['Roboto'],
     fontWeights: fontWeights ? fontWeights.split(',').map(x => Number(x)) : [200],
     concurrency: Number(concurrency) || 4,
-    labelType: labelType || null,
-    segment: !!segment,
     outputSvg: !!outputSvg,
     outputLabels: !!outputLabels,
     outputFlat: !!outputFlat,
     clean: !!clean,
     maxSmilesLength: Number(maxSmilesLength) || 1000,
     minSmilesLength: Number(minSmilesLength) || 0
-  }
-
-  if (!Object.keys(labelTypes).includes(config.labelType)) {
-    throw new Error(`invalid label type '${config.labelType}'`)
   }
 
   const invalid = Object.entries(config).filter(([key, value]) => value === null)
