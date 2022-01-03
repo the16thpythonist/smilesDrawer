@@ -66,15 +66,8 @@ function getPositionInfoFromSvg() {
   return { nodes, edges }
 }
 
-function resizeImage({ height, width }) {
+function resizeImage() {
   const svg = document.querySelector('svg')
-
-  // aneb: original viewbox must be preserved, inner coordinates are relative to it
-  // changing width and height is the proper way to do it, rendering it will recognize the new proportions
-  svg.setAttributeNS(null, 'height', height)
-  svg.setAttributeNS(null, 'width', width)
-  svg.setAttributeNS(null, 'preserveAspectRatio', 'none')
-
   const elements = document.documentElement.querySelectorAll('[label-id]')
   // aneb: find better way to do this?
   const labels = Array.from(elements)

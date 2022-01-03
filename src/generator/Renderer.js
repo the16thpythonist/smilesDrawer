@@ -135,11 +135,8 @@ Renderer.prototype.groupLabels = function(labels) {
 
 Renderer.prototype.saveResizedImage = async function(page, smiles, svg, fileName, quality, jsonOnly = false) {
   await page.setContent(svg, this.waitOptions)
-  const distortionFactor = 33
-  const distortion = _.random(-distortionFactor, +distortionFactor, false) / 100
-  const height = this.size - (this.size * distortion / 2)
-  const width = this.size + (this.size * distortion / 2)
-  let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage, { height, width })
+  // TODO aneb: images are not resized anymore, clean up code later
+  let [updatedSvg, labels, matrix] = await page.evaluate(resizeImage)
 
   await page.setContent(updatedSvg, this.waitOptions)
   updatedSvg = await page.evaluate(drawMasksAroundTextElements)
