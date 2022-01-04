@@ -43,6 +43,16 @@ Renderer.prototype.color = function(color, circle = false) {
   return `fill: ${fill}; stroke: ${color};`
 }
 
+Renderer.prototype.randomColorMap = function(keys) {
+  const map = {}
+  for (const key of keys) {
+    // https://stackoverflow.com/questions/5092808/how-do-i-randomly-generate-html-hex-color-codes-using-javascript
+    map[key] = '#000000'.replace(/0/g, function() { return (~~(Math.random() * 16)).toString(16) })
+  }
+
+  return map
+}
+
 Renderer.prototype.makeEdgeAttributesNumeric = function(edge) {
   // aneb: one can only read html attributes as strings, postprocessing is done in one place to avoid handling
   // all types of bonds in browser code which cannot be debugged
@@ -188,12 +198,12 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     strokeWidth: _.sample([5, 6, 7, 8, 9, 10]),
     gradientOffset: _.sample([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]),
     wedgeBaseWidth: baseValue * _.sample([0.2, 0.3, 0.4, 0.5]),
-    dashedWedgeSpacing: baseValue * _.sample([0.07, 0.08, 0.09, 0.1]),
+    dashedWedgeSpacing: baseValue * _.sample([0.05, 0.06, 0.07, 0.08, 0.09]),
     dashedWedgeWidth: baseValue * _.sample([0.6, 0.7, 0.7, 0.8, 0.9]),
     bondThickness: baseValue * _.sample([0.1, 0.15, 0.2, 0.25]),
     bondLength: baseValue * _.sample([2, 2.5, 3, 3.5, 4]),
     shortBondLength: _.sample([0.7, 0.75, 0.8, 0.85]),
-    bondSpacing: baseValue * _.sample([0.2, 0.25, 0.5]),
+    bondSpacing: baseValue * _.sample([0.2, 0.3, 0.4, 0.5]),
     font: _.sample(this.fonts),
     fontWeight: _.sample(this.fontWeights),
     fontSizeLarge: baseValue * _.sample([0.8, 0.85, 0.9, 0.95]),
@@ -203,11 +213,12 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     explicitHydrogens: _.sample([true, false])
   }
 
-  // aneb: make roughly 30% be black and white only
-  const randomizeColors = _.random(0, 10)
   const mono = { C: '#000', BACKGROUND: '#fff' }
+  const random = this.randomColorMap(Object.keys(this.colorMap))
+  const randomWithWhiteBackGround = { ...random, BACKGROUND: mono.BACKGROUND }
 
-  const colors = randomizeColors > 3 ? this.colorMap : mono
+  const colormaps = [this.colorMap, mono, random, randomWithWhiteBackGround]
+  const colors = _.sample(colormaps)
   const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND}`
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const drawer = new SvgDrawer({ colors, options })
