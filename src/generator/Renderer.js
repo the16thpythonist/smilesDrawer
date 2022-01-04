@@ -186,7 +186,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     overlapSensitivity: 1e-5,
     overlapResolutionIterations: 50,
     strokeWidth: _.sample([5, 6, 7, 8, 9, 10]),
-    gradientOffset: _.sample([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]),
+    gradientOffset: _.sample([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]),
     wedgeBaseWidth: baseValue * _.sample([0.2, 0.3, 0.4, 0.5]),
     dashedWedgeSpacing: baseValue * _.sample([0.07, 0.08, 0.09, 0.1]),
     dashedWedgeWidth: baseValue * _.sample([0.6, 0.7, 0.7, 0.8, 0.9]),
@@ -198,12 +198,16 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     fontWeight: _.sample(this.fontWeights),
     fontSizeLarge: baseValue * _.sample([0.8, 0.85, 0.9, 0.95]),
     fontSizeSmall: baseValue * _.sample([0.5, 0.55, 0.6, 0.65]),
-    padding: baseValue * _.sample([5, 7.5, 10, 12.5, 15]),
+    padding: baseValue * _.sample([4, 6, 8, 10, 12]),
     terminalCarbons: _.sample([true, false]),
     explicitHydrogens: _.sample([true, false])
   }
 
-  const colors = this.colorMap
+  // aneb: make roughly 30% be black and white only
+  const randomizeColors = _.random(0, 10)
+  const mono = { C: '#000', BACKGROUND: '#fff' }
+
+  const colors = randomizeColors > 3 ? this.colorMap : mono
   const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND}`
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   const drawer = new SvgDrawer({ colors, options })
