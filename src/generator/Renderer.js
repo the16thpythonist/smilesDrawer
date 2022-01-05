@@ -215,9 +215,11 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
 
   const mono = { C: '#000', BACKGROUND: '#fff' }
   const random = this.randomColorMap(Object.keys(this.colorMap))
-  const randomWithWhiteBackGround = { ...random, BACKGROUND: mono.BACKGROUND }
 
-  const colormaps = [this.colorMap, mono, random, randomWithWhiteBackGround]
+  const backgroundColor = '#' + _.random(200, 255).toString(16).repeat(3)
+  const randomWithWhiteBackGround = { ...random, BACKGROUND: backgroundColor }
+
+  const colormaps = [this.colorMap, mono, randomWithWhiteBackGround]
   const colors = _.sample(colormaps)
   const style = `stroke-width: 0px; background-color: ${colors.BACKGROUND}`
   const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
