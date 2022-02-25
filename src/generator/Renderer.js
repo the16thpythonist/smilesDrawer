@@ -208,7 +208,7 @@ Renderer.prototype.smilesToSvgXml = function(smiles) {
     fontWeight: _.sample(this.fontWeights),
     fontSizeLarge: baseValue * _.sample([0.8, 0.85, 0.9, 0.95]),
     fontSizeSmall: baseValue * _.sample([0.5, 0.55, 0.6, 0.65]),
-    padding: baseValue * _.sample([4, 6, 8, 10, 12]),
+    padding: baseValue * _.sample([2, 4, 6, 8]),
     terminalCarbons: _.sample([true, false]),
     explicitHydrogens: _.sample([true, false])
   }
