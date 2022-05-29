@@ -18,6 +18,10 @@
 
   const { readSmilesFromCsv, cliParams, hash, setIntersection, wait } = require('./src/generator/misc')
 
+  // This is an object which contains fields that correspond to the command line parameters which were
+  // passed when calling this module as a command.
+  // The original command line parameters are typically dash-separated (for example --from-csv-file) and
+  // the fields of this object are the corresponding camelCase names for those parameters (fromCsvFile)
   const conf = cliParams()
 
   if (conf.clean) {
